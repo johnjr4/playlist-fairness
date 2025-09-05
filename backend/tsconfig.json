@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // ES features target
+    "module": "NodeNext", // Allows me to use import not just require()
+    "moduleResolution": "NodeNext", // I don't really know but coordinate with module
+    "esModuleInterop": true, // "mends fences" between ESM and CommonJS modules
+    "allowJs": true, // Allows you to import JavaScript files (?)
+    "resolveJsonModule": true, // Allows you to import JSON (?)
+    "verbatimModuleSyntax": true, // See Notion
+    "outDir": "dist", // Where compiled files go
+    "rootDir": "src", // Where TS files come from
+    "skipLibCheck": true, // Only type check stuff in my actual source code
+    "strict": true, // Enables some extra safety checks. See docs
+    "noUncheckedIndexedAccess": true, // Maybe turn off? See Notion
+    "noImplicitOverride": true, // See Notion
+    "noImplicitReturns": true, // All code paths must return value
+    "forceConsistentCasingInFileNames": true
+    
+  },
+  "include": ["src"]
+}
