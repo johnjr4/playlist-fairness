@@ -70,6 +70,9 @@ node_modules/
 # ignore jekyll build directory
 /_site
 
+# ignore prisma generated files
+/src/generated/prisma
+
 # ignore OS generated files
 ehthumbs.db
 Thumbs.db
