@@ -71,7 +71,7 @@ node_modules/
 /_site
 
 # ignore prisma generated files
-/src/generated/prisma
+/backend/src/generated/prisma
 
 # ignore OS generated files
 ehthumbs.db
@@ -84,7 +84,7 @@ Thumbs.db
 
 # ignore log files and databases
 *.log
-*.sql
+# *.sql
 *.sqlite
 
 # ignore compiled files
