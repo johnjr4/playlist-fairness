@@ -58,20 +58,20 @@
 node_modules/
 
 # Ignore build directories.
-/build
-/dist
+**/build
+**/dist
 
 # ignore composer vendor directory
-/vendor
+**/vendor
 
 # ignore components loaded via Bower
-/bower_components
+**/bower_components
 
 # ignore jekyll build directory
-/_site
+**/_site
 
 # ignore prisma generated files
-/backend/src/generated/prisma
+**/generated/prisma
 
 # ignore OS generated files
 ehthumbs.db
