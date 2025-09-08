@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/adapter-pg": "^6.15.0",
     "@prisma/client": "^6.15.0",
     "axios": "^1.11.0",
     "cookie-parser": "^1.4.7",
