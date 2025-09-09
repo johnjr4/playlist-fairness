@@ -3,12 +3,13 @@ import express from 'express';
 import 'dotenv/config';
 import axios from 'axios';
 import { getCodeVerifier, codeChallengeFromVerifier } from '../utils/pkce.js';
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } from '../utils/envLoader.js';
 
 const router = express.Router();
 
-const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID!;
-const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET!;
-const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI!;
+const CLIENT_ID = SPOTIFY_CLIENT_ID
+const CLIENT_SECRET = SPOTIFY_CLIENT_SECRET;
+const REDIRECT_URI = SPOTIFY_REDIRECT_URI
 const SCOPES = ['user-read-currently-playing', 'playlist-read-private', 'playlist-read-collaborative', 'user-read-recently-played'].join(' ');
 
 
