@@ -4,6 +4,7 @@ import 'dotenv/config';
 import axios from 'axios';
 import { getCodeVerifier, codeChallengeFromVerifier } from '../utils/pkce.js';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } from '../utils/envLoader.js';
+import { getSpotifyAxios, spotifyAuthAxios } from '../utils/axiosInstances.js';
 
 const router = express.Router();
 
@@ -43,7 +44,6 @@ router.get('/callback', async (req, res) => {
     } else {
         const code = req.query.code! as string;
         const state = req.query.state! as string;
-        console.log(`auth code: ${code}`)
 
         if (state !== initialState) {
             // TODO: Better error handling
@@ -53,8 +53,8 @@ router.get('/callback', async (req, res) => {
 
         try {
             const authCombination = `${CLIENT_ID}:${CLIENT_SECRET}`;
-            const tokenResponse = await axios.post(
-                `https://accounts.spotify.com/api/token`,
+            const tokenResponse = await spotifyAuthAxios.post(
+                '/api/token',
                 new URLSearchParams({
                     grant_type: 'authorization_code',
                     code: code,
@@ -62,25 +62,15 @@ router.get('/callback', async (req, res) => {
                     client_id: CLIENT_ID,
                     code_verifier: codeVerifier,
                     client_secret: CLIENT_SECRET
-                }),
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    }
                 })
+            );
 
             const { access_token, refresh_token, expires_in } = tokenResponse.data;
             
             // TODO: Store access tokens
-            
-            const spotifyUser = await axios.get(
-                `https://api.spotify.com/v1/me`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${access_token}`,
-                    }
-                }
-            )
+            console.log(`Access token ${access_token}`);
+            const spotifyAxios = getSpotifyAxios(access_token);
+            const spotifyUser = await spotifyAxios.get('/me');
 
             const { display_name, country } = spotifyUser.data; 
 
