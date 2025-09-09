@@ -22,6 +22,8 @@ model User {
   playlists         Playlist[]
   listeningHistory  ListeningEvent[]
   trackingStartTime DateTime         @default(now())
+  accessToken       String
+  refreshToken      String
 }
 
 model Playlist {
