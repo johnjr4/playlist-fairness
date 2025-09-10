@@ -33,6 +33,7 @@ model Playlist {
   id                Int             @id @default(autoincrement())
   name              String
   coverUrl          String?
+  spotifyId         String          @unique
   spotifyUri        String          @unique
   spotifySnapshotId String
   owner             User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -54,7 +55,7 @@ model Artist {
   id         Int     @id @default(autoincrement())
   spotifyUri String  @unique
   name       String
-  imageUrl   String?
+  // imageUrl   String?
   tracks     Track[]
   albums     Album[]
 }
