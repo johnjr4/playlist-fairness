@@ -6,7 +6,7 @@ import { getCodeVerifier, codeChallengeFromVerifier } from '../utils/pkce.js';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } from '../utils/envLoader.js';
 import { getSpotifyAxios, spotifyAuthAxios } from '../utils/axiosInstances.js';
 import { createAndSyncUser } from '../controllers/syncSpotifyData.js';
-import { getUserPlaylists } from '../controllers/getFromDb.js';
+import { getPlaylistTracksFromPlaylist, getUserPlaylists } from '../controllers/getFromDb.js';
 
 const router = express.Router();
 
@@ -72,15 +72,26 @@ router.get('/callback', async (req, res) => {
             console.log(`Access token ${access_token}`);
             // const spotifyAxios = getSpotifyAxios(access_token);
             // const spotifyUser = await spotifyAxios.get('/me');
+            // TODO: get rid of terrible server-side rendering in the auth callback for goodness sake
             const spotifyUser = await createAndSyncUser(access_token, refresh_token);
             const userPlaylists = await getUserPlaylists(spotifyUser.id);
+            let nestedPlaylists = [];
+            for (const playlist of userPlaylists) {
+                const tracklist = await getPlaylistTracksFromPlaylist(playlist.id);
+                nestedPlaylists.push({
+                    playlist: playlist,
+                    tracklist: tracklist,
+                })
+            }
             const hobbitPlaceholderUrl = "https://lh5.googleusercontent.com/proxy/iny1xEuggv0DZlJMsrXFAM0owcGuOcaKeQT4ZZirfjl_jPnVHF_UclZbdJeX1QI7B6y4f9ItMCAU9XAvp-vzhOiiq7ICDU89MIWBvU_iezcafVoCs3phh0ZozTRS5A3p0jEMHzTsy4wMfA";
             res.send(`
                 <h2>Authorization successful!</h2>
                 <p>Welcome ${spotifyUser.displayName}. You joined UnShuffle at ${spotifyUser.trackingStartTime}</p>
                 <img src="${spotifyUser.imageUrl ? spotifyUser.imageUrl : hobbitPlaceholderUrl}">
                 <ul>
-                    ${userPlaylists.map(playlist => `<img src=${playlist.coverUrl ? playlist.coverUrl : hobbitPlaceholderUrl}><p>${playlist.name}</p>`).join('\n')}
+                    ${nestedPlaylists.map(p => `<img src=${p.playlist.coverUrl ? p.playlist.coverUrl : hobbitPlaceholderUrl}><p>${p.playlist.name}</p><ul>
+                            ${p.tracklist.map(el => `<li>${el.track.name}<li>`)}
+                        </ul>`).join('\n')}
                 </ul>
             `);
         } catch (err) {

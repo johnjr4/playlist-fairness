@@ -76,14 +76,15 @@ model PlaylistTrack {
   playlistId          Int
   track               Track            @relation(fields: [trackId], references: [id])
   trackId             Int
-  playlistPosition    Int              @unique
+  playlistPosition    Int
   currentlyOnPlaylist Boolean          @default(true)
-  addedToPlaylistTime DateTime
+  addedToPlaylistTime DateTime?
   trackingStartTime   DateTime         @default(now())
   trackingStopTime    DateTime?
   listeningEvents     ListeningEvent[]
 
   @@id([playlistId, trackId])
+  @@unique([playlistId, playlistPosition])
 }
 
 model ListeningEvent {

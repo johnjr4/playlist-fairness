@@ -55,7 +55,7 @@ export interface ImageObject {
     width: number | null,
 }
 
-export interface PlaylistTrackObject {
+export interface PlaylistTrackMetadata {
     added_at: string | null,
     added_by: {
         external_urls: {
@@ -67,6 +67,9 @@ export interface PlaylistTrackObject {
         uri: string,
     } | null,
     is_local: boolean,
+}
+
+export interface PlaylistTrackObject extends PlaylistTrackMetadata {
     track: TrackObject | EpisodeObject,
 }
 

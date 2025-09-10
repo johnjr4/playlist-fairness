@@ -1,6 +1,6 @@
 import prisma from "../utils/prismaClient.js";
 import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
-import type { Playlist, User } from "../generated/prisma/client.js";
+import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
 import type * as Spotify from "../utils/spotifyTypes.js";
 import type { Axios, AxiosInstance } from "axios";
 
@@ -162,8 +162,9 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
                             }
                         },
                     });
-                    const tracks = await getSpotifyPlaylistTracks(insertedPlaylist, spotifyAxios);
-                    await upsertSpotifyDataFromTracks(tracks);
+                    const spotifyPlaylistTracks = await getSpotifyPlaylistTracks(insertedPlaylist, spotifyAxios);
+                    const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
+                    const playlistTracks = await upsertPlaylistTracks(insertedPlaylist, tracks, trackMetadata);
                 }
             }
         }
@@ -175,35 +176,40 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
 }
 
 // Inserts all tracks from playlist and albums and artist from those tracks into my database
-async function upsertSpotifyDataFromTracks(playlistTracks: Spotify.PlaylistTrackObject[]) {
+async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.PlaylistTrackObject[]) {
     try {
-        for (const playlistTrack of playlistTracks) {
-            const track: Spotify.TrackObject = playlistTrack.track as Spotify.TrackObject; // Can do this because we filtered out episode tracks
+        let tracks: Track[] = [];
+        let trackMetadata: Spotify.PlaylistTrackMetadata[] = [];
+        for (const playlistTrack of spotifyPlaylistTracks) {
+            const spotifyTrack: Spotify.TrackObject = playlistTrack.track as Spotify.TrackObject; // Can do this because we filtered out episode tracks
 
             // First upsert artists
-            const firstArtist = selectFirstArtist(track.artists);
+            const firstArtist = selectFirstArtist(spotifyTrack.artists);
             await upsertSpotifyDataFromArtist(firstArtist);
             // Then upsert albums
-            await upsertSpotifyDataFromAlbum(track.album);
+            await upsertSpotifyDataFromAlbum(spotifyTrack.album);
             // Then upsert track
             const upsertedTrack = await prisma.track.upsert({
                 where: {
-                    spotifyUri: track.uri,
+                    spotifyUri: spotifyTrack.uri,
                 },
                 update: {},
                 create: {
-                    spotifyUri: track.uri,
-                    name: track.name,
+                    spotifyUri: spotifyTrack.uri,
+                    name: spotifyTrack.name,
                     artist: {
                         connect: { spotifyUri: firstArtist.uri },
                     },
                     album: {
-                        connect: { spotifyUri: track.album.uri },
+                        connect: { spotifyUri: spotifyTrack.album.uri },
                     },
                 },
-            })
+            });
+            tracks.push(upsertedTrack);
+            trackMetadata.push({ added_at: playlistTrack.added_at, added_by: playlistTrack.added_by, is_local: playlistTrack.is_local });
         }
         console.log("Successfully upserted tracks data");
+        return { tracks: tracks, trackMetadata: trackMetadata };
     } catch (err) {
         console.error(err);
         throw new Error("Failed to upsert track data");
@@ -258,5 +264,46 @@ async function upsertSpotifyDataFromAlbum(album: Spotify.AlbumObject) {
     } catch (err) {
         console.error(err);
         throw new Error(`Failed to upsert album data for ${album.name} (did you remember to create the artist first?)`);
+    }
+}
+
+async function upsertPlaylistTracks(playlist: Playlist, tracks: Track[], trackMetadata: Spotify.PlaylistTrackMetadata[]) {
+    try {
+        let playlistTracks: PlaylistTrack[] = [];
+        // TODO: This doesn't deal with tracks removed from playlist! I need to get both full lists and correlate them (see playlist upsert)
+        if (tracks.length != trackMetadata.length) {
+            if (tracks.length > trackMetadata.length) {
+                throw new Error("Metadata misaligned: More tracks than metadata entries");
+            } else {
+                throw new Error("Metadata misaligned: More metadata entries than tracks");
+            }
+        };
+        for (let i = 0; i < tracks.length; i++) {
+            const track = tracks[i]!;
+            const trackMetadatum = trackMetadata[i]!;
+
+            const upsertedPlaylistTrack = await prisma.playlistTrack.upsert({
+                where: {
+                    playlistId_trackId: {
+                        playlistId: playlist.id,
+                        trackId: track.id,
+                    }
+                },
+                update: {
+                    playlistPosition: i,
+                },
+                create: {
+                    playlistId: playlist.id,
+                    trackId: track.id,
+                    playlistPosition: i,
+                    addedToPlaylistTime: trackMetadatum.added_at
+                },
+            });
+            playlistTracks.push(upsertedPlaylistTrack);
+        }
+        return playlistTracks;
+    } catch (err) {
+        console.error(err);
+        throw new Error(`Failed to upsert playlist tracks for ${playlist.name}`)
     }
 }
