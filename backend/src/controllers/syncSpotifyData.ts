@@ -1,7 +1,7 @@
 import prisma from "../utils/prismaClient.js";
 import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, User } from "../generated/prisma/index.js";
-import type { SpotifyImageObject, SpotifySimplifiedPlaylistObject, SpotifyUser } from "../utils/spotifyTypes.js";
+import type * as Spotify from "../utils/spotifyTypes.js";
 import type { AxiosInstance } from "axios";
 
 export async function createAndSyncUser(accessToken: string, refreshToken: string) {
@@ -10,7 +10,7 @@ export async function createAndSyncUser(accessToken: string, refreshToken: strin
     if (!spotifyUserRes) {
         throw new Error("Unable to find spotify user");
     }
-    const spotifyUser: SpotifyUser = spotifyUserRes.data;
+    const spotifyUser: Spotify.User = spotifyUserRes.data;
 
     try {
         const user = await prisma.user.upsert({
@@ -51,7 +51,7 @@ export async function syncSpotifyData(user: User, spotifyAxios: AxiosInstance) {
 // Returns an array of all the playlists a user has saved from Spotify API
 async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) {
     // const spotifyAxios = getSpotifyAxios(user.accessToken);
-    let playlists: Array<SpotifySimplifiedPlaylistObject> = [];
+    let playlists: Array<Spotify.SimplifiedPlaylistObject> = [];
 
     try {
         let morePlaylists = true;
@@ -79,7 +79,7 @@ async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) 
 //     let tracks: Array<SpotifyTra
 // }
 
-function selectProperImage(images: SpotifyImageObject[] | null): string | null {
+function selectProperImage(images: Spotify.ImageObject[] | null): string | null {
     if (images !== null && images.length > 0) {
         if (images.length > 1) {
             return images[1]!.url;
@@ -90,7 +90,7 @@ function selectProperImage(images: SpotifyImageObject[] | null): string | null {
 }
 
 // Inserts all non-existing playlists, tracks from those playlists, and albums and artists from those tracks into my database
-async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<SpotifySimplifiedPlaylistObject>, spotifyAxios: AxiosInstance) {
+async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spotify.SimplifiedPlaylistObject>, spotifyAxios: AxiosInstance) {
     try {
         for (const playlist of playlists) {
             if (!playlist.collaborative && playlist.owner.uri == user.spotifyUri) {
