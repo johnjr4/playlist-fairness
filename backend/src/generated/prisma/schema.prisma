@@ -17,8 +17,10 @@ datasource db {
 
 model User {
   id                String           @id @default(uuid())
+  spotifyUri        String           @unique
   spotifyId         String           @unique
-  displayName       String
+  displayName       String?
+  imageUrl          String?
   playlists         Playlist[]
   listeningHistory  ListeningEvent[]
   trackingStartTime DateTime         @default(now())
@@ -27,35 +29,38 @@ model User {
 }
 
 model Playlist {
-  id        Int             @id @default(autoincrement())
-  spotifyId String          @unique
-  owner     User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId   String
-  tracks    PlaylistTrack[]
+  id                Int             @id @default(autoincrement())
+  name              String
+  coverUrl          String?
+  spotifyUri        String          @unique
+  spotifySnapshotId String
+  owner             User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId           String
+  tracks            PlaylistTrack[]
 }
 
 model Album {
-  id        Int     @id @default(autoincrement())
-  spotifyId String  @unique
-  name      String
-  coverUrl  String?
-  tracks    Track[]
-  artist    Artist  @relation(fields: [artistId], references: [id])
-  artistId  Int
+  id         Int     @id @default(autoincrement())
+  spotifyUri String  @unique
+  name       String
+  coverUrl   String?
+  tracks     Track[]
+  artist     Artist  @relation(fields: [artistId], references: [id])
+  artistId   Int
 }
 
 model Artist {
-  id        Int     @id @default(autoincrement())
-  spotifyId String  @unique
-  name      String
-  image     String
-  tracks    Track[]
-  albums    Album[]
+  id         Int     @id @default(autoincrement())
+  spotifyUri String  @unique
+  name       String
+  imageUrl   String?
+  tracks     Track[]
+  albums     Album[]
 }
 
 model Track {
   id             Int             @id @default(autoincrement())
-  spotifyId      String          @unique
+  spotifyUri     String          @unique
   name           String
   artist         Artist          @relation(fields: [artistId], references: [id])
   artistId       Int

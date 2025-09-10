@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 export function getSpotifyAxios(accessToken: string) {
     return axios.create({
@@ -14,4 +14,19 @@ export const spotifyAuthAxios = axios.create({
     headers: {
         "Content-Type": "application/x-www-form-urlencoded",
     }
-})
+});
+
+export function handleAxiosError(err: AxiosError) {
+    if (err.response) {
+        console.error("Response error");
+        console.log(err.response.data);
+        console.log(err.response.status);
+        console.log(err.response.headers);
+    } else if (err.request) {
+        console.error("Request error");
+        console.log(err.request);
+    } else {
+        console.error("Unknown axios error");
+        console.log(err.message);
+    }
+}
