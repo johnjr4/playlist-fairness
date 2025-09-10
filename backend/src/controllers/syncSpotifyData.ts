@@ -5,6 +5,9 @@ import type * as Spotify from "../utils/spotifyTypes.js";
 import type { AxiosInstance } from "axios";
 import { getUserPlaylists } from "./getFromDb.js";
 import { deletePlaylists } from "./deleteData.js";
+import pLimit from "p-limit";
+import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
+import type { BundledSpotifyPlaylistTracks } from "../utils/helperTypes.js";
 
 export async function createAndSyncUser(accessToken: string, refreshToken: string) {
     const spotifyAxios = getSpotifyAxios(accessToken);
@@ -87,7 +90,7 @@ async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) 
     }
 }
 
-async function getSpotifyPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance) {
+async function getSpotifyPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance): Promise<BundledSpotifyPlaylistTracks> {
     let tracks: Array<Spotify.PlaylistTrackObject> = [];
     try {
         console.log(`Loading tracks obtained for playlist ${playlist.name}`);
@@ -107,7 +110,7 @@ async function getSpotifyPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosI
         }
         const nonPodcastTracks = tracks.filter((playlistTrack) => playlistTrack.track && playlistTrack.track.type == "track");
         console.log(`\tSpotify tracks obtained for playlist ${playlist.name}`);
-        return nonPodcastTracks;
+        return { playlist: playlist, spotifyPlaylistTracks: nonPodcastTracks };
     } catch (err) {
         console.error(err);
         throw new Error("Error fetching Spotify playlist tracks");
@@ -168,49 +171,52 @@ function categorizePlaylists(spotifyPlaylists: Spotify.SimplifiedPlaylistObject[
 // Inserts all non-existing playlists, tracks from those playlists, and albums and artists from those tracks into my database
 async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spotify.SimplifiedPlaylistObject>, spotifyAxios: AxiosInstance) {
     try {
+        // Array to track upserted playlists so we know which ones to handle Tracks of
+        const upsertedPlaylists: Playlist[] = [];
         for (const playlist of playlists) {
-            // This playlist belongs to this user, insert it
-            // TODO: This strategy doesn't take care of playlist versioning with snapshot ids, nor deleted playlists. Redo it!
-            // Suggested flow:
-            //  Get all current db playlists for this user
-            //  Match with spotify playlists 1 by 1
-            //      Any in db that aren't in spotify delete
-            //      Any in both that match snapshot, leave
-            //      Any in both that don't match snapshot, update
-            //      Any in spotify only, insert
-            let existingPlaylist = await prisma.playlist.findUnique({
+            // Upsert playlist into database
+            const upsertedPlaylist = await prisma.playlist.upsert({
                 where: {
+                    spotifyUri: playlist.uri
+                },
+                update: {
+                    name: playlist.name,
+                    coverUrl: selectProperImage(playlist.images),
+                    spotifySnapshotId: playlist.snapshot_id,
+                },
+                create: {
                     spotifyUri: playlist.uri,
-                }
-            });
-            if (!existingPlaylist) {
-                // Playlist not found, insert into database
-                // Upsert not create to protect against race condition in high-concurrency (totally unnecessary)
-                const insertedPlaylist = await prisma.playlist.upsert({
-                    where: {
-                        spotifyUri: playlist.uri
-                    },
-                    update: {
-                        name: playlist.name,
-                        coverUrl: selectProperImage(playlist.images),
-                        spotifySnapshotId: playlist.snapshot_id,
-                    },
-                    create: {
-                        spotifyUri: playlist.uri,
-                        spotifyId: playlist.id,
-                        spotifySnapshotId: playlist.snapshot_id,
-                        name: playlist.name,
-                        coverUrl: selectProperImage(playlist.images),
-                        owner: {
-                            connect: { id: user.id },
-                        }
-                    },
-                });
-                const spotifyPlaylistTracks = await getSpotifyPlaylistTracks(insertedPlaylist, spotifyAxios);
-                const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
-                const playlistTracks = await upsertPlaylistTracks(insertedPlaylist, tracks, trackMetadata);
+                    spotifyId: playlist.id,
+                    spotifySnapshotId: playlist.snapshot_id,
+                    name: playlist.name,
+                    coverUrl: selectProperImage(playlist.images),
+                    owner: {
+                        connect: { id: user.id },
+                    }
+                },
+            }).catch(err => console.error(`Failed to upsert playlist ${playlist.name}`, err));
+            if (upsertedPlaylist) {
+                // If successful upsertion, push
+                upsertedPlaylists.push(upsertedPlaylist);
             }
         }
+        // Get all Spotify PlaylistTracks with limited concurrency
+        const limit = pLimit(SPOTIFY_CONCURRENCY_LIMIT);
+        const tracksByPlaylistPromises = upsertedPlaylists.map(
+            playlist => limit(() => getSpotifyPlaylistTracks(playlist, spotifyAxios))
+        );
+        const trackResults = await Promise.allSettled(tracksByPlaylistPromises);
+        // Then filter out the failed Promises
+        const successfulTrackResults = trackResults.filter(res => res.status === 'fulfilled');
+        // Then transform to get the BundledPlaylist
+        const tracksByPlaylist = successfulTrackResults.map(res => res.value);
+
+        // Upsert the relevant track data on per-playlist basis
+        for (const { playlist, spotifyPlaylistTracks } of tracksByPlaylist) {
+            const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
+            const dbPlaylistTracks = await upsertPlaylistTracks(playlist, tracks, trackMetadata);
+        }
+
         console.log("Spotify playlist data upserted");
     } catch (err) {
         console.error(err);
