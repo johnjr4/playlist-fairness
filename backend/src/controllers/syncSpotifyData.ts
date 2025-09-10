@@ -2,7 +2,7 @@ import prisma from "../utils/prismaClient.js";
 import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
 import type * as Spotify from "../utils/spotifyTypes.js";
-import type { Axios, AxiosInstance } from "axios";
+import type { AxiosInstance } from "axios";
 
 export async function createAndSyncUser(accessToken: string, refreshToken: string) {
     const spotifyAxios = getSpotifyAxios(accessToken);
