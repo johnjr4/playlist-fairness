@@ -3,6 +3,8 @@ import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
 import type * as Spotify from "../utils/spotifyTypes.js";
 import type { AxiosInstance } from "axios";
+import { getUserPlaylists } from "./getFromDb.js";
+import { deletePlaylists } from "./deleteData.js";
 
 export async function createAndSyncUser(accessToken: string, refreshToken: string) {
     const spotifyAxios = getSpotifyAxios(accessToken);
@@ -39,8 +41,17 @@ export async function createAndSyncUser(accessToken: string, refreshToken: strin
 // Gets Spotify user data, inserts/updates user data in database
 export async function syncSpotifyData(user: User, spotifyAxios: AxiosInstance) {
     try {
-        const simplifiedPlaylists = await getSpotifyUserPlaylists(user, spotifyAxios);
-        await upsertSpotifyDataFromPlaylists(user, simplifiedPlaylists, spotifyAxios);
+        const spotifySimplifiedPlaylists = await getSpotifyUserPlaylists(user, spotifyAxios);
+        const userPlaylists = await getUserPlaylists(user.id);
+        const { toDelete, toUpdate, toInsert } = categorizePlaylists(spotifySimplifiedPlaylists, userPlaylists);
+        // Delete playlists that the Spotify user no longer has
+        if (toDelete.length > 0) {
+            // No await because these playlists are effectively irrelevant to other calls
+            deletePlaylists(toDelete);
+        }
+        // Upsert new Spotify playlists (toInsert) and playlists where snapshot_id has changed (toUpdate)
+        const toUpsert = toInsert.concat(toUpdate);
+        await upsertSpotifyDataFromPlaylists(user, toUpsert, spotifyAxios);
         console.log("Spotify data synced");
     } catch (err) {
         console.error(err);
@@ -48,7 +59,7 @@ export async function syncSpotifyData(user: User, spotifyAxios: AxiosInstance) {
     }
 }
 
-// Returns an array of all the playlists a user has saved from Spotify API
+// Returns an array of all the non-collaborate playlists a user owns from Spotify API
 async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) {
     // const spotifyAxios = getSpotifyAxios(user.accessToken);
     let playlists: Array<Spotify.SimplifiedPlaylistObject> = [];
@@ -69,7 +80,7 @@ async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) 
             }
         }
         console.log("Spotify playlists obtained");
-        return playlists;
+        return playlists.filter(playlist => !playlist.collaborative && playlist.owner.uri == user.spotifyUri);
     } catch (err) {
         console.error(err);
         throw new Error("Error fetching Spotify playlists");
@@ -120,52 +131,84 @@ function selectFirstArtist(artists: Spotify.SimplifiedArtistObject[]): Spotify.S
     return artists[0]!;
 }
 
+function categorizePlaylists(spotifyPlaylists: Spotify.SimplifiedPlaylistObject[], dbPlaylists: Playlist[]) {
+    // Create spotifyId->playlist maps
+    const dbMap = new Map(dbPlaylists.map(p => [p.spotifyId, p]));
+    const spotifyMap = new Map(spotifyPlaylists.map(p => [p.id, p]));
+
+    // Create playlist categories
+    const toDelete = [];
+    const toUpdate = [];
+    const toInsert = [];
+
+    // Sort into categories
+    for (const [spotifyId, dbPlaylist] of dbMap.entries()) {
+        if (!spotifyMap.has(spotifyId)) {
+            // Case 1: Playlist exists in DB but not Spotify -> Delete from db
+            toDelete.push(dbPlaylist.id);
+        } else {
+            const spotifyPlaylist = spotifyMap.get(spotifyId)!; // Assertion because we checked if spotifyMap has it
+            if (spotifyPlaylist.snapshot_id !== dbPlaylist.spotifySnapshotId) {
+                // Case 3: snapshot_id changed -> Update in db
+                toUpdate.push(spotifyPlaylist);
+            }
+            // Case 2: snapshot_id same -> Leave it alone
+        }
+    }
+
+    for (const [spotifyId, spotifyPlaylist] of spotifyMap.entries()) {
+        if (!dbMap.has(spotifyId)) {
+            toInsert.push(spotifyPlaylist);
+        }
+    }
+
+    return { toDelete: toDelete, toUpdate: toUpdate, toInsert: toInsert };
+}
+
 // Inserts all non-existing playlists, tracks from those playlists, and albums and artists from those tracks into my database
 async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spotify.SimplifiedPlaylistObject>, spotifyAxios: AxiosInstance) {
     try {
         for (const playlist of playlists) {
-            if (!playlist.collaborative && playlist.owner.uri == user.spotifyUri) {
-                // This playlist belongs to this user, insert it
-                // TODO: This strategy doesn't take care of playlist versioning with snapshot ids, nor deleted playlists. Redo it!
-                // Suggested flow:
-                //  Get all current db playlists for this user
-                //  Match with spotify playlists 1 by 1
-                //      Any in db that aren't in spotify delete
-                //      Any in both that match snapshot, leave
-                //      Any in both that don't match snapshot, update
-                //      Any in spotify only, insert
-                let existingPlaylist = await prisma.playlist.findUnique({
-                    where: {
-                        spotifyUri: playlist.uri,
-                    }
-                });
-                if (!existingPlaylist) {
-                    // Playlist not found, insert into database
-                    // Upsert not create to protect against race condition in high-concurrency (totally unnecessary)
-                    const insertedPlaylist = await prisma.playlist.upsert({
-                        where: {
-                            spotifyUri: playlist.uri
-                        },
-                        update: {
-                            name: playlist.name,
-                            coverUrl: selectProperImage(playlist.images),
-                            spotifySnapshotId: playlist.snapshot_id,
-                        },
-                        create: {
-                            spotifyUri: playlist.uri,
-                            spotifyId: playlist.id,
-                            spotifySnapshotId: playlist.snapshot_id,
-                            name: playlist.name,
-                            coverUrl: selectProperImage(playlist.images),
-                            owner: {
-                                connect: { id: user.id },
-                            }
-                        },
-                    });
-                    const spotifyPlaylistTracks = await getSpotifyPlaylistTracks(insertedPlaylist, spotifyAxios);
-                    const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
-                    const playlistTracks = await upsertPlaylistTracks(insertedPlaylist, tracks, trackMetadata);
+            // This playlist belongs to this user, insert it
+            // TODO: This strategy doesn't take care of playlist versioning with snapshot ids, nor deleted playlists. Redo it!
+            // Suggested flow:
+            //  Get all current db playlists for this user
+            //  Match with spotify playlists 1 by 1
+            //      Any in db that aren't in spotify delete
+            //      Any in both that match snapshot, leave
+            //      Any in both that don't match snapshot, update
+            //      Any in spotify only, insert
+            let existingPlaylist = await prisma.playlist.findUnique({
+                where: {
+                    spotifyUri: playlist.uri,
                 }
+            });
+            if (!existingPlaylist) {
+                // Playlist not found, insert into database
+                // Upsert not create to protect against race condition in high-concurrency (totally unnecessary)
+                const insertedPlaylist = await prisma.playlist.upsert({
+                    where: {
+                        spotifyUri: playlist.uri
+                    },
+                    update: {
+                        name: playlist.name,
+                        coverUrl: selectProperImage(playlist.images),
+                        spotifySnapshotId: playlist.snapshot_id,
+                    },
+                    create: {
+                        spotifyUri: playlist.uri,
+                        spotifyId: playlist.id,
+                        spotifySnapshotId: playlist.snapshot_id,
+                        name: playlist.name,
+                        coverUrl: selectProperImage(playlist.images),
+                        owner: {
+                            connect: { id: user.id },
+                        }
+                    },
+                });
+                const spotifyPlaylistTracks = await getSpotifyPlaylistTracks(insertedPlaylist, spotifyAxios);
+                const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
+                const playlistTracks = await upsertPlaylistTracks(insertedPlaylist, tracks, trackMetadata);
             }
         }
         console.log("Spotify playlist data upserted");

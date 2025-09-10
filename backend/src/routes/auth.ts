@@ -7,7 +7,7 @@ import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } from '
 import { getSpotifyAxios, spotifyAuthAxios } from '../utils/axiosInstances.js';
 import { createAndSyncUser } from '../controllers/syncSpotifyData.js';
 import { getPlaylistTracksFromPlaylist, getUserPlaylists } from '../controllers/getFromDb.js';
-import { deleteOrphanedAlbums, deleteOrphanedArtists, deleteOrphanedTracks, deleteUserAndChildren } from '../controllers/deleteData.js';
+import { deleteOrphanedAlbums, deleteOrphanedArtists, deleteOrphanedTracks, deleteUserAndOwnedData } from '../controllers/deleteData.js';
 
 const router = express.Router();
 
@@ -94,8 +94,8 @@ router.get('/callback', async (req, res) => {
                 </ul>
             `);
 
-            await deleteUserAndChildren(user.id);
-            let numDeleted = new Array<Number>(3);
+            await deleteUserAndOwnedData(user.id);
+            let numDeleted = new Array<number>(3);
             numDeleted[0] = await deleteOrphanedTracks();
             numDeleted[1] = await deleteOrphanedAlbums();
             numDeleted[2] = await deleteOrphanedArtists();
