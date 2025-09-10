@@ -1,8 +1,8 @@
 import prisma from "../utils/prismaClient.js";
 import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
-import type { Playlist, User } from "../generated/prisma/index.js";
+import type { Playlist, User } from "../generated/prisma/client.js";
 import type * as Spotify from "../utils/spotifyTypes.js";
-import type { AxiosInstance } from "axios";
+import type { Axios, AxiosInstance } from "axios";
 
 export async function createAndSyncUser(accessToken: string, refreshToken: string) {
     const spotifyAxios = getSpotifyAxios(accessToken);
@@ -56,13 +56,14 @@ async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) 
     try {
         let morePlaylists = true;
         let offset = 0;
+        const maxLimit = 50;
         while (morePlaylists) {
-            const res = await spotifyAxios.get(`/me/playlists?offset=${offset}&limit=50`);
+            const res = await spotifyAxios.get(`/me/playlists?offset=${offset}&limit=${maxLimit}`);
             const data = res.data;
             if (data.total > 0) {
                 playlists = playlists.concat(data.items);
                 morePlaylists = data.next != null;
-                offset += 50;
+                offset += maxLimit;
             } else {
                 morePlaylists = false;
             }
@@ -75,8 +76,30 @@ async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) 
     }
 }
 
-// async function getSpotifyPlaylistTracks(playlist: SpotifySimplifiedPlaylistObject) {
-//     let tracks: Array<SpotifyTra
+// async function getSpotifyPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance) {
+//     let tracks: Array<Spotify.PlaylistTrackObject> = [];
+//     try {
+//         let moreTracks = true;
+//         let offset = 0;
+//         const maxLimit = 100;
+//         while (moreTracks) {
+//             const res = await spotifyAxios.get(`/playlists/${playlist.id}/tracks?offset=${offset}&limit=${maxLimit}`);
+//             const data = res.data;
+//             if (data.total > 0) {
+//                 tracks = tracks.concat(data.items);
+//                 moreTracks = data.next != null;
+//                 offset += maxLimit;
+//             } else {
+//                 moreTracks = false;
+//             }
+//         }
+//         const nonPodcastTracks = tracks.filter((playlistTrack) => playlistTrack.track.type == "track");
+//         console.log(`Spotify tracks obtained for playlist ${playlist.name}`)
+//         return nonPodcastTracks;
+//     } catch (err) {
+//         console.error(err);
+//         throw new Error("Error fetching Spotify playlist tracks");
+//     }
 // }
 
 function selectProperImage(images: Spotify.ImageObject[] | null): string | null {
@@ -103,7 +126,7 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
                 //      Any in both that match snapshot, leave
                 //      Any in both that don't match snapshot, update
                 //      Any in spotify only, insert
-                const upsertedPlaylist = await prisma.playlist.upsert({
+                const upsertedPlaylist: Playlist = await prisma.playlist.upsert({
                     where: {
                         spotifyUri: playlist.uri
                     },
@@ -122,6 +145,8 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
                         }
                     },
                 });
+
+                // const tracks = await getSpotifyPlaylistTracks(upsertedPlaylist, spotifyAxios);
             }
         }
         console.log("Spotify playlist data upserted");
@@ -132,6 +157,47 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
 }
 
 // Inserts all tracks from playlist and albums and artist from those tracks into my database
-// async function upsertSpotifyDataFromTrack(playlist) {
-    
+// async function upsertSpotifyDataFromTracks(playlistTracks: Spotify.PlaylistTrackObject[]) {
+//     try {
+//         for (const playlistTrack of playlistTracks) {
+//             const track: Spotify.TrackObject = playlistTrack.track as Spotify.TrackObject; // Can do this because we filtered out episode tracks
+//             const upsertedTrack = prisma.track.upsert({
+//                 where: {
+//                     spotifyUri: track.uri,
+//                 },
+//                 update: {},
+//                 create: {
+//                     spotifyUri: track.uri,
+//                     name: track.name,
+
+//                 },
+//             })
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         throw new Error("Failed to upsert track data");
+//     }
+// }
+
+// async function upsertSpotifyDataFromArtist(artist: Spotify.SimplifiedArtistObject) {
+//     try {
+//         const upsertedArtist = prisma.artist.upsert({
+//             where: {
+//                 spotifyUri: artist.uri,
+//             },
+//             update: {},
+//             create: {
+//                 spotifyUri: artist.uri,
+//                 name: artist.name,
+//                 imageUrl: selectProperImage(artist.images);
+//             },
+//         })
+//     } catch (err) {
+//         console.error(err);
+//         throw new Error("Failed to upsert artist data");
+//     }
+// }
+
+// async function upsertSpotifyDataFromAlbum(album: Spotify.AlbumObject) {
+
 // }

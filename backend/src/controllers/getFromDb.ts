@@ -1,4 +1,4 @@
-import type { Playlist } from "../generated/prisma/index.js";
+import type { Playlist } from "../generated/prisma/client.js";
 import prisma from "../utils/prismaClient.js";
 
 export async function getUserPlaylists(userId: string): Promise<Playlist[]> {
