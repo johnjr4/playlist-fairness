@@ -1,13 +1,14 @@
 import prisma from "../utils/prismaClient.js";
 import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
-import type * as Spotify from "../utils/spotifyTypes.js";
+import * as Spotify from "../utils/spotifyTypes.js";
 import type { AxiosInstance } from "axios";
 import { getPlaylistTracksFromPlaylist, getUserPlaylists } from "./getFromDb.js";
 import { deletePlaylists } from "./deleteData.js";
 import pLimit from "p-limit";
 import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
 import type { BundledSpotifyPlaylistTracks } from "../utils/helperTypes.js";
+import { partition } from "../utils/arrayUtils.js";
 
 export async function createAndSyncUser(accessToken: string, refreshToken: string) {
     const spotifyAxios = getSpotifyAxios(accessToken);
@@ -134,7 +135,7 @@ function selectFirstArtist(artists: Spotify.SimplifiedArtistObject[]): Spotify.S
     return artists[0]!;
 }
 
-function categorizePlaylists(spotifyPlaylists: Spotify.SimplifiedPlaylistObject[], dbPlaylists: Playlist[]) {
+function categorizePlaylists(spotifyPlaylists: (Spotify.SimplifiedPlaylistObject)[], dbPlaylists: Playlist[]) {
     // Create spotifyId->playlist maps
     const dbMap = new Map(dbPlaylists.map(p => [p.spotifyId, p]));
     const spotifyMap = new Map(spotifyPlaylists.map(p => [p.id, p]));
@@ -200,23 +201,12 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
                 upsertedPlaylists.push(upsertedPlaylist);
             }
         }
-        // Get all Spotify PlaylistTracks with limited concurrency
+        // Get all Spotify.PlaylistTracks  and upsert Tracks and PlaylistTracks with limited concurrency
         const limit = pLimit(SPOTIFY_CONCURRENCY_LIMIT);
         const tracksByPlaylistPromises = upsertedPlaylists.map(
             playlist => limit(() => getAndUpsertPlaylistTracks(playlist, spotifyAxios))
         );
         const trackResults = await Promise.allSettled(tracksByPlaylistPromises);
-        // // Then filter out the failed Promises
-        // const successfulTrackResults = trackResults.filter(res => res.status === 'fulfilled');
-        // // Then transform to get the BundledPlaylist
-        // const tracksByPlaylist = successfulTrackResults.map(res => res.value);
-
-        // // Upsert the relevant track data on per-playlist basis
-        // for (const { playlist, spotifyPlaylistTracks } of tracksByPlaylist) {
-        //     const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
-        //     const dbPlaylistTracks = await upsertPlaylistTracks(playlist, tracks, trackMetadata);
-        // }
-
         console.log("Spotify playlist data upserted");
     } catch (err) {
         console.error(err);
@@ -232,44 +222,174 @@ async function getAndUpsertPlaylistTracks(playlist: Playlist, spotifyAxios: Axio
 }
 
 // Inserts all tracks from playlist and albums and artist from those tracks into my database
-async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.PlaylistTrackObject[]) {
+async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.PlaylistTrackObject[], batchSize = 50) {
     try {
         let tracks: Track[] = [];
         let trackMetadata: Spotify.PlaylistTrackMetadata[] = [];
-        for (const playlistTrack of spotifyPlaylistTracks) {
-            const spotifyTrack: Spotify.TrackObject = playlistTrack.track as Spotify.TrackObject; // Can do this because we filtered out episode tracks
 
-            // First upsert artists
-            const firstArtist = selectFirstArtist(spotifyTrack.artists);
-            await upsertSpotifyDataFromArtist(firstArtist);
-            // Then upsert albums
-            await upsertSpotifyDataFromAlbum(spotifyTrack.album);
-            // Then upsert track
-            const upsertedTrack = await prisma.track.upsert({
+        for (let i = 0; i < spotifyPlaylistTracks.length; i += batchSize) {
+            const playlistTrackBatch = spotifyPlaylistTracks.slice(i, i + batchSize);
+
+            if (playlistTrackBatch.length <= 0) break;
+
+            // Can do this because we filtered out episode tracks
+            const spotifyTrackBatch = playlistTrackBatch.map(spotPlaylistTrack => spotPlaylistTrack.track as Spotify.TrackObject);
+
+            // Upsert artist batch first
+            const necessaryArtists = spotifyTrackBatch.map(spotifyTrack => selectFirstArtist(spotifyTrack.artists));
+            await upsertSpotifyDataFromArtists(necessaryArtists);
+            // Find necessary artists in db
+            const necessaryArtistsDb = await prisma.artist.findMany({
                 where: {
-                    spotifyUri: spotifyTrack.uri,
-                },
-                update: {},
-                create: {
-                    spotifyUri: spotifyTrack.uri,
-                    name: spotifyTrack.name,
-                    artist: {
-                        connect: { spotifyUri: firstArtist.uri },
-                    },
-                    album: {
-                        connect: { spotifyUri: spotifyTrack.album.uri },
+                    spotifyUri: {
+                        in: necessaryArtists.map(artist => artist.uri),
                     },
                 },
             });
-            tracks.push(upsertedTrack);
-            trackMetadata.push({ added_at: playlistTrack.added_at, added_by: playlistTrack.added_by, is_local: playlistTrack.is_local });
+            // Create helper map
+            const uriToArtistId = new Map(necessaryArtistsDb.map(a => [a.spotifyUri, a.id]));
+
+            // Then upsert album batch
+            const necessaryAlbums = spotifyTrackBatch.map(spotifyTrack => spotifyTrack.album);
+            await upsertSpotifyDataFromAlbums(necessaryAlbums);
+            // Find necessary albums in db
+            const necessaryAlbumsInDb = await prisma.album.findMany({
+                where: {
+                    spotifyUri: {
+                        in: necessaryAlbums.map(album => album.uri),
+                    },
+                },
+            });
+            // Create helper map
+            const uriToAlbumId = new Map(necessaryAlbumsInDb.map(a => [a.spotifyUri, a.id]));
+
+            // Probably redundant error handling to make sure that the proper albums and artists actually exist
+            const spotifyTracksWithNecessaryData = spotifyTrackBatch.filter(t => uriToArtistId.has(selectFirstArtist(t.artists).uri) && uriToAlbumId.has(t.album.uri));
+            if (spotifyTracksWithNecessaryData.length < spotifyTrackBatch.length) {
+                console.warn(`${spotifyTrackBatch.length - spotifyTracksWithNecessaryData.length} tracks skipped when inserting due to insufficient related data`);
+            }
+
+            // Find tracks already there
+            const tracksInDb = await prisma.track.findMany({
+                where: {
+                    spotifyUri: {
+                        in: spotifyTracksWithNecessaryData.map(t => t.uri),
+                    }
+                }
+            });
+            const urisInDb = new Set(tracksInDb.map(t => t.spotifyUri));
+
+            // toUpdate == all tracks from spotifyTracksWithNecessaryData that already exist in db
+            // toInsert == all tracks from spotifyTracksWithNecessaryData that aren't in the db
+            const [toUpdate, toInsert] = partition(spotifyTracksWithNecessaryData, st => urisInDb.has(st.uri));
+
+            const metadataMap: Map<string, Spotify.PlaylistTrackMetadata> = new Map(
+                playlistTrackBatch.map(pt => [
+                    pt.track.uri,
+                    {
+                        added_by: pt.added_by,
+                        added_at: pt.added_at,
+                        is_local: pt.is_local
+                    }
+                ])
+            );
+            let insertedTracks: Track[] = [];
+            let updatedTracks: Track[] = [];
+
+            // Update track batch
+            if (toUpdate.length > 0) {
+                updatedTracks = await Promise.all(
+                    toUpdate.map(spotifyTrack =>
+                        prisma.track.update({
+                            where: { spotifyUri: spotifyTrack.uri },
+                            data: {
+                                name: spotifyTrack.name,
+                                // Can assert non-null because we checked for related data above
+                                artistId: uriToArtistId.get(selectFirstArtist(spotifyTrack.artists).uri)!,
+                                albumId: uriToAlbumId.get(spotifyTrack.album.uri)!,
+
+                            },
+                        })
+                    )
+                );
+            }
+
+            // Then insert track batch
+            if (toInsert.length > 0) {
+                insertedTracks = await prisma.track.createManyAndReturn({
+                    data: spotifyTracksWithNecessaryData.map(spotifyTrack => {
+                        return {
+                            spotifyUri: spotifyTrack.uri,
+                            name: spotifyTrack.name,
+                            // Can assert non-null because we checked for related data above
+                            artistId: uriToArtistId.get(selectFirstArtist(spotifyTrack.artists).uri)!,
+                            albumId: uriToAlbumId.get(spotifyTrack.album.uri)!,
+                        };
+                    }),
+                    skipDuplicates: true,
+                });
+            }
+
+            // Push to tracking arrays
+            ({ runningTracks: tracks, runningTrackMetadata: trackMetadata } = concatTracksAndMetadata(insertedTracks, metadataMap, tracks, trackMetadata));
+            ({ runningTracks: tracks, runningTrackMetadata: trackMetadata } = concatTracksAndMetadata(updatedTracks, metadataMap, tracks, trackMetadata));
         }
+
+        // for (const playlistTrack of spotifyPlaylistTracks) {
+        //     const spotifyTrack: Spotify.TrackObject = playlistTrack.track as Spotify.TrackObject; // Can do this because we filtered out episode tracks
+
+        //     // First upsert artists
+        //     const firstArtist = selectFirstArtist(spotifyTrack.artists);
+        //     await upsertSpotifyDataFromArtist(firstArtist);
+        //     // Then upsert albums
+        //     await upsertSpotifyDataFromAlbum(spotifyTrack.album);
+        //     // Then upsert track
+        //     const upsertedTrack = await prisma.track.upsert({
+        //         where: {
+        //             spotifyUri: spotifyTrack.uri,
+        //         },
+        //         update: {},
+        //         create: {
+        //             spotifyUri: spotifyTrack.uri,
+        //             name: spotifyTrack.name,
+        //             artist: {
+        //                 connect: { spotifyUri: firstArtist.uri },
+        //             },
+        //             album: {
+        //                 connect: { spotifyUri: spotifyTrack.album.uri },
+        //             },
+        //         },
+        //     });
+        //     tracks.push(upsertedTrack);
+        //     trackMetadata.push({ added_at: playlistTrack.added_at, added_by: playlistTrack.added_by, is_local: playlistTrack.is_local });
+        // }
         console.log("Successfully upserted tracks data");
         return { tracks: tracks, trackMetadata: trackMetadata };
     } catch (err) {
         console.error(err);
         throw new Error("Failed to upsert track data");
     }
+}
+
+function concatTracksAndMetadata(
+    newTracks: Track[],
+    metadataMap: Map<string, Spotify.PlaylistTrackMetadata>,
+    runningTracks: Track[],
+    runningTrackMetadata: Spotify.PlaylistTrackMetadata[]
+): { runningTracks: Track[], runningTrackMetadata: Spotify.PlaylistTrackMetadata[] } {
+    if (newTracks.length > 0) {
+        const updatedRunningTracks = runningTracks.concat(newTracks);
+        const updatedRunningTrackMetadata = runningTrackMetadata.concat(newTracks.map(t => {
+            const pt = metadataMap.get(t.spotifyUri)!; // Can assert because insertedTracks is subset of playlistTrackBatch
+            return {
+                added_at: pt.added_at,
+                added_by: pt.added_by,
+                is_local: pt.is_local,
+            }
+        }));
+        return { runningTracks: updatedRunningTracks, runningTrackMetadata: updatedRunningTrackMetadata };
+    }
+    return { runningTracks, runningTrackMetadata };
 }
 
 // Inserts or updates artist in my database
@@ -288,6 +408,59 @@ async function upsertSpotifyDataFromArtist(artist: Spotify.SimplifiedArtistObjec
     } catch (err) {
         console.error(err);
         throw new Error(`Failed to upsert artist data for ${artist.name}`);
+    }
+}
+
+// Inserts or updates multiple artists in my database
+async function upsertSpotifyDataFromArtists(spotifyArtists: Spotify.SimplifiedArtistObject[]) {
+    try {
+        const artistsInDb = await prisma.artist.findMany({
+            where: {
+                spotifyUri: {
+                    in: spotifyArtists.map(artist => artist.uri),
+                },
+            },
+        });
+        // Find artists not in DB
+        const spotifyUrisInDb = artistsInDb.map(foundArtist => foundArtist.spotifyUri);
+        const artistsInDbSet = new Set(spotifyUrisInDb);
+        const artistsNotInDb = spotifyArtists.filter(artist => !artistsInDbSet.has(artist.uri));
+
+        // Find artists in DB that differ
+        // const spotifyArtistMap = new Map(spotifyArtists.map(artist => [artist.uri, artist]));
+        // const artistsDiffInDb = artistsInDb.filter(artist => spotifyArtistMap.has(artist.spotifyUri) && artist.name !== spotifyArtistMap.get(artist.spotifyUri)!.name);
+
+        if (artistsNotInDb.length > 0) {
+            // Add artists not in db
+            const newArtists = await prisma.artist.createMany({
+                data: artistsNotInDb.map(artist => {
+                    return {
+                        spotifyUri: artist.uri,
+                        name: artist.name,
+                    }
+                }),
+                skipDuplicates: true,
+            })
+        }
+
+        // if (artistsDiffInDb.length > 0) {
+        //     // Update artists with new names
+        //     const renamedArtists = await prisma.artist.updateMany({
+        //         where: {
+        //             spotifyUri: {
+        //                 in: artistsDiffInDb.map(artist => artist.spotifyUri),
+        //             },
+        //         },
+        //         data: artistsDiffInDb.map(artist => {
+        //             // TODO: this is incorrect. It needs to be the new spotify name
+        //             return { name: artist.name };
+        //         }),
+        //     })
+        // }
+
+    } catch (err) {
+        console.error(err);
+        throw new Error(`Failed to upsert multiple artists data`);
     }
 }
 
@@ -322,6 +495,87 @@ async function upsertSpotifyDataFromAlbum(album: Spotify.AlbumObject) {
         throw new Error(`Failed to upsert album data for ${album.name} (did you remember to create the artist first?)`);
     }
 }
+
+// Inserts or updates multiple albums in my database
+async function upsertSpotifyDataFromAlbums(spotifyAlbums: Spotify.AlbumObject[]) {
+    try {
+        // First handle inserting artists
+        const necessaryArtists = spotifyAlbums.map(album => selectFirstArtist(album.artists));
+        await upsertSpotifyDataFromArtists(necessaryArtists);
+
+        // Find albums already in DB
+        const albumsInDb = await prisma.album.findMany({
+            where: {
+                spotifyUri: {
+                    in: spotifyAlbums.map(album => album.uri),
+                },
+            },
+        });
+        // Discern albums not in DB
+        const spotifyUrisInDb = albumsInDb.map(foundAlbum => foundAlbum.spotifyUri);
+        const albumsInDbSet = new Set(spotifyUrisInDb);
+        const albumsNotInDb = spotifyAlbums.filter(album => !albumsInDbSet.has(album.uri));
+
+        // Discern albums in DB that differ
+        // const spotifyAlbumsMap = new Map(spotifyAlbums.map(album => [album.uri, album]));
+        // const albumsDiffInDb = albumsInDb.filter(album => spotifyAlbumsMap.has(album.spotifyUri) && album.name !== spotifyAlbumsMap.get(album.spotifyUri)!.name);
+
+
+        if (albumsNotInDb.length > 0) {
+            // Find necessary artists in db
+            const necessaryArtistsDb = await prisma.artist.findMany({
+                where: {
+                    spotifyUri: {
+                        in: necessaryArtists.map(artist => artist.uri),
+                    },
+                },
+            });
+            // Create helper map
+            const uriToArtistId = new Map(necessaryArtistsDb.map(a => [a.spotifyUri, a.id]));
+
+            // Add albums not in db
+            const newAlbums = await prisma.album.createManyAndReturn({
+                data: albumsNotInDb.map(album => {
+                    return {
+                        spotifyUri: album.uri,
+                        name: album.name,
+                        coverUrl: selectProperImage(album.images),
+                        // Can assert non-null below because albumsNotInDb is subset of spotifyAlbums
+                        artistId: uriToArtistId.get(selectFirstArtist(album.artists).uri)!,
+                    }
+                }),
+                select: {
+                    id: true,
+                    spotifyUri: true,
+                },
+                skipDuplicates: true,
+            });
+        }
+
+        // if (albumsDiffInDb.length > 0) {
+        //     // Update albums with new names
+        //     const renamedAlbums = await prisma.artist.updateMany({
+        //         where: {
+        //             spotifyUri: {
+        //                 in: albumsDiffInDb.map(album => album.spotifyUri),
+        //             },
+        //         },
+        //         // TODO: This is incorrect. It needs to be the new Spotify data
+        //         data: albumsDiffInDb.map(album => {
+        //             return { 
+        //                 name: album.name
+        //                 coverUrl: selectProperImage(album.images), 
+        //             };
+        //         }),
+        //     })
+        // }
+
+    } catch (err) {
+        console.error(err);
+        throw new Error(`Failed to upsert multiple artists data`);
+    }
+}
+
 
 async function upsertPlaylistTracks(playlist: Playlist, tracks: Track[], trackMetadata: Spotify.PlaylistTrackMetadata[]) {
     try {
