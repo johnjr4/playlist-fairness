@@ -3,7 +3,7 @@ import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
 import type * as Spotify from "../utils/spotifyTypes.js";
 import type { AxiosInstance } from "axios";
-import { getUserPlaylists } from "./getFromDb.js";
+import { getPlaylistTracksFromPlaylist, getUserPlaylists } from "./getFromDb.js";
 import { deletePlaylists } from "./deleteData.js";
 import pLimit from "p-limit";
 import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
@@ -203,25 +203,32 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
         // Get all Spotify PlaylistTracks with limited concurrency
         const limit = pLimit(SPOTIFY_CONCURRENCY_LIMIT);
         const tracksByPlaylistPromises = upsertedPlaylists.map(
-            playlist => limit(() => getSpotifyPlaylistTracks(playlist, spotifyAxios))
+            playlist => limit(() => getAndUpsertPlaylistTracks(playlist, spotifyAxios))
         );
         const trackResults = await Promise.allSettled(tracksByPlaylistPromises);
-        // Then filter out the failed Promises
-        const successfulTrackResults = trackResults.filter(res => res.status === 'fulfilled');
-        // Then transform to get the BundledPlaylist
-        const tracksByPlaylist = successfulTrackResults.map(res => res.value);
+        // // Then filter out the failed Promises
+        // const successfulTrackResults = trackResults.filter(res => res.status === 'fulfilled');
+        // // Then transform to get the BundledPlaylist
+        // const tracksByPlaylist = successfulTrackResults.map(res => res.value);
 
-        // Upsert the relevant track data on per-playlist basis
-        for (const { playlist, spotifyPlaylistTracks } of tracksByPlaylist) {
-            const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
-            const dbPlaylistTracks = await upsertPlaylistTracks(playlist, tracks, trackMetadata);
-        }
+        // // Upsert the relevant track data on per-playlist basis
+        // for (const { playlist, spotifyPlaylistTracks } of tracksByPlaylist) {
+        //     const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(spotifyPlaylistTracks);
+        //     const dbPlaylistTracks = await upsertPlaylistTracks(playlist, tracks, trackMetadata);
+        // }
 
         console.log("Spotify playlist data upserted");
     } catch (err) {
         console.error(err);
         throw new Error("Failed to upsert playlist data to database");
     }
+}
+
+async function getAndUpsertPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance) {
+    const bundledSpotifyPlaylistTracks = await getSpotifyPlaylistTracks(playlist, spotifyAxios);
+    const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(bundledSpotifyPlaylistTracks.spotifyPlaylistTracks);
+    const dbPlaylistTracks = await upsertPlaylistTracks(playlist, tracks, trackMetadata);
+
 }
 
 // Inserts all tracks from playlist and albums and artist from those tracks into my database
