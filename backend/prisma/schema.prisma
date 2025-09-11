@@ -82,9 +82,9 @@ model PlaylistTrack {
   trackingStartTime   DateTime         @default(now())
   trackingStopTime    DateTime?
   listeningEvents     ListeningEvent[]
+  // @@unique([playlistId, playlistPosition])
 
   @@id([playlistId, trackId])
-  @@unique([playlistId, playlistPosition])
 }
 
 model ListeningEvent {

@@ -217,7 +217,8 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
 async function getAndUpsertPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance) {
     const bundledSpotifyPlaylistTracks = await getSpotifyPlaylistTracks(playlist, spotifyAxios);
     const { tracks, trackMetadata } = await upsertSpotifyDataFromTracks(bundledSpotifyPlaylistTracks.spotifyPlaylistTracks);
-    const dbPlaylistTracks = await upsertPlaylistTracks(playlist, tracks, trackMetadata);
+    console.log(`${tracks.length} new tracks for playlist: ${playlist.name}`);
+    const dbPlaylistTracks = await upsertPlaylistTracks(bundledSpotifyPlaylistTracks);
 
 }
 
@@ -275,13 +276,31 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
                     spotifyUri: {
                         in: spotifyTracksWithNecessaryData.map(t => t.uri),
                     }
+                },
+                include: {
+                    album: {
+                        select: {
+                            name: true,
+                        }
+                    },
+                    artist: {
+                        select: {
+                            name: true,
+                        }
+                    }
                 }
             });
-            const urisInDb = new Set(tracksInDb.map(t => t.spotifyUri));
+            const urisInDb = new Map(tracksInDb.map(t => [t.spotifyUri, t]));
 
             // toUpdate == all tracks from spotifyTracksWithNecessaryData that already exist in db
             // toInsert == all tracks from spotifyTracksWithNecessaryData that aren't in the db
-            const [toUpdate, toInsert] = partition(spotifyTracksWithNecessaryData, st => urisInDb.has(st.uri));
+            const [alreadyInDb, toInsert] = partition(spotifyTracksWithNecessaryData, st => urisInDb.has(st.uri));
+
+            // Select only the tracks which have a name difference somewhere
+            const toUpdate = alreadyInDb.filter(t => {
+                const dbTrack = urisInDb.get(t.uri)!; // non-null because of partition() call
+                return dbTrack.name !== t.name || dbTrack.album.name !== t.album.name || dbTrack.artist.name !== selectFirstArtist(t.artists).name;
+            });
 
             const metadataMap: Map<string, Spotify.PlaylistTrackMetadata> = new Map(
                 playlistTrackBatch.map(pt => [
@@ -414,49 +433,53 @@ async function upsertSpotifyDataFromArtist(artist: Spotify.SimplifiedArtistObjec
 // Inserts or updates multiple artists in my database
 async function upsertSpotifyDataFromArtists(spotifyArtists: Spotify.SimplifiedArtistObject[]) {
     try {
-        const artistsInDb = await prisma.artist.findMany({
-            where: {
-                spotifyUri: {
-                    in: spotifyArtists.map(artist => artist.uri),
-                },
-            },
-        });
-        // Find artists not in DB
-        const spotifyUrisInDb = artistsInDb.map(foundArtist => foundArtist.spotifyUri);
-        const artistsInDbSet = new Set(spotifyUrisInDb);
-        const artistsNotInDb = spotifyArtists.filter(artist => !artistsInDbSet.has(artist.uri));
-
-        // Find artists in DB that differ
-        // const spotifyArtistMap = new Map(spotifyArtists.map(artist => [artist.uri, artist]));
-        // const artistsDiffInDb = artistsInDb.filter(artist => spotifyArtistMap.has(artist.spotifyUri) && artist.name !== spotifyArtistMap.get(artist.spotifyUri)!.name);
-
-        if (artistsNotInDb.length > 0) {
-            // Add artists not in db
-            const newArtists = await prisma.artist.createMany({
-                data: artistsNotInDb.map(artist => {
-                    return {
-                        spotifyUri: artist.uri,
-                        name: artist.name,
-                    }
-                }),
-                skipDuplicates: true,
-            })
+        // TODO: I'm doing this because I got deadlock on this method once and have no idea how to fix it
+        for (const spotifyArtist of spotifyArtists) {
+            await upsertSpotifyDataFromArtist(spotifyArtist);
         }
-
-        // if (artistsDiffInDb.length > 0) {
-        //     // Update artists with new names
-        //     const renamedArtists = await prisma.artist.updateMany({
-        //         where: {
-        //             spotifyUri: {
-        //                 in: artistsDiffInDb.map(artist => artist.spotifyUri),
-        //             },
+        // const artistsInDb = await prisma.artist.findMany({
+        //     where: {
+        //         spotifyUri: {
+        //             in: spotifyArtists.map(artist => artist.uri),
         //         },
-        //         data: artistsDiffInDb.map(artist => {
-        //             // TODO: this is incorrect. It needs to be the new spotify name
-        //             return { name: artist.name };
+        //     },
+        // });
+        // // Find artists not in DB
+        // const spotifyUrisInDb = artistsInDb.map(foundArtist => foundArtist.spotifyUri);
+        // const artistsInDbSet = new Set(spotifyUrisInDb);
+        // const artistsNotInDb = spotifyArtists.filter(artist => !artistsInDbSet.has(artist.uri));
+
+        // // Find artists in DB that differ
+        // // const spotifyArtistMap = new Map(spotifyArtists.map(artist => [artist.uri, artist]));
+        // // const artistsDiffInDb = artistsInDb.filter(artist => spotifyArtistMap.has(artist.spotifyUri) && artist.name !== spotifyArtistMap.get(artist.spotifyUri)!.name);
+
+        // if (artistsNotInDb.length > 0) {
+        //     // Add artists not in db
+        //     const newArtists = await prisma.artist.createMany({
+        //         data: artistsNotInDb.map(artist => {
+        //             return {
+        //                 spotifyUri: artist.uri,
+        //                 name: artist.name,
+        //             }
         //         }),
+        //         skipDuplicates: true,
         //     })
         // }
+
+        // // if (artistsDiffInDb.length > 0) {
+        // //     // Update artists with new names
+        // //     const renamedArtists = await prisma.artist.updateMany({
+        // //         where: {
+        // //             spotifyUri: {
+        // //                 in: artistsDiffInDb.map(artist => artist.spotifyUri),
+        // //             },
+        // //         },
+        // //         data: artistsDiffInDb.map(artist => {
+        // //             // TODO: this is incorrect. It needs to be the new spotify name
+        // //             return { name: artist.name };
+        // //         }),
+        // //     })
+        // // }
 
     } catch (err) {
         console.error(err);
@@ -577,26 +600,51 @@ async function upsertSpotifyDataFromAlbums(spotifyAlbums: Spotify.AlbumObject[])
 }
 
 
-async function upsertPlaylistTracks(playlist: Playlist, tracks: Track[], trackMetadata: Spotify.PlaylistTrackMetadata[]) {
+async function upsertPlaylistTracks(bundledSpotifyPlaylistTracks: BundledSpotifyPlaylistTracks) {
+    const playlist = bundledSpotifyPlaylistTracks.playlist;
     try {
         let playlistTracks: PlaylistTrack[] = [];
-        // TODO: This doesn't deal with tracks removed from playlist! I need to get both full lists and correlate them (see playlist upsert)
-        if (tracks.length != trackMetadata.length) {
-            if (tracks.length > trackMetadata.length) {
-                throw new Error("Metadata misaligned: More tracks than metadata entries");
-            } else {
-                throw new Error("Metadata misaligned: More metadata entries than tracks");
-            }
-        };
-        for (let i = 0; i < tracks.length; i++) {
-            const track = tracks[i]!;
-            const trackMetadatum = trackMetadata[i]!;
 
+        const spotifyPlaylistTracklist = bundledSpotifyPlaylistTracks.spotifyPlaylistTracks;
+        const spotifyPlaylistTracklistUris = spotifyPlaylistTracklist.map(track => track.track.uri);
+
+        const existingTracks = await prisma.track.findMany({
+            where: {
+                spotifyUri: {
+                    in: spotifyPlaylistTracklistUris,
+                }
+            }
+        });
+
+        const existingPlaylistTracks = await prisma.playlistTrack.findMany({
+            where: {
+                playlistId: playlist.id,
+            },
+            include: {
+                track: {
+                    select: {
+                        id: true,
+                        spotifyUri: true,
+                    }
+                }
+            }
+        })
+
+        const existingTrackUris = new Map(existingTracks.map(t => [t.spotifyUri, t.id]));
+        // I'm simply going to skip playlist tracks that don't have their necessary tracks in the database
+        // TODO: insert the tracks here?
+        const spotifyTracklistWithNecessaryTracks = spotifyPlaylistTracklist.filter(t => existingTrackUris.has(t.track.uri));
+
+        // TODO: This doesn't deal with tracks removed from playlist! I need to get both full lists and correlate them (see playlist upsert)
+        let i = 0;
+        for (i = 0; i < spotifyTracklistWithNecessaryTracks.length; i++) {
+            const spotifyPlaylistTrack = spotifyTracklistWithNecessaryTracks[i]!; // non-null assertion because it's a for loop
+            const trackId = existingTrackUris.get(spotifyPlaylistTrack.track.uri)!; // Non-null assertion because we checked above
             const upsertedPlaylistTrack = await prisma.playlistTrack.upsert({
                 where: {
                     playlistId_trackId: {
                         playlistId: playlist.id,
-                        trackId: track.id,
+                        trackId: trackId,
                     }
                 },
                 update: {
@@ -604,12 +652,34 @@ async function upsertPlaylistTracks(playlist: Playlist, tracks: Track[], trackMe
                 },
                 create: {
                     playlistId: playlist.id,
-                    trackId: track.id,
+                    trackId: trackId,
                     playlistPosition: i,
-                    addedToPlaylistTime: trackMetadatum.added_at
+                    addedToPlaylistTime: spotifyPlaylistTrack.added_at,
                 },
             });
             playlistTracks.push(upsertedPlaylistTrack);
+        }
+
+        // Tracks that are in db but not spotify should be marked (but not removed)
+        const spotifyUrisSet = new Set(spotifyPlaylistTracklistUris);
+        const toMarkRemoved = existingPlaylistTracks.filter(t => !spotifyUrisSet.has(t.track.spotifyUri));
+        for (let j = 0; j < toMarkRemoved.length; j++) {
+            const trackToMarkRemoved = toMarkRemoved[j]!; // non-null assertion because it's a for loop
+            const removedPlaylistTrack = await prisma.playlistTrack.update({
+                where: {
+                    playlistId_trackId: {
+                        playlistId: playlist.id,
+                        trackId: trackToMarkRemoved.track.id,
+                    }
+                },
+                data: {
+                    playlistPosition: i,
+                    currentlyOnPlaylist: false,
+                    trackingStopTime: new Date(),
+                },
+            });
+            playlistTracks.push(removedPlaylistTrack);
+            i++;
         }
         return playlistTracks;
     } catch (err) {

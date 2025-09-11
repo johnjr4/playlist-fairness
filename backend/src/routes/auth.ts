@@ -88,18 +88,18 @@ router.get('/callback', async (req, res) => {
                 <p>Welcome ${user.displayName}. You joined UnShuffle at ${user.trackingStartTime}</p>
                 <img src="${user.imageUrl ? user.imageUrl : hobbitPlaceholderUrl}">
                 <ul>
-                    ${nestedPlaylists.map(p => `<img src=${p.playlist.coverUrl ? p.playlist.coverUrl : hobbitPlaceholderUrl}><p>${p.playlist.name}</p><ul>
-                            ${p.tracklist.map(el => `<li>${el.track.name}<li>`)}
+                    ${nestedPlaylists.map(p => `<img src=${p.playlist.coverUrl ? p.playlist.coverUrl : hobbitPlaceholderUrl}><p>${p.playlist.name}: ${p.tracklist.length} tracks</p><ul>
+                            ${p.tracklist.map(el => `<li>${el.track.name}${el.currentlyOnPlaylist ? "" : " REMOVED"}</li>`).join('')}
                         </ul>`).join('\n')}
                 </ul>
             `);
 
-            await deleteUserAndOwnedData(user.id);
-            let numDeleted = new Array<number>(3);
-            numDeleted[0] = await deleteOrphanedTracks();
-            numDeleted[1] = await deleteOrphanedAlbums();
-            numDeleted[2] = await deleteOrphanedArtists();
-            console.log(`Deleted ${numDeleted[0]} tracks, ${numDeleted[1]} albums, and ${numDeleted[2]} artists`);
+            // await deleteUserAndOwnedData(user.id);
+            // let numDeleted = new Array<number>(3);
+            // numDeleted[0] = await deleteOrphanedTracks();
+            // numDeleted[1] = await deleteOrphanedAlbums();
+            // numDeleted[2] = await deleteOrphanedArtists();
+            // console.log(`Deleted ${numDeleted[0]} tracks, ${numDeleted[1]} albums, and ${numDeleted[2]} artists`);
         } catch (err) {
             console.error(err);
             res.status(500).send('Token exchange failed');
