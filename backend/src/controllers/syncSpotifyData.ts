@@ -152,7 +152,7 @@ function categorizePlaylists(spotifyPlaylists: (Spotify.SimplifiedPlaylistObject
             toDelete.push(dbPlaylist.id);
         } else {
             const spotifyPlaylist = spotifyMap.get(spotifyId)!; // Assertion because we checked if spotifyMap has it
-            if (spotifyPlaylist.snapshot_id !== dbPlaylist.spotifySnapshotId) {
+            if (spotifyPlaylist.snapshot_id !== dbPlaylist.spotifySnapshotId || !dbPlaylist.syncCompleted) {
                 // Case 3: snapshot_id changed -> Update in db
                 toUpdate.push(spotifyPlaylist);
             }
@@ -184,11 +184,13 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
                     name: playlist.name,
                     coverUrl: selectProperImage(playlist.images),
                     spotifySnapshotId: playlist.snapshot_id,
+                    syncCompleted: false,
                 },
                 create: {
                     spotifyUri: playlist.uri,
                     spotifyId: playlist.id,
                     spotifySnapshotId: playlist.snapshot_id,
+                    syncCompleted: false,
                     name: playlist.name,
                     coverUrl: selectProperImage(playlist.images),
                     owner: {
@@ -201,16 +203,35 @@ async function upsertSpotifyDataFromPlaylists(user: User, playlists: Array<Spoti
                 upsertedPlaylists.push(upsertedPlaylist);
             }
         }
-        // Get all Spotify.PlaylistTracks  and upsert Tracks and PlaylistTracks with limited concurrency
+        // Get all Spotify.PlaylistTracks and upsert Tracks and PlaylistTracks with limited concurrency
         const limit = pLimit(SPOTIFY_CONCURRENCY_LIMIT);
-        const tracksByPlaylistPromises = upsertedPlaylists.map(
-            playlist => limit(() => getAndUpsertPlaylistTracks(playlist, spotifyAxios))
+        const getAndUpsertTasks = upsertedPlaylists.map(
+            playlist => limit(async () => {
+                await getAndUpsertPlaylistTracks(playlist, spotifyAxios);
+                await markPlaylistSynced(playlist);
+            })
         );
-        const trackResults = await Promise.allSettled(tracksByPlaylistPromises);
+        const trackResults = await Promise.allSettled(getAndUpsertTasks);
         console.log("Spotify playlist data upserted");
     } catch (err) {
         console.error(err);
         throw new Error("Failed to upsert playlist data to database");
+    }
+}
+
+async function markPlaylistSynced(playlist: Playlist) {
+    try {
+        await prisma.playlist.update({
+            where: {
+                id: playlist.id,
+            },
+            data: {
+                syncCompleted: true,
+            },
+        })
+    } catch (err) {
+        console.error(`Failed to mark ${playlist.name} synced:`, err);
+        throw err;
     }
 }
 
