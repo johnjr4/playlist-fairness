@@ -6,7 +6,8 @@
 
 generator client {
   provider        = "prisma-client"
-  previewFeatures = ["relationJoins", "queryCompiler", "driverAdapters"]
+  previewFeatures = ["relationJoins"]
+  engineType      = "client"
   output          = "../src/generated/prisma"
   moduleFormat    = "esm"
 }
