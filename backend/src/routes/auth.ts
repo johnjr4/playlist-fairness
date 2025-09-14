@@ -71,6 +71,7 @@ router.get('/callback', async (req, res) => {
 
             // TODO: Store access tokens
             console.log(`Access token ${access_token}`);
+            console.log(`Refresh token ${refresh_token}`);
             // TODO: get rid of terrible server-side rendering in the auth callback for goodness sake
             const user = await createAndSyncUser(access_token, refresh_token);
             const userPlaylists = await getUserPlaylists(user.id);

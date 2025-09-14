@@ -8,6 +8,7 @@ import pLimit from "p-limit";
 import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
 import { syncSpotifyData } from "./syncSpotifyData.js";
 import type { AxiosInstance } from "axios";
+import { refreshAccessToken } from "./refreshToken.js";
 
 const cronStr = '*/5 * * * *';
 const pollTask = cron.createTask(cronStr, pollAndUpdateSpotifyHistory);
@@ -30,7 +31,10 @@ async function pollAndUpdateSpotifyHistory(ctx: TaskContext) {
         // Poll and insert their history with limited concurrency
         const limit = pLimit(SPOTIFY_CONCURRENCY_LIMIT);
         const listeningHistoryTasks = allUsers.map(
-            user => limit(async () => await updateUsersListeningHistory(user))
+            user => limit(async () => {
+                const refreshedUser = await refreshAccessToken(user);
+                return await updateUsersListeningHistory(refreshedUser);
+            })
         );
         const taskResults = await Promise.allSettled(listeningHistoryTasks);
         console.log("Polled and updated spotify history");
