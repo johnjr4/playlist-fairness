@@ -6,7 +6,7 @@ import { getCodeVerifier, codeChallengeFromVerifier } from '../utils/pkce.js';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } from '../utils/envLoader.js';
 import { getSpotifyAxios, spotifyAuthAxios } from '../utils/axiosInstances.js';
 import { createAndSyncUser } from '../controllers/syncSpotifyData.js';
-import { getPlaylistTracksFromPlaylist, getUserPlaylists } from '../controllers/getFromDb.js';
+import { getPlaylistTracks, getPlaylistTracksWithHistory, getUserPlaylists } from '../controllers/getFromDb.js';
 import { deleteOrphanedAlbums, deleteOrphanedArtists, deleteOrphanedTracks, deleteUserAndOwnedData } from '../controllers/deleteData.js';
 
 const router = express.Router();
@@ -76,7 +76,7 @@ router.get('/callback', async (req, res) => {
             const userPlaylists = await getUserPlaylists(user.id);
             let nestedPlaylists = [];
             for (const playlist of userPlaylists) {
-                const tracklist = await getPlaylistTracksFromPlaylist(playlist.id);
+                const tracklist = await getPlaylistTracksWithHistory(playlist.id);
                 nestedPlaylists.push({
                     playlist: playlist,
                     tracklist: tracklist,
@@ -88,8 +88,8 @@ router.get('/callback', async (req, res) => {
                 <p>Welcome ${user.displayName}. You joined UnShuffle at ${user.trackingStartTime}</p>
                 <img src="${user.imageUrl ? user.imageUrl : hobbitPlaceholderUrl}">
                 <ul>
-                    ${nestedPlaylists.map(p => `<img src=${p.playlist.coverUrl ? p.playlist.coverUrl : hobbitPlaceholderUrl}><p>${p.playlist.name}: ${p.tracklist.length} tracks</p><ul>
-                            ${p.tracklist.map(el => `<li>${el.track.name}${el.currentlyOnPlaylist ? "" : " REMOVED"}</li>`).join('')}
+                    ${nestedPlaylists.map(p => `<img src=${p.playlist.coverUrl ? p.playlist.coverUrl : hobbitPlaceholderUrl}><p>${p.playlist.name}: ${p.tracklist ? p.tracklist.length : 0} tracks</p><ul>
+                            ${p.tracklist?.map(el => `<li>${el.track.name}${el.currentlyOnPlaylist ? "" : " REMOVED"} - ${el.listeningEvents.length} plays</li>`).join('')}
                         </ul>`).join('\n')}
                 </ul>
             `);

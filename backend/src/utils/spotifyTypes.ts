@@ -7,9 +7,7 @@ export interface SimplifiedPlaylistObject {
     images: ImageObject[] | null,
     name: string,
     owner: {
-        external_urls: {
-            spotify: string,
-        },
+        external_urls: ExternalUrls,
         href: string,
         id: string,
         type: string,
@@ -58,9 +56,7 @@ export interface ImageObject {
 export interface PlaylistTrackMetadata {
     added_at: string | null,
     added_by: {
-        external_urls: {
-            spotify: string
-        },
+        external_urls: ExternalUrls,
         href: string,
         id: string,
         type: string,
@@ -85,9 +81,7 @@ export interface TrackObject {
         ean: string,
         upc: string,
     },
-    external_urls: {
-        spotify: string,
-    },
+    external_urls: ExternalUrls,
     href: string,
     id: string,
     is_playable: boolean,
@@ -110,9 +104,7 @@ export interface AlbumObject {
     album_type: string,
     total_tracks: number,
     available_markets: string[],
-    external_urls: {
-        spotify: string,
-    },
+    external_urls: ExternalUrls,
     href: string,
     id: string,
     images: ImageObject[] | null,
@@ -128,9 +120,7 @@ export interface AlbumObject {
 }
 
 export interface SimplifiedArtistObject {
-    external_urls: {
-        spotify: string,
-    },
+    external_urls: ExternalUrls,
     href: string,
     id: string,
     name: string,
@@ -144,9 +134,7 @@ export interface EpisodeObject {
     html_description: string,
     duration_ms: number,
     explicit: boolean,
-    external_urls: {
-        spotify: string,
-    },
+    external_urls: ExternalUrls,
     href: string,
     id: string,
     images: ImageObject[] | null,
@@ -167,4 +155,31 @@ export interface EpisodeObject {
         reason: string,
     }
     show: any, // I'm not doing this
+}
+
+export interface RecentlyPlayed {
+    href: string,
+    limit: number,
+    next: string, // Thid doesn't actually work
+    cursors: {
+        after: string,
+        before: string,
+    },
+    total?: number, // Doesn't seem to actually be returned?
+    items: PlayHistoryObject[],
+}
+
+export interface PlayHistoryObject {
+    track: TrackObject,
+    played_at: string,
+    context: {
+        type: string, // Looking for "playlist"
+        href: string,
+        external_urls: ExternalUrls,
+        uri: string,
+    }
+}
+
+export interface ExternalUrls {
+    spotify: string,
 }

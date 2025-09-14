@@ -3,7 +3,7 @@ import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
 import * as Spotify from "../utils/spotifyTypes.js";
 import type { AxiosInstance } from "axios";
-import { getPlaylistTracksFromPlaylist, getUserPlaylists } from "./getFromDb.js";
+import { getPlaylistTracks, getUserPlaylists } from "./getFromDb.js";
 import { deletePlaylists } from "./deleteData.js";
 import pLimit from "p-limit";
 import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
@@ -23,7 +23,12 @@ export async function createAndSyncUser(accessToken: string, refreshToken: strin
             where: {
                 spotifyUri: spotifyUser.uri,
             },
-            update: {}, // Using upsert as idempotent insert
+            update: {
+                imageUrl: selectProperImage(spotifyUser.images),
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                displayName: spotifyUser.display_name,
+            }, // Using upsert as idempotent insert
             create: {
                 spotifyUri: spotifyUser.uri,
                 spotifyId: spotifyUser.id,

@@ -97,9 +97,10 @@ model ListeningEvent {
   trackId       Int
   playlistTrack PlaylistTrack @relation(fields: [playlistId, trackId], references: [playlistId, trackId], onDelete: Cascade)
 
-  playedAt   DateTime
-  wasShuffle Boolean
+  playedAt DateTime
+  // wasShuffle Boolean
 
+  @@unique([playlistId, trackId, playedAt])
   @@index([userId, playedAt])
   @@index([playlistId, trackId])
 }
