@@ -6,24 +6,32 @@ import './index.css'
 import AuthLayout from './layouts/AuthLayout.tsx'
 import { AuthProvider } from './utils/AuthContext.tsx'
 import MainLayout from './layouts/MainLayout.tsx'
-import Home from './pages/Home.tsx'
-import Login from './pages/auth/Login.tsx'
-import Callback from './pages/auth/Callback.tsx'
+import HomePage from './pages/HomePage.tsx'
+import LoginPage from './pages/auth/LoginPage.tsx'
+import CallbackPage from './pages/auth/CallbackPage.tsx'
 import ProtectedRoute from './layouts/ProtectedRoute.tsx'
+import LandingPage from './pages/LandingPage.tsx'
+import PlaylistPage from './pages/PlaylistPage.tsx'
 
 const router = createBrowserRouter([
   {
+    index: true,
+    Component: LandingPage,
+  },
+  {
+    path: '/user',
     element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
     children: [
-      { index: true, Component: Home },
+      { index: true, Component: HomePage },
+      { path: ':spotifyUri', Component: PlaylistPage },
     ]
   },
   {
     path: '/auth',
     Component: AuthLayout,
     children: [
-      { path: 'login', Component: Login },
-      { path: 'callback', Component: Callback }
+      { path: 'login', Component: LoginPage },
+      { path: 'callback', Component: CallbackPage }
     ]
   }
 ]);
