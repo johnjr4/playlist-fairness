@@ -11,6 +11,18 @@ export async function getAllUsers() {
     }
 }
 
+export async function getUser(userId: string) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+        return user;
+    } catch (err) {
+        console.error("Failed to get user", err);
+        return null;
+    }
+}
+
 export async function getUserPlaylists(userId: string): Promise<Playlist[]> {
     try {
         const playlists = await prisma.playlist.findMany({
