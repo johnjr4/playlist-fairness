@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { errorResponse } from "../apiResponses.js";
 
 // Async catcher that passes errors to middleware when you wrap it around an express function
 export function asyncHandler(
@@ -18,10 +19,9 @@ export function errorHandler(
     console.error("errorHandler caught express issue:", err);
 
     // Catch errors
-    res.status(err.status ?? 500).json({
-        success: false,
-        error: {
-            message: err.message || 'Internal server error',
-        }
-    });
+    res.status(err.status ?? 500).json(
+        errorResponse(
+            err.message || "Internal server error",
+        )
+    );
 }

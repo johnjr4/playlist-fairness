@@ -1,11 +1,17 @@
 import type { NextFunction, Request, Response } from 'express';
 import { getUser } from '../../controllers/getFromDb.js';
+import { errorResponse } from '../apiResponses.js';
 
 export default function requrieAuth(req: Request, res: Response, next: NextFunction) {
     if (req.session && req.session.user) {
         return next(); // User is authenticated
     }
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json(
+        errorResponse(
+            "Route requires user authentication",
+            "UNAUTHORIZED"
+        )
+    );
 }
 
 // Assume that this appears after requireAuth

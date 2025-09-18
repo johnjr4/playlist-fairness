@@ -41,11 +41,12 @@ export async function getUserPlaylists(userId: string): Promise<Playlist[]> {
     }
 }
 
-export async function getPlaylist(playlistId: number, isFull = false) {
+export async function getPlaylist(playlistId: number, isFull = false, ownerId: string | null = null) {
     try {
         const playlist = await prisma.playlist.findUnique({
             where: {
                 id: playlistId,
+                ...(ownerId ? { ownerId: ownerId } : {}), // Include ownerId if non-null
             },
             include: {
                 owner: isFull,

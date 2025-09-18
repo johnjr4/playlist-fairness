@@ -6,6 +6,7 @@ import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } from '
 import { spotifyAuthAxios } from '../utils/axiosInstances.js';
 import { createAndSyncUser } from '../controllers/syncSpotifyData.js';
 import type { AuthCallbackReqQuery } from '../utils/types/helperTypes.js';
+import { errorResponse } from '../utils/apiResponses.js';
 
 const router = express.Router();
 
@@ -54,19 +55,24 @@ router.get('/callback', async (req: Request<{}, any, any, AuthCallbackReqQuery>,
     const { code, state, verifier } = req.query;
 
     if (!code || !state || !verifier) {
-        res.status(400).json({
-            error: {
-                code: "BAD_REQUEST",
-                message: "Didn't provide all of necessary OAuth parameters",
-            }
-        });
+        res.status(400).json(
+            errorResponse(
+                "Didn't provide all necessary OAuth parameters",
+                "BAD_REQUEST"
+            )
+        );
         return;
     }
 
     if (state !== initialState) {
         // TODO: Better error handling
         console.log("State doesn't match initial state");
-        res.status(500).send('State does not match');
+        res.status(400).json(
+            errorResponse(
+                "State does not match",
+                "BAD_REQUEST"
+            )
+        )
         return;
     }
 
@@ -96,7 +102,12 @@ router.get('/callback', async (req: Request<{}, any, any, AuthCallbackReqQuery>,
         res.send('User authenticated');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Token exchange failed');
+        res.status(500).json(
+            errorResponse(
+                "Token exchange failed",
+                "INTERNAL_SERVICE_ERROR"
+            )
+        )
     }
 });
 
