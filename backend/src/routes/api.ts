@@ -1,8 +1,10 @@
 // TODO: Consolidate all the routers in ./routes/api under the general /api URL suffix
 import express from 'express';
-import { getPlaylistTracksWithHistory, getUser, getUserPlaylists } from '../controllers/getFromDb.js';
+import { getPlaylistTracksWithHistory, getUser } from '../controllers/getFromDb.js';
+import { getUserPlaylists } from '../controllers/playlistsController.js';
 import requrieAuth from '../utils/middleware/requireAuth.js';
 import { default as playlistsRouter } from './api/playlists.js'
+import { default as albumRouter } from './api/album.js'
 
 const router = express.Router();
 
@@ -47,6 +49,8 @@ router.get('/test-print', async (req, res) => {
 
 });
 
+// Attach routers
 router.use('/playlists', playlistsRouter);
+router.use('/album', albumRouter);
 
 export default router;

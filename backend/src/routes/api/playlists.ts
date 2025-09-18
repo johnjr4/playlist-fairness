@@ -1,6 +1,6 @@
 import express from 'express';
 import { asyncHandler } from '../../utils/middleware/handleServerError.js';
-import { getPlaylist, getPlaylistHist, getPlaylistWithTracks, getUserPlaylists } from '../../controllers/getFromDb.js';
+import { getPlaylist, getPlaylistHist, getPlaylistWithTracks, getUserPlaylists } from '../../controllers/playlistsController.js';
 import { playlistToPublic, playlistToPublicFull, playlistToPublicHist } from '../../utils/types/frontendTypeMapper.js';
 import { errorResponse, successfulResponse } from '../../utils/apiResponses.js';
 

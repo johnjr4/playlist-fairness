@@ -2,7 +2,7 @@ import cron, { type TaskContext } from "node-cron";
 import { getSpotifyAxios } from "../utils/axiosInstances.js";
 import type { User } from "../generated/prisma/client.js";
 import type * as Spotify from "../utils/types/spotifyTypes.js";
-import { getAllUsers, getUserPlaylists } from "./getFromDb.js";
+import { getAllUsers } from "./getFromDb.js";
 import prisma from "../utils/prismaClient.js";
 import pLimit from "p-limit";
 import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
