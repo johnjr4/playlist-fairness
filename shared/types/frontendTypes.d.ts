@@ -17,11 +17,13 @@ export interface PlaylistFull {
     coverUrl: string | null
     spotifyId: string
     spotifyUri: string
-    owner: User
     ownerId: string
-    tracks: PlaylistTrack[]
+    tracks: PlaylistTrackWithMeta[]
 }
-export type Playlist = Omit<PlaylistFull, 'owner' | 'tracks'>
+export type Playlist = Omit<PlaylistFull, 'tracks'>
+export type PlaylistHist = Playlist & {
+    tracks: PlaylistTrackHist[]
+}
 
 export interface AlbumFull {
     id: number
@@ -32,7 +34,7 @@ export interface AlbumFull {
     artist: Artist
     artistId: number
 }
-export type Album = Omit<AlbumFull, 'tracks' | 'artist'>;
+export type Album = Omit<AlbumFull, 'tracks' | 'artist' | 'artistId'>;
 
 export interface ArtistFull {
     id: number
@@ -53,7 +55,9 @@ export interface TrackFull {
     albumId: number
     playlistTracks: PlaylistTrack[]
 }
-export type Track = Omit<TrackFull, 'artist' | 'album' | 'playlistTracks'>
+// Includes `artist` and `album`
+export type TrackWithMeta = Pick<TrackFull, 'id' | 'spotifyUri' | 'name' | 'artist' | 'album'>
+export type Track = Omit<TrackWithMeta, 'artist' | 'album'>
 
 export interface PlaylistTrackFull {
     playlist: Playlist
@@ -67,7 +71,15 @@ export interface PlaylistTrackFull {
     trackingStopTime: Date | null
     listeningEvents: ListeningEvent[]
 }
-export type PlaylistTrack = Omit<PlaylistTrackFull, 'playlist' | 'track' | 'listeningEvents'>
+// Includes `track` with album and artist
+
+export type PlaylistTrackWithMeta = Pick<PlaylistTrackFull, 'playlistPosition' | 'currentlyOnPlaylist' | 'addedToPlaylistTime' | 'trackingStartTime' | 'trackingStopTime'> & {
+    track: TrackWithMeta
+}
+export type PlaylistTrack = Omit<PlaylistTrackWithMeta, 'track'>
+export type PlaylistTrackHist = PlaylistTrackWithMeta & {
+    listeningEvents: ListeningEventHist[]
+}
 
 export interface ListeningEventFull {
     id: number
@@ -80,4 +92,5 @@ export interface ListeningEventFull {
 
     playedAt: Date
 }
-export type ListeningEvent = Omit<ListeningEventFull, 'user' | 'playlistTrack'>
+export type ListeningEvent = Omit<ListeningEventFull, 'user' | 'userId' | 'playlistTrack'>
+export type ListeningEventHist = Pick<ListeningEvent, 'playedAt'>

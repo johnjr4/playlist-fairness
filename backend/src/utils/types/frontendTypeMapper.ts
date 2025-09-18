@@ -1,6 +1,6 @@
 import * as Public from "spotifair";
 import type { Album, Artist, ListeningEvent, Playlist, PlaylistTrack, Track, User } from "../../generated/prisma/client.js";
-import type { AlbumFull, ArtistFull, ListeningEventFull, PlaylistFull, PlaylistTrackFull, TrackFull, UserFull } from "./includeTypes.js";
+import type { AlbumFull, ArtistFull, ListeningEventFull, PlaylistFull, PlaylistHist, PlaylistTrackFull, TrackFull, UserFull } from "./includeTypes.js";
 
 export function userToPublic(user: User): Public.User {
     const { id, spotifyUri, spotifyId, displayName, imageUrl, trackingStartTime } = user;
@@ -18,14 +18,19 @@ export function playlistToPublic(playlist: Playlist): Public.Playlist {
 }
 
 export function playlistToPublicFull(playlist: PlaylistFull): Public.PlaylistFull {
-    const { id, name, coverUrl, spotifyId, spotifyUri, owner, ownerId, tracks } = playlist;
-    return { id, name, coverUrl, spotifyId, spotifyUri, owner, ownerId, tracks };
+    const { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks } = playlist;
+    return { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks };
+}
+
+export function playlistToPublicHist(playlist: PlaylistHist): Public.PlaylistHist {
+    const { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks } = playlist;
+    return { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks };
 }
 
 
 export function albumToPublic(album: Album): Public.Album {
-    const { id, spotifyUri, name, coverUrl, artistId } = album;
-    return { id, spotifyUri, name, coverUrl, artistId };
+    const { id, spotifyUri, name, coverUrl } = album;
+    return { id, spotifyUri, name, coverUrl };
 }
 
 export function albumToPublicFull(album: AlbumFull): Public.AlbumFull {
@@ -46,8 +51,8 @@ export function artistToPublicFull(artist: ArtistFull): Public.ArtistFull {
 
 
 export function trackToPublic(track: Track): Public.Track {
-    const { id, spotifyUri, name, artistId, albumId } = track;
-    return { id, spotifyUri, name, artistId, albumId };
+    const { id, spotifyUri, name } = track;
+    return { id, spotifyUri, name };
 }
 
 export function trackToPublicFull(track: TrackFull): Public.TrackFull {
@@ -57,8 +62,8 @@ export function trackToPublicFull(track: TrackFull): Public.TrackFull {
 
 
 export function playlistTrackToPublic(playlistTrack: PlaylistTrack): Public.PlaylistTrack {
-    const { playlistId, trackId, playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime } = playlistTrack;
-    return { playlistId, trackId, playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime };
+    const { playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime } = playlistTrack;
+    return { playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime };
 }
 
 export function playlistTrackToPublicFull(playlistTrack: PlaylistTrackFull): Public.PlaylistTrackFull {
@@ -68,8 +73,8 @@ export function playlistTrackToPublicFull(playlistTrack: PlaylistTrackFull): Pub
 
 
 export function listeningEventToPublic(listeningEvent: ListeningEvent): Public.ListeningEvent {
-    const { id, userId, playlistId, trackId, playedAt } = listeningEvent;
-    return { id, userId, playlistId, trackId, playedAt };
+    const { id, playlistId, trackId, playedAt } = listeningEvent;
+    return { id, playlistId, trackId, playedAt };
 }
 
 export function listeningEventToPublicFull(listeningEvent: ListeningEventFull): Public.ListeningEventFull {
