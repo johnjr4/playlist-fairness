@@ -1,13 +1,13 @@
 import prisma from "../utils/prismaClient.js";
 import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
-import * as Spotify from "../utils/spotifyTypes.js";
+import * as Spotify from "../utils/types/spotifyTypes.js";
 import type { AxiosInstance } from "axios";
 import { getPlaylistTracks, getUserPlaylists } from "./getFromDb.js";
 import { deletePlaylists } from "./deleteData.js";
 import pLimit from "p-limit";
 import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
-import type { BundledSpotifyPlaylistTracks } from "../utils/helperTypes.js";
+import type { BundledSpotifyPlaylistTracks } from "../utils/types/helperTypes.js";
 import { partition } from "../utils/arrayUtils.js";
 
 export async function createAndSyncUser(accessToken: string, refreshToken: string) {

@@ -5,7 +5,7 @@ import { getCodeVerifier, codeChallengeFromVerifier } from '../utils/pkce.js';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } from '../utils/envLoader.js';
 import { spotifyAuthAxios } from '../utils/axiosInstances.js';
 import { createAndSyncUser } from '../controllers/syncSpotifyData.js';
-import type { AuthCallbackReqQuery } from '../utils/helperTypes.js';
+import type { AuthCallbackReqQuery } from '../utils/types/helperTypes.js';
 
 const router = express.Router();
 

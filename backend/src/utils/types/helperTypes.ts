@@ -1,4 +1,4 @@
-import type { Playlist, User } from "../generated/prisma/client.js";
+import type { Playlist, User } from "../../generated/prisma/client.js";
 import type * as Spotify from "./spotifyTypes.js";
 
 export interface BundledSpotifyPlaylistTracks {
