@@ -14,6 +14,12 @@ export interface AuthCallbackReqQuery {
     verifier?: string,
 }
 
+declare module 'express' {
+    interface Request {
+        user?: User
+    }
+}
+
 // express-session stuff
 
 export type SessionUser = Pick<User, 'id' | 'spotifyUri'>

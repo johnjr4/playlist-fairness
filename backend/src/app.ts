@@ -5,6 +5,7 @@ import express from 'express';
 import authRouter from './routes/auth.js';
 import apiRouter from './routes/api.js';
 import { isProd, SESSION_SECRET, VITE_URL } from './utils/envLoader.js';
+import { errorHandler } from './utils/middleware/handleServerError.js';
 
 // Create main express app
 const app = express();
@@ -30,5 +31,7 @@ app.use(session({
 app.use('/api', apiRouter);
 
 app.use('/auth', authRouter);
+
+app.use(errorHandler);
 
 export default app;

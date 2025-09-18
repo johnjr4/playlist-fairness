@@ -11,10 +11,14 @@ export async function getAllUsers() {
     }
 }
 
-export async function getUser(userId: string) {
+export async function getUser(userId: string, isFull = false) {
     try {
         const user = await prisma.user.findUnique({
-            where: { id: userId }
+            where: { id: userId },
+            include: {
+                playlists: isFull,
+                listeningHistory: isFull,
+            }
         });
         return user;
     } catch (err) {
@@ -34,6 +38,24 @@ export async function getUserPlaylists(userId: string): Promise<Playlist[]> {
     } catch (err) {
         console.error("Error fetching playlists from db", err);
         return [];
+    }
+}
+
+export async function getPlaylist(playlistId: number, isFull = false) {
+    try {
+        const playlist = await prisma.playlist.findUnique({
+            where: {
+                id: playlistId,
+            },
+            include: {
+                owner: isFull,
+                tracks: isFull,
+            }
+        });
+        return playlist;
+    } catch (err) {
+        console.error(`Failed to get playlists ${playlistId}`, err);
+        return null;
     }
 }
 

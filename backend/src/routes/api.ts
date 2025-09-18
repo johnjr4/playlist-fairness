@@ -1,27 +1,22 @@
 // TODO: Consolidate all the routers in ./routes/api under the general /api URL suffix
-import express, { type NextFunction, type Request, type Response } from 'express';
-import prisma from '../utils/prismaClient.js';
+import express from 'express';
 import { getPlaylistTracksWithHistory, getUser, getUserPlaylists } from '../controllers/getFromDb.js';
+import requrieAuth from '../utils/middleware/requireAuth.js';
+import { default as playlistsRouter } from './api/playlists.js'
 
 const router = express.Router();
-
-function requrieAuth(req: Request, res: Response, next: NextFunction) {
-    console.log(`Session grabbed ${req.session.id}`);
-    if (req.session && req.session.user) {
-        return next(); // User is authenticated
-    }
-    return res.status(401).json({ error: 'Unauthorized' });
-}
 
 // Apply requireAuth middleware to all the following api routes
 router.use(requrieAuth);
 
+// TODO: Segment route elsewhere
 router.get('/me', async (req, res) => {
     const user = await getUser(req.session.user!.id);
 
     res.json(user);
 })
 
+// TODO: remove test routes
 router.get('/test-print', async (req, res) => {
     const user = await getUser(req.session.user!.id);
 
@@ -50,6 +45,8 @@ router.get('/test-print', async (req, res) => {
         `);
     }
 
-})
+});
+
+router.use('/playlists', playlistsRouter);
 
 export default router;

@@ -1,13 +1,10 @@
 {
-  "name": "@types/spotifair",
+  "name": "spotifair",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.ts",
-  "types": "frontendTypes.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+  "types": "frontendTypes.d.ts",
+  "main": "frontendTypes.d.ts"
 }
