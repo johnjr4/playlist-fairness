@@ -95,3 +95,22 @@ export interface ListeningEventFull {
 }
 export type ListeningEvent = Omit<ListeningEventFull, 'user' | 'userId' | 'playlistTrack'>
 export type ListeningEventHist = Pick<ListeningEvent, 'playedAt'>
+
+
+// HTTP Response types
+
+export interface HTTPResponseSuccess {
+    success: true,
+    message: string,
+    data: any,
+}
+
+export interface HTTPResponseFailure {
+    success: false,
+    error: {
+        message: string,
+        code: string | undefined,
+    }
+}
+
+export type HTTPResponse = HTTPResponseSuccess | HTTPResponseFailure;

@@ -1,4 +1,6 @@
-export function successfulResponse(message: string, data: any) {
+import type { HTTPResponseFailure, HTTPResponseSuccess } from "spotifair"
+
+export function successfulResponse(message: string, data: any): HTTPResponseSuccess {
     return {
         success: true,
         message: message,
@@ -6,7 +8,7 @@ export function successfulResponse(message: string, data: any) {
     }
 }
 
-export function errorResponse(message: string, code: string | null = null) {
+export function errorResponse(message: string, code: string | null = null): HTTPResponseFailure {
     return {
         success: false,
         error: {
