@@ -15,7 +15,7 @@ export function validateIntId(req: Request, res: Response, next: NextFunction, v
 export function validateUserUuid(req: Request, res: Response, next: NextFunction, val: string) {
     if (typeof val !== 'string') {
         res.status(400).json(errorResponse(
-            `Malformed uuic ${val}`,
+            `Malformed uuid ${val}`,
             'BAD_REQUEST'
         ));
         return;
