@@ -10,7 +10,7 @@ function ProtectedRoute({ children }: { children: ReactElement }) {
         if (!loading && !user) {
             navigate('/auth/login')
         }
-    }, [user, loading]);
+    }, [user, loading, navigate]);
     if (loading) return <div>Loading...</div>
 
     return user ? children : null;
