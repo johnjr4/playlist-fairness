@@ -5,6 +5,9 @@ import { getUserPlaylists } from '../controllers/playlistsController.js';
 import requrieAuth from '../utils/middleware/requireAuth.js';
 import { default as playlistsRouter } from './api/playlists.js'
 import { default as albumRouter } from './api/album.js'
+import { default as artistRouter } from './api/artist.js'
+import { default as trackRouter } from './api/track.js'
+import { default as playlistTrackRouter } from './api/playlistTrack.js'
 
 const router = express.Router();
 
@@ -52,5 +55,8 @@ router.get('/test-print', async (req, res) => {
 // Attach routers
 router.use('/playlists', playlistsRouter);
 router.use('/album', albumRouter);
+router.use('/artist', artistRouter);
+router.use('/track', trackRouter);
+router.use('/playlistTrack', playlistTrackRouter)
 
 export default router;

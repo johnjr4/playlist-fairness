@@ -3,25 +3,26 @@ import { asyncHandler } from '../../utils/middleware/handleServerError.js';
 import { validateIntId } from '../../utils/middleware/requireIdParam.js';
 import { getAlbum, getAlbumFull } from '../../controllers/albumController.js';
 import { errorResponse, successfulResponse } from '../../utils/apiResponses.js';
-import { albumToPublic, albumToPublicFull } from '../../utils/types/frontendTypeMapper.js';
+import { getArtist, getArtistFull } from '../../controllers/artistController.js';
+import { artistToPublic, artistToPublicFull } from '../../utils/types/frontendTypeMapper.js';
 
-// Prefix will be '/album'
+// Prefix will be '/artist'
 const router = express.Router();
 
 router.param('id', validateIntId);
 
 router.get('/:id',
     asyncHandler(async (req, res) => {
-        const albumId = parseInt(req.params.id!);
-        const album = await getAlbum(albumId);
-        if (album) {
+        const artistId = parseInt(req.params.id!);
+        const artist = await getArtist(artistId);
+        if (artist) {
             res.json(successfulResponse(
-                `Successfully got album ${albumId}`,
-                albumToPublic(album),
+                `Successfully got artist ${artistId}`,
+                artistToPublic(artist)
             ))
         } else {
             res.status(404).json(errorResponse(
-                `No album of id ${albumId}`,
+                `No album of id ${artistId}`,
                 null
             ))
         }
@@ -30,20 +31,19 @@ router.get('/:id',
 
 router.get('/:id/full',
     asyncHandler(async (req, res) => {
-        const albumId = parseInt(req.params.id!);
-        const album = await getAlbumFull(albumId);
-        if (album) {
+        const artistId = parseInt(req.params.id!);
+        const artist = await getArtistFull(artistId);
+        if (artist) {
             res.json(successfulResponse(
-                `Successfully got album ${albumId}`,
-                albumToPublicFull(album)
+                `Successfully got artist ${artistId}`,
+                artistToPublicFull(artist)
             ))
         } else {
             res.status(404).json(errorResponse(
-                `No album of id ${albumId}`,
+                `No album of id ${artistId}`,
                 null
             ))
         }
-
     })
 )
 
