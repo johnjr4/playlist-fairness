@@ -1,33 +1,33 @@
 // AuthContext.jsx
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { getMe } from './api/authFetch';
-import type { ClientUser } from './prismaTypes';
+import * as Public from 'spotifair';
 
 interface AuthContextType {
-    // TODO: Change me!
-    user: ClientUser | null,
-    loading: boolean,
-    setUser: (user: ClientUser | null) => void;
+  // TODO: Change me!
+  user: Public.User | null,
+  loading: boolean,
+  setUser: (user: Public.User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: {children: ReactNode}) {
-  const [user, setUser] = useState<ClientUser | null>(null);         // user object or null
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<Public.User | null>(null);         // user object or null
   const [loading, setLoading] = useState(true);   // loading during fetch
 
   // Fetch current user session on app load
   useEffect(() => {
     const getAuthUser = async () => {
-        try {
-            const user = await getMe();
-            // user may be null
-            setUser(user);
-        } catch (err) {
-            console.error("Error getting auth user:", err);
-        } finally {
-            setLoading(false);
-        }
+      try {
+        const user = await getMe();
+        // user may be null
+        setUser(user);
+      } catch (err) {
+        console.error("Error getting auth user:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     getAuthUser();
   }, []);
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: {children: ReactNode}) {
 
 // Custom hook for easy access
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) throw new Error("useAuth must be used within an AuthProvider");
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) throw new Error("useAuth must be used within an AuthProvider");
+  return context;
 }

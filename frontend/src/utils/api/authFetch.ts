@@ -1,6 +1,6 @@
-import type { ClientUser } from "../prismaTypes.js";
+import * as Public from 'spotifair';
 
-const debugUser: ClientUser = {
+const debugUser: Public.User = {
     id: 'abcd',
     displayName: 'testUser',
     imageUrl: null,

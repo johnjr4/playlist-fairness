@@ -8,8 +8,8 @@ export function userToPublic(user: User): Public.User {
 }
 
 export function userToPublicFull(user: UserFull): Public.UserFull {
-    const { id, spotifyUri, spotifyId, displayName, imageUrl, playlists, trackingStartTime } = user;
-    return { id, spotifyUri, spotifyId, displayName, imageUrl, playlists, trackingStartTime };
+    const { id, spotifyUri, spotifyId, displayName, imageUrl, playlists, listeningHistory, trackingStartTime } = user;
+    return { id, spotifyUri, spotifyId, displayName, imageUrl, playlists, listeningHistory, trackingStartTime };
 }
 
 export function playlistToPublic(playlist: Playlist): Public.Playlist {

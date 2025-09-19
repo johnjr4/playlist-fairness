@@ -7,9 +7,10 @@ export interface UserFull {
     displayName: string | null
     imageUrl: string | null
     playlists: Playlist[]
+    listeningHistory: ListeningEvent[]
     trackingStartTime: Date
 }
-export type User = Omit<UserFull, 'playlists'>
+export type User = Omit<UserFull, 'playlists' | 'listeningHistory'>
 
 export interface PlaylistFull {
     id: number
