@@ -3,6 +3,7 @@ import { asyncHandler } from '../../utils/middleware/handleServerError.js';
 import { getPlaylist, getPlaylistHist, getPlaylistWithTracks, getUserPlaylists } from '../../controllers/playlistsController.js';
 import { playlistToPublic, playlistToPublicFull, playlistToPublicHist } from '../../utils/types/frontendTypeMapper.js';
 import { errorResponse, successfulResponse } from '../../utils/apiResponses.js';
+import { validateIntId } from '../../utils/middleware/requireIdParam.js';
 
 // Prefix will be '/playlists'
 const router = express.Router();
@@ -17,16 +18,12 @@ router.get('/',
     })
 );
 
+// Parameter middleware to validate int id
+router.param('id', validateIntId);
+
 router.get('/:id',
     asyncHandler(async (req, res) => {
         const playlistId = parseInt(req.params.id!);
-        if (isNaN(playlistId)) {
-            res.status(400).json(errorResponse(
-                `Malformed playlist id ${req.params.id}`,
-                'BAD_REQUEST'
-            ));
-            return;
-        }
         const playlist = await getPlaylist(playlistId, req.session.user!.id);
         if (playlist) {
             res.json(successfulResponse(
@@ -45,13 +42,6 @@ router.get('/:id',
 router.get('/:id/tracks',
     asyncHandler(async (req, res) => {
         const playlistId = parseInt(req.params.id!);
-        if (isNaN(playlistId)) {
-            res.status(400).json(errorResponse(
-                `Malformed playlist id ${req.params.id}`,
-                'BAD_REQUEST'
-            ));
-            return;
-        }
         const playlist = await getPlaylistWithTracks(playlistId, req.session.user!.id);
         if (playlist) {
             res.json(successfulResponse(
@@ -70,13 +60,6 @@ router.get('/:id/tracks',
 router.get('/:id/tracks/hist',
     asyncHandler(async (req, res) => {
         const playlistId = parseInt(req.params.id!);
-        if (isNaN(playlistId)) {
-            res.status(400).json(errorResponse(
-                `Malformed playlist id \"${req.params.id}\"`,
-                'BAD_REQUEST'
-            ));
-            return;
-        }
         const playlist = await getPlaylistHist(playlistId, req.session.user!.id);
         if (playlist) {
             res.json(successfulResponse(
