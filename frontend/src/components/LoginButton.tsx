@@ -1,8 +1,15 @@
 import Button from "./ui/Button";
 import { createNewPKCE, setPKCEVals } from "../utils/pkce";
 import { getAuthServerUrl } from "../utils/auth/initiateOAuth";
+import { useAuth } from "../utils/AuthContext";
 
 function LoginButton() {
+    const { user } = useAuth();
+    let isLoggedIn = false;
+    if (user) {
+        isLoggedIn = true;
+    }
+
     async function handleLogin() {
         // Initiate PKCE
         const { verifier, challenge, state } = await createNewPKCE();
@@ -14,8 +21,8 @@ function LoginButton() {
     }
 
     return (
-        <Button onClick={handleLogin}>
-            Login
+        <Button onClick={isLoggedIn ? undefined : handleLogin} variant={isLoggedIn ? 'secondary' : 'primary'}>
+            {isLoggedIn ? 'Logged In' : 'Log In'}
         </Button>
     )
 }
