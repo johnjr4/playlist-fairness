@@ -1,8 +1,8 @@
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../../utils/AuthContext";
 import { useEffect, useRef } from "react";
-import { backendAxios } from "../../utils/axiosInstances";
-import { type HTTPResponse, type HTTPResponseSuccess } from "spotifair";
+import { backendAuthAxios } from "../../utils/axiosInstances";
+import { type HTTPResponseSuccess } from "spotifair";
 import { deletePCKEVals, getPKCEVals } from "../../utils/pkce";
 import { REDIRECT_URI } from "../../utils/envLoader";
 
@@ -39,11 +39,11 @@ function CallbackPage() {
             return;
         }
 
-        const backendCallbackRoute = `/auth/callback?code=${code}&state=${state}&verifier=${codeVerifier}&redirect=${REDIRECT_URI}`
+        const backendCallbackRoute = `/callback?code=${code}&state=${state}&verifier=${codeVerifier}&redirect=${REDIRECT_URI}`
         console.log(backendCallbackRoute);
         async function exchangeCode() {
             try {
-                const authRes = await backendAxios.get<HTTPResponse>(backendCallbackRoute);
+                const authRes = await backendAuthAxios.get(backendCallbackRoute);
 
                 if (authRes.status !== 200 && !authRes.data.success) {
                     console.error(authRes.data.error.message);
