@@ -19,11 +19,11 @@ const router = createBrowserRouter([
     Component: LandingPage,
   },
   {
-    path: '/user',
+    path: '/u', // u for user (arbitrary)
     element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
     children: [
       { index: true, Component: HomePage },
-      { path: ':spotifyUri', Component: PlaylistPage },
+      { path: ':playlistId', Component: PlaylistPage },
     ]
   },
   {
