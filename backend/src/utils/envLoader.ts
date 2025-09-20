@@ -20,6 +20,6 @@ export const SPOTIFY_CLIENT_ID = getEnv('SPOTIFY_CLIENT_ID');
 export const SPOTIFY_CLIENT_SECRET = getEnv('SPOTIFY_CLIENT_SECRET');
 // export const SPOTIFY_REDIRECT_URI = getEnv('SPOTIFY_REDIRECT_URI');
 export const SPOTIFY_CONCURRENCY_LIMIT = parseInt(getEnv('SPOTIFY_CONCURRENCY_LIMIT'));
-export const VITE_URL = getEnv('VITE_URL');
+export const VITE_URLS = getEnv('VITE_URLS').split(',');
 export const SESSION_SECRET = getEnv('SESSION_SECRET');
 const NODE_ENV = getEnv('NODE_ENV');

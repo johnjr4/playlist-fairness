@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setLoading(false);
             }
         }
-        // checkIfSessionExists();
+        checkIfSessionExists();
     }, []);
 
     return (

@@ -1,57 +1,29 @@
 // login and callback routes under the /auth URL suffix
 import express, { type Request } from 'express';
 import 'dotenv/config';
-import { getCodeVerifier, codeChallengeFromVerifier } from '../utils/pkce.js';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '../utils/envLoader.js';
 import { spotifyAuthAxios } from '../utils/axiosInstances.js';
 import { createAndSyncUser } from '../controllers/syncSpotifyData.js';
 import type { AuthCallbackReqQuery } from '../utils/types/helperTypes.js';
 import { errorResponse, successfulResponse } from '../utils/apiResponses.js';
 import { userToPublic } from '../utils/types/frontendTypeMapper.js';
+import requrieAuth from '../utils/middleware/requireAuth.js';
+import { getUser } from '../controllers/getFromDb.js';
 
 const router = express.Router();
 
 const CLIENT_ID = SPOTIFY_CLIENT_ID
 const CLIENT_SECRET = SPOTIFY_CLIENT_SECRET;
-// const REDIRECT_URI = SPOTIFY_REDIRECT_URI
-const SCOPES = ['user-library-read', 'playlist-read-private', 'user-read-recently-played'].join(' ');
 
-
-// TODO: Remove, this should be frontend
-// let codeVerifier: string;
-// let initialState: string;
-
-// router.get('/login', (req, res) => {
-//     // TODO: Replace all of this. PKCE should be on the frontend
-//     codeVerifier = getCodeVerifier();
-//     initialState = 'booyah'; // Change this obviously
-//     let codeChallenge = codeChallengeFromVerifier(codeVerifier);
-//     const params = new URLSearchParams({
-//         client_id: CLIENT_ID,
-//         response_type: 'code',
-//         redirect_uri: REDIRECT_URI,
-//         state: initialState,
-//         scope: SCOPES,
-//         code_challenge_method: 'S256',
-//         code_challenge: codeChallenge,
-//     });
-//     // res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`);
-//     res.send(`https://accounts.spotify.com/authorize?${params.toString()}`);
-// });
-
-// TODO: This should also be frontend
-// router.get('/debug_callback', async (req, res) => {
-//     if (req.query.error) {
-//         // TODO: Obviously more sophisticated error handling
-//         console.log("Error getting authorization code from Spotify");
-//         res.status(500).send('Failed to get Spotify authorization code');
-//         return;
-//     }
-//     const url = `http://localhost:3000/auth/callback?code=${req.query.code}&state=${req.query.state}&verifier=${codeVerifier}`;
-//     res.send(url);
-// })
-
-// TODO: Change this from something the spotify API calls to something the frontend calls with code (auth code) and code_verifier params
+// 
+/**
+ * Receives intermediate call from frontend to exchange for access code from Spotify Authorization server
+ * 
+ * front makes PKCE -> front qs Spot -> Spot redirs to front -> front qs back w PKCE -> back qs Spot -> Spot sends back access_token
+ *                                                                                           ^
+ *                                                                                           |
+ *                                                                                      you are here
+ */
 router.get('/callback', async (req: Request<{}, any, any, AuthCallbackReqQuery>, res) => {
     const { code, state, verifier, redirect } = req.query;
 
@@ -112,5 +84,27 @@ router.get('/callback', async (req: Request<{}, any, any, AuthCallbackReqQuery>,
         )
     }
 });
+
+// Return user if the passed cookie is valid (i.e., a session exists)
+// require existing user in session with middleware
+router.use(requrieAuth);
+router.get('/check-session', async (req, res) => {
+    const user = await getUser(req.session.user!.id);
+    if (user) {
+        res.json(
+            successfulResponse(
+                "Successfully found current user",
+                userToPublic(user),
+            )
+        )
+    } else {
+        res.status(404).json(
+            errorResponse(
+                "User not found for existing session. Try re-authenticating",
+                "NOT_FOUND",
+            )
+        )
+    }
+})
 
 export default router;

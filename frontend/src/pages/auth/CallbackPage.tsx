@@ -54,8 +54,6 @@ function CallbackPage() {
                 const user = response.data;
 
                 // Set AuthProvider variables
-                console.log('Got user!');
-                console.log(user);
                 setUser(user);
                 setLoading(false);
 
@@ -65,7 +63,7 @@ function CallbackPage() {
                 // Navigate to protected routes
                 navigate('/user');
             } catch (err) {
-                console.error('Failed to get session user from backend', err);
+                console.error('Failed to authenticate user with backend', err);
                 // TODO: This is not acceptable error handling!
                 navigate('/auth/login');
             }

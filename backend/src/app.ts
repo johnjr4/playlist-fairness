@@ -4,14 +4,22 @@ import session from 'express-session';
 import express from 'express';
 import authRouter from './routes/auth.js';
 import apiRouter from './routes/api.js';
-import { isProd, SESSION_SECRET, VITE_URL } from './utils/envLoader.js';
+import { isProd, SESSION_SECRET, VITE_URLS } from './utils/envLoader.js';
 import { errorHandler } from './utils/middleware/handleServerError.js';
 
 // Create main express app
 const app = express();
 
 app.use(cors({
-    origin: VITE_URL,
+    origin: function (origin, callback) {
+        if (!origin) {
+            callback(new Error('Empty origin not allowed by CORS'));
+        } else if (VITE_URLS.indexOf(origin!) !== -1) {
+            callback(null, true); // null just means no error
+        } else {
+            callback(new Error(`Origin ${origin} not allowed by CORS`));
+        }
+    },
     credentials: true,
 }));
 

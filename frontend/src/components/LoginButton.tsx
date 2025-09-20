@@ -1,8 +1,6 @@
-import type { ReactNode } from "react";
 import Button from "./ui/Button";
 import { createNewPKCE, setPKCEVals } from "../utils/pkce";
 import { getAuthServerUrl } from "../utils/auth/initiateOAuth";
-import { useNavigate } from "react-router";
 
 function LoginButton() {
     async function handleLogin() {
