@@ -1,18 +1,18 @@
 import { useEffect, useState, type ReactNode } from "react";
 import * as Public from 'spotifair';
-import { getMe } from './api/authFetch';
-import { AuthContext } from "./AuthContext";
+import { getMe } from '../utils/auth/authFetch';
+import { AuthContext } from "../utils/AuthContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<Public.User | null>(null);         // user object or null
     const [loading, setLoading] = useState(true);   // loading during fetch
 
-    // Fetch current user session on app load
+    // Check if session exists already on session load
     useEffect(() => {
-        const getAuthUser = async () => {
+        const checkIfSessionExists = async () => {
             try {
                 const user = await getMe();
-                // user may be null
+                // user may be null, this was just an initial check
                 setUser(user);
             } catch (err) {
                 console.error("Error getting auth user:", err);
@@ -20,11 +20,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setLoading(false);
             }
         }
-        getAuthUser();
+        // checkIfSessionExists();
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, loading }}>
+        <AuthContext.Provider value={{ user, setUser, loading, setLoading }}>
             {children}
         </AuthContext.Provider>
     );

@@ -7,6 +7,7 @@ interface AuthContextType {
   user: Public.User | null,
   loading: boolean,
   setUser: (user: Public.User | null) => void;
+  setLoading: (loading: boolean) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

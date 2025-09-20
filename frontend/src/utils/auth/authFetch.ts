@@ -11,6 +11,6 @@ const debugUser: Public.User = {
 
 export async function getMe() {
     // TODO: Implement actual authentication
-    console.warn("getMe() not yet implemented! Returning debug user");
-    return debugUser;
+    console.warn("getMe() not yet implemented! Returning null");
+    return null;
 }

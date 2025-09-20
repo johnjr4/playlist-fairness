@@ -12,6 +12,7 @@ export interface AuthCallbackReqQuery {
     code?: string,
     state?: string,
     verifier?: string,
+    redirect?: string,
 }
 
 declare module 'express' {
