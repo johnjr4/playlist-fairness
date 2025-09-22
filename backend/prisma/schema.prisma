@@ -37,6 +37,7 @@ model Playlist {
   spotifyId         String          @unique
   spotifyUri        String          @unique
   spotifySnapshotId String
+  syncEnabled       Boolean         @default(false)
   syncCompleted     Boolean         @default(false)
   owner             User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId           String

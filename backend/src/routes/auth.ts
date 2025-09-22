@@ -3,7 +3,7 @@ import express, { type Request } from 'express';
 import 'dotenv/config';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '../utils/envLoader.js';
 import { spotifyAuthAxios } from '../utils/axiosInstances.js';
-import { createAndSyncUser } from '../controllers/syncSpotifyData.js';
+import { createAndSyncUser, upsertUserAndPlaylists } from '../controllers/syncSpotifyData.js';
 import type { AuthCallbackReqQuery } from '../utils/types/helperTypes.js';
 import { errorResponse, successfulResponse } from '../utils/apiResponses.js';
 import { userToPublic } from '../utils/types/frontendTypeMapper.js';
@@ -37,14 +37,6 @@ router.get('/callback', async (req: Request<{}, any, any, AuthCallbackReqQuery>,
         return;
     }
 
-    console.log("PARAMS");
-    console.log(`
-        code: ${code},
-        state: ${state},
-        verifier: ${verifier},
-        redirect: ${redirect},
-        `)
-
     try {
         const tokenResponse = await spotifyAuthAxios.post(
             '/api/token',
@@ -60,13 +52,11 @@ router.get('/callback', async (req: Request<{}, any, any, AuthCallbackReqQuery>,
 
         const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
-        // TODO: Store access tokens
-        console.log(`Access token ${access_token}`);
-        console.log(`Refresh token ${refresh_token}`);
-        // TODO: get rid of terrible server-side rendering in the auth callback for goodness sake
-        const user = await createAndSyncUser(access_token, refresh_token);
+        // console.log(`Access token ${access_token}`);
+        // console.log(`Refresh token ${refresh_token}`);
+        const user = await upsertUserAndPlaylists(access_token, refresh_token);
         req.session.user = { id: user.id, spotifyUri: user.spotifyUri };
-        console.log(`Session saved ${req.session.id}`);
+        // console.log(`Session saved ${req.session.id}`);
 
         res.json(
             successfulResponse(
