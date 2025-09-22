@@ -1,23 +1,28 @@
 type ButtonProps = {
     children: React.ReactNode;
-    variant?: 'primary' | 'secondary' | 'danger';
+    variant?: 'primary' | 'secondary' | 'secondaryInvert' | 'danger';
     onClick?: () => void;
     className?: string;
 }
 
 function Button({ children, variant = 'primary', onClick, className }: ButtonProps) {
+
     const variantStyles = {
-        primary: 'bg-blue-600 text-white hover:bg-blue-700',
-        secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-        danger: 'bg-red-600 text-white hover:bg-red-700',
+        primary: 'bg-primary border-primary text-textSecondary hover:brightness-115',
+        secondary: `bg-transparent border-textPrimary text-textPrimary hover:brightness-105`,
+        secondaryInvert: `bg-transparent border-textSecondary text-textSecondary hover:brightness-105`,
+        danger: 'bg-red-800 border-red-800 text-white hover:brightness-110',
     };
+
 
     return (
         <button
             onClick={onClick}
-            className={`px-4 py-2 rounded font-medium focus:outline-none ${variantStyles[variant]} ${className}`}
+            className={`px-4 py-2 rounded-md font-medium box-border border-2 ${variantStyles[variant]} ${className}`}
         >
-            {children}
+            <div className="brightness-100">
+                {children}
+            </div>
         </button>
     )
 }

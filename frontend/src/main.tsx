@@ -12,6 +12,7 @@ import CallbackPage from './pages/auth/CallbackPage.tsx'
 import ProtectedRoute from './layouts/ProtectedRoute.tsx'
 import LandingPage from './pages/LandingPage.tsx'
 import PlaylistPage from './pages/PlaylistPage.tsx'
+import ThemeProvider from './layouts/ThemeProvider.tsx'
 
 const router = createBrowserRouter([
   {
@@ -39,7 +40,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </AuthProvider>
   </StrictMode>,
 )

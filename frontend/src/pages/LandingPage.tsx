@@ -15,9 +15,9 @@ function LandingPage() {
     }
 
     return (
-        <div className="flex flex-col justify-center items-center h-full">
+        <div className="flex flex-col justify-center items-center h-full text-textPrimary bg-bgCol">
             <h1 className="font-bold text-7xl p-6">Spotifair</h1>
-            <Button onClick={onClick}>
+            <Button onClick={onClick} variant='primary'>
                 Get Started
             </Button>
         </div>

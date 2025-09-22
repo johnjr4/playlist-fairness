@@ -3,6 +3,12 @@
 
 @theme {
   --font-mont: "Montserrat", sans-serif;
+  /* --color-bgCol: #e0ddcc; */
+  --color-bgCol: #e7d9b9;
+  --color-textPrimary: #0a0e16;
+  --color-textSecondary: #f9fafb;
+  --color-primary: #186e18;
+  --color-secondary: #d8be86;
 }
 
 :root {
@@ -10,5 +16,14 @@
 }
 
 html, body, #root {
-    height: 100%;
+  height: 100%;
+}
+
+/* Dark theme variable overrides */
+.dark {
+  --color-bgCol: #111827;
+  --color-textPrimary: #f9fafb;
+  --color-textSecondary: #f9fafb;
+  --color-primary: #186e18;
+  --color-secondary: #1c2a49;
 }
