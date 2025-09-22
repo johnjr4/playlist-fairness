@@ -18,7 +18,7 @@ function PlaylistTrackRow({ playlistTrack, className, fillPercent }: PlaylistTra
         <li className={`w-full ${className} relative border-2`}>
             {/* Background */}
             <div
-                className="absolute top-0 left-0 h-full bg-blue-600 opacity-60"
+                className="absolute top-0 left-0 h-full bg-primary opacity-45"
                 style={{ width: `${cappedPercent}%` }}
             />
             {/* Main content */}

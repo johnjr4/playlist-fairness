@@ -9,7 +9,9 @@ function MainLayout() {
     return (
         <div className={`${isDarkMode ? 'dark' : null} min-h-screen flex flex-col bg-bgCol text-textPrimary`}>
             <header className="h-14 z-20 px-4 py-1.5 w-full fixed bg-primary text-textSecondary flex justify-between items-center">
-                <NavLink to='/u/' className='aria-[current=page]:underline'>
+                <NavLink to='/u' className={({ isActive }) =>
+                    isActive ? 'underline' : undefined
+                }>
                     Home Page
                 </NavLink>
                 <div className="flex items-center gap-4">
