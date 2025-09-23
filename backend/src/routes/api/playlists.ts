@@ -5,8 +5,8 @@ import { playlistToPublic, playlistToPublicFull, playlistToPublicHist } from '..
 import { errorResponse, successfulResponse } from '../../utils/apiResponses.js';
 import { validateIntId } from '../../utils/middleware/requireIdParam.js';
 import { getUser } from '../../controllers/getFromDb.js';
-import { disablePlaylistSync } from '../../controllers/syncSpotifyData.js';
-import type { PlaylistSyncBody } from 'spotifair';
+import { disableAndDeletePlaylistSync } from '../../controllers/syncSpotifyData.js';
+import type { PlaylistSyncBody, PlaylistSyncRes } from 'spotifair';
 
 // Prefix will be '/playlists'
 const router = express.Router();
@@ -79,9 +79,9 @@ router.get('/:id/tracks/hist',
 );
 
 router.post('/:id/sync',
-    asyncHandler(async (req: Request<{ id?: string }, {}, PlaylistSyncBody>, res) => {
+    asyncHandler(async (req: Request<{ id?: string }, PlaylistSyncRes, PlaylistSyncBody>, res) => {
         const enabled = req.body.enabled;
-        if (!enabled || typeof enabled !== 'boolean') {
+        if (enabled === undefined || enabled === null || typeof enabled !== 'boolean') {
             res.status(400).json(errorResponse(
                 'Field \'enabled\' not properly formatted',
                 'BAD_REQUEST'
@@ -97,11 +97,11 @@ router.post('/:id/sync',
             ))
             return;
         }
-        const updatedPlaylist = await setPlaylistSync(playlistId, user, enabled);
-        if (updatedPlaylist) {
+        const playlistSyncRes = await setPlaylistSync(playlistId, user, enabled);
+        if (playlistSyncRes) {
             res.json(successfulResponse(
                 `Playlist sync updated successfully`,
-                playlistToPublic(updatedPlaylist)
+                playlistSyncRes,
             ));
         } else {
             res.status(500).json(errorResponse(

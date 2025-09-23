@@ -14,6 +14,7 @@ function PlaylistPage() {
     const { data, isLoading, error, refetch } = useQuery(`/playlists/${playlistId}/tracks/hist`);
 
     if (isLoading) return <div>It's the loading page...</div>
+    if (isSyncing) return <div>Syncing playlist...</div>
     if (error) return <div>Error!</div>
 
     const playlistData = data as Public.PlaylistHist;
@@ -21,10 +22,11 @@ function PlaylistPage() {
         return Math.max(accumulator, currentValue.listeningEvents.length);
     }, 0);
 
-    async function handleSyncClick() {
+    async function handleSyncClick(enabled: boolean) {
         setIsSyncing(true);
-        const updatedPlaylist = await backendAxios.post(`/playlists/${playlistId}/sync`, { enabled: true });
+        const playlistRes = await backendAxios.post(`/playlists/${playlistId}/sync`, { enabled: enabled });
         setIsSyncing(false);
+        console.log(playlistRes.data.data);
         refetch();
     }
 
@@ -34,7 +36,7 @@ function PlaylistPage() {
         return (
             <>
                 <div>Sync not enabled for this playlist</div>
-                <Button onClick={() => handleSyncClick()}>Enable it</Button>
+                <Button onClick={() => handleSyncClick(true)}>Enable it</Button>
             </>
         )
     }
@@ -44,6 +46,8 @@ function PlaylistPage() {
             <div className='flex gap-4 items-center justify-center'>
                 <CoverArt coverUrl={playlistData.coverUrl} size='w-32' />
                 <h1>{playlistData.name}</h1>
+                <p>{playlistData.tracks.length} Tracks</p>
+                <Button variant='danger' onClick={() => handleSyncClick(false)}>Disable Sync</Button>
             </div>
             <div className='my-4'>
                 <h1 className='font-bold text-4xl'>Your playlist is <span className='text-green-600'>mostly fair</span></h1>

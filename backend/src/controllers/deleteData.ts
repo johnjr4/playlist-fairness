@@ -6,6 +6,10 @@ import prisma from "../utils/prismaClient.js";
 //      Playlists belonging to User
 //      PlaylistTracks belonging to those playlists
 //      ListeningEvents belonging to those PlaylistTracks
+// Then calls deleteOrphanedSyncData to delete now unneccessary:
+//      Tracks referenced only by deleted PlaylistTracks
+//      Albums referenced only by those Tracks
+//      Artists referenced only by those Tracks and Albums
 // Returns deleted user
 export async function deleteUserAndOwnedData(userId: string): Promise<User | null> {
     try {
@@ -14,6 +18,7 @@ export async function deleteUserAndOwnedData(userId: string): Promise<User | nul
                 id: userId,
             },
         });
+        await deleteOrphanedSyncData();
         return deletedUser;
     } catch (err) {
         console.error("Failed to delete user", err);
@@ -47,6 +52,67 @@ export async function deletePlaylists(playlistIds: number[]): Promise<number> {
     } catch (err) {
         console.error("Failed to delete playlists", err);
         return 0;
+    }
+}
+
+// Deletes PlaylistTracks (which cascades to listeningEvents) and orphaned data
+export async function unsyncPlaylist(playlistId: number) {
+    let ptCount = 0;
+    try {
+        const playlistTracks = await prisma.playlistTrack.deleteMany({
+            where: {
+                playlistId: playlistId,
+            }
+        });
+        ptCount = playlistTracks.count;
+        if (ptCount === 0) {
+            console.warn("No PlaylistTracks deleted. Did your playlist have any tracks?");
+            return { numPlaylistTracks: 0, numTracks: 0, numAlbums: 0, numArtists: 0 };
+        }
+        const { numTracks, numAlbums, numArtists } = await deleteOrphanedSyncData();
+        return { numPlaylistTracks: ptCount, numTracks, numAlbums, numArtists };
+    } catch (err) {
+        console.error("Failed to unsync playlist", err);
+        return { numPlaylistTracks: ptCount, numTracks: 0, numAlbums: 0, numArtists: 0 };
+    }
+}
+
+export async function deleteOrphanedSyncData() {
+    try {
+        // Has to be in this order
+        const [tracks, albums, artists] = await prisma.$transaction([
+            prisma.track.deleteMany({
+                where: {
+                    playlistTracks: {
+                        none: {},   // No PlaylistTracks exist
+                    },
+                }
+            }),
+            prisma.album.deleteMany({
+                where: {
+                    tracks: {
+                        none: {},   // No Tracks exist
+                    }
+                }
+            }),
+            prisma.artist.deleteMany({
+                where: {
+                    tracks: {
+                        none: {},   // No Tracks exist
+                    },
+                    albums: {
+                        none: {},   // No Albums exist
+                    },
+                },
+            }),
+        ]);
+        if (tracks.count === 0 && albums.count === 0 && artists.count === 0) {
+            console.warn("No orphaned data deleted. Did you remember to delete PlaylistTracks first?");
+        }
+        return { numTracks: tracks.count, numAlbums: albums.count, numArtists: artists.count }
+    } catch (err) {
+        console.error("Failed to delete orphaned data", err);
+        return { numTracks: 0, numAlbums: 0, numArtists: 0 }
     }
 }
 

@@ -120,3 +120,18 @@ export interface HTTPResponseFailure {
 }
 
 export type HTTPResponse = HTTPResponseSuccess | HTTPResponseFailure;
+
+
+// etc.
+
+export interface PlaylistSyncRes {
+    enabled: boolean;
+    counts: PlaylistSyncCounts;
+}
+
+export interface PlaylistSyncCounts {
+    numPlaylistTracks: number;
+    numTracks: number;
+    numAlbums: number;
+    numArtists: number;
+}

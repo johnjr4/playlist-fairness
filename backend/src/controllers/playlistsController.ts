@@ -1,6 +1,7 @@
+import type { PlaylistSyncRes } from "spotifair";
 import type { Playlist, User } from "../generated/prisma/client.js";
 import prisma from "../utils/prismaClient.js";
-import { enableAndSyncPlaylist } from "./syncSpotifyData.js";
+import { disableAndDeletePlaylistSync, enableAndSyncPlaylist } from "./syncSpotifyData.js";
 
 export async function getUserPlaylists(userId: string): Promise<Playlist[]> {
     try {
@@ -113,16 +114,31 @@ export async function getPlaylistHist(playlistId: number, ownerId: string | null
     }
 }
 
-export async function setPlaylistSync(playlistId: number, user: User, enabled: boolean) {
+// If enabled === true:
+//      Sets syncEnabled to true on playlist
+//      Put required Tracks, Albums, and Artists into db
+//      Put PlaylistTracks into db
+//      Returns numbers created
+// If enabled === false:
+//      Sets syncEnabled to false on playlist
+//      Deletes PlaylistTracks from playlist
+//      Deletes ListeningEvents from those PlaylistTracks
+//      Deletes Tracks, Albums, and Artists that are no longer needed in db
+//      Returns numbers deleted
+export async function setPlaylistSync(playlistId: number, user: User, enabled: boolean): Promise<PlaylistSyncRes> {
     try {
         const playlist = await getPlaylist(playlistId, user.id);
         if (!playlist) {
             throw new Error("Unable to fetch playlist");
         }
-        const enabledPlaylist = await enableAndSyncPlaylist(playlist, user);
-        return enabledPlaylist;
+        if (enabled) {
+            const counts = await enableAndSyncPlaylist(playlist, user);
+            return { enabled: true, counts };
+        }
+        const counts = await disableAndDeletePlaylistSync(playlist);
+        return { enabled: false, counts };
     } catch (err) {
-        console.error(`Failed to enable sync for playlist ${playlistId}:`, err);
-        return null;
+        console.error(`Failed to set sync for playlist ${playlistId}:`, err);
+        return { enabled: enabled, counts: { numPlaylistTracks: 0, numTracks: 0, numAlbums: 0, numArtists: 0 } };
     }
 }
