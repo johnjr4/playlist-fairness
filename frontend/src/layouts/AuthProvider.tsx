@@ -13,7 +13,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 const user = await getMe();
                 // user may be null, this was just an initial check
-                setUser(user);
+                if (user) {
+                    // Don't want to set null user because it may have been set by a successful auth login
+                    setUser(user);
+                }
             } catch (err) {
                 console.error("Error getting auth user:", err);
             } finally {
