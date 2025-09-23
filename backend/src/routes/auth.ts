@@ -97,4 +97,24 @@ router.get('/check-session', async (req, res) => {
     }
 })
 
+// Delete user session
+// Requires existing user in session with middleware
+router.post('/logout', async (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.status(500).json(errorResponse(
+                'Failed to log out',
+                'INTERNAL_SERVER_ERROR'
+            ))
+        } else {
+            res.clearCookie('spotifair.sid');
+            return res.json(successfulResponse(
+                'Successfully logged out',
+                null
+            ))
+        }
+    });
+})
+
 export default router;
