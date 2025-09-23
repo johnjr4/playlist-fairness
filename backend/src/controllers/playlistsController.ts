@@ -1,5 +1,6 @@
-import type { Playlist } from "../generated/prisma/client.js";
+import type { Playlist, User } from "../generated/prisma/client.js";
 import prisma from "../utils/prismaClient.js";
+import { enableAndSyncPlaylist } from "./syncSpotifyData.js";
 
 export async function getUserPlaylists(userId: string): Promise<Playlist[]> {
     try {
@@ -108,6 +109,20 @@ export async function getPlaylistHist(playlistId: number, ownerId: string | null
         return playlist;
     } catch (err) {
         console.error(`Failed to get playlists ${playlistId}`, err);
+        return null;
+    }
+}
+
+export async function setPlaylistSync(playlistId: number, user: User, enabled: boolean) {
+    try {
+        const playlist = await getPlaylist(playlistId, user.id);
+        if (!playlist) {
+            throw new Error("Unable to fetch playlist");
+        }
+        const enabledPlaylist = await enableAndSyncPlaylist(playlist, user);
+        return enabledPlaylist;
+    } catch (err) {
+        console.error(`Failed to enable sync for playlist ${playlistId}:`, err);
         return null;
     }
 }

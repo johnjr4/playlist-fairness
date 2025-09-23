@@ -13,18 +13,18 @@ export function userToPublicFull(user: UserFull): Public.UserFull {
 }
 
 export function playlistToPublic(playlist: Playlist): Public.Playlist {
-    const { id, name, coverUrl, spotifyId, spotifyUri, ownerId } = playlist;
-    return { id, name, coverUrl, spotifyId, spotifyUri, ownerId };
+    const { id, name, coverUrl, spotifyId, spotifyUri, ownerId, syncEnabled } = playlist;
+    return { id, name, coverUrl, spotifyId, spotifyUri, ownerId, syncEnabled };
 }
 
 export function playlistToPublicFull(playlist: PlaylistFull): Public.PlaylistFull {
-    const { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks } = playlist;
-    return { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks };
+    const { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks, syncEnabled } = playlist;
+    return { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks, syncEnabled };
 }
 
 export function playlistToPublicHist(playlist: PlaylistHist): Public.PlaylistHist {
-    const { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks } = playlist;
-    return { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks };
+    const { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks, syncEnabled } = playlist;
+    return { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks, syncEnabled };
 }
 
 

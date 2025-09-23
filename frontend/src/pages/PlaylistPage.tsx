@@ -4,10 +4,14 @@ import * as Public from 'spotifair';
 import CoverArt from "../components/ui/CoverArt";
 import PlaylistTrackRow from "../components/PlaylistTrackRow";
 import playlistTrackRowClasses from '../styling/playlistTrackRow.module.css'
+import Button from "../components/ui/Button";
+import { useState } from "react";
+import { backendAxios } from "../utils/axiosInstances";
 
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
-    const { data, isLoading, error } = useQuery(`/playlists/${playlistId}/tracks/hist`);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const { data, isLoading, error, refetch } = useQuery(`/playlists/${playlistId}/tracks/hist`);
 
     if (isLoading) return <div>It's the loading page...</div>
     if (error) return <div>Error!</div>
@@ -16,6 +20,24 @@ function PlaylistPage() {
     const maxCount = playlistData.tracks.reduce((accumulator, currentValue) => {
         return Math.max(accumulator, currentValue.listeningEvents.length);
     }, 0);
+
+    async function handleSyncClick() {
+        setIsSyncing(true);
+        const updatedPlaylist = await backendAxios.post(`/playlists/${playlistId}/sync`, { enabled: true });
+        setIsSyncing(false);
+        refetch();
+    }
+
+    console.log(playlistData);
+
+    if (!playlistData.syncEnabled) {
+        return (
+            <>
+                <div>Sync not enabled for this playlist</div>
+                <Button onClick={() => handleSyncClick()}>Enable it</Button>
+            </>
+        )
+    }
 
     return (
         <div className='flex flex-col items-center'>

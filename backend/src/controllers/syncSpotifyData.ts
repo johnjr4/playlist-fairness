@@ -2,7 +2,7 @@ import prisma from "../utils/prismaClient.js";
 import { getSpotifyAxios, handleAxiosError } from "../utils/axiosInstances.js";
 import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/client.js";
 import * as Spotify from "../utils/types/spotifyTypes.js";
-import type { AxiosInstance } from "axios";
+import type { Axios, AxiosInstance } from "axios";
 import { getUserPlaylists } from "./playlistsController.js";
 import { deletePlaylists } from "./deleteData.js";
 import pLimit from "p-limit";
@@ -132,7 +132,8 @@ async function upsertPlaylistsWithoutData(user: User) {
 export async function syncSpotifyData(user: User, spotifyAxios: AxiosInstance) {
     try {
         const upsertedPlaylists = await upsertPlaylistsWithoutData(user);
-        await upsertSpotifyDataFromPlaylists(upsertedPlaylists, getSpotifyAxios(user.accessToken));
+        const toSync = upsertedPlaylists.filter(p => p.syncEnabled);
+        await upsertSpotifyDataFromPlaylists(toSync, getSpotifyAxios(user.accessToken));
         console.log("Spotify data synced");
     } catch (err) {
         console.error(err);
@@ -246,15 +247,59 @@ function categorizePlaylists(spotifyPlaylists: (Spotify.SimplifiedPlaylistObject
     return { toDelete: toDelete, toUpdate: toUpdate, toInsert: toInsert };
 }
 
-// Inserts all non-existing playlists, tracks from those playlists, and albums and artists from those tracks into my database
+export async function enableAndSyncPlaylist(playlist: Playlist, user: User) {
+    if (user.id !== playlist.ownerId) {
+        throw new Error("Attempted to enable and sync playlist belonging to wrong user");
+    }
+
+    try {
+        const enabledPlaylist = await prisma.playlist.update({
+            where: {
+                id: playlist.id,
+            },
+            data: {
+                syncEnabled: true,
+            }
+        });
+        const spotifyAxios = getSpotifyAxios(user.accessToken);
+        await upsertSpotifyDataFromPlaylist(enabledPlaylist, spotifyAxios);
+        return enabledPlaylist;
+    } catch (err) {
+        console.error(err);
+        throw new Error("Failed to enable and sync playlist");
+    }
+}
+
+export async function disablePlaylistSync(playlist: Playlist) {
+    try {
+        const enabledPlaylist = await prisma.playlist.update({
+            where: {
+                id: playlist.id,
+            },
+            data: {
+                syncEnabled: false,
+            }
+        });
+        return enabledPlaylist;
+    } catch (err) {
+        console.error(err);
+        throw new Error("Failed to disable playlist sync");
+    }
+}
+
+async function upsertSpotifyDataFromPlaylist(playlist: Playlist, spotifyAxios: AxiosInstance) {
+    await getAndUpsertPlaylistTracks(playlist, spotifyAxios);
+    await markPlaylistSynced(playlist);
+}
+
+// Inserts all tracks, albums, artists and PlaylistTracks from these playlists into my database
 async function upsertSpotifyDataFromPlaylists(upsertedPlaylists: Array<Playlist>, spotifyAxios: AxiosInstance) {
     try {
         // Get all Spotify.PlaylistTracks and upsert Tracks and PlaylistTracks with limited concurrency
         const limit = pLimit(SPOTIFY_CONCURRENCY_LIMIT);
         const getAndUpsertTasks = upsertedPlaylists.map(
             playlist => limit(async () => {
-                await getAndUpsertPlaylistTracks(playlist, spotifyAxios);
-                await markPlaylistSynced(playlist);
+                upsertSpotifyDataFromPlaylist(playlist, spotifyAxios);
             })
         );
         const trackResults = await Promise.allSettled(getAndUpsertTasks);

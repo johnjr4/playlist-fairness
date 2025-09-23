@@ -19,6 +19,7 @@ export interface PlaylistFull {
     spotifyId: string
     spotifyUri: string
     ownerId: string
+    syncEnabled: boolean,
     tracks: PlaylistTrackWithMeta[]
 }
 export type Playlist = Omit<PlaylistFull, 'tracks'>
@@ -96,6 +97,11 @@ export interface ListeningEventFull {
 export type ListeningEvent = Omit<ListeningEventFull, 'user' | 'userId' | 'playlistTrack'>
 export type ListeningEventHist = Pick<ListeningEvent, 'playedAt'>
 
+// Post body types
+
+export interface PlaylistSyncBody {
+    enabled: boolean,
+}
 
 // HTTP Response types
 

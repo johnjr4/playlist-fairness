@@ -36,6 +36,9 @@ app.use(session({
     }
 }));
 
+// Require application/json request bodies
+app.use(express.json());
+
 app.use('/api', apiRouter);
 
 app.use('/auth', authRouter);
