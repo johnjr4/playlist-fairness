@@ -23,7 +23,7 @@ function HomePage() {
                 {playlists!.map(p => <PlaylistCard
                     key={p.id}
                     playlist={p}
-                    className='w-52 bg-secondary'
+                    className='w-52 bg-bgHighlight'
                 />)}
             </ul>
         </div>

@@ -18,3 +18,12 @@ export function useAuth() {
   if (context === undefined) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }
+
+// Get a non-null user when already inside a ProtectedRoute (for type convenience)
+export function useProtectedAuth() {
+  const { user, setUser } = useAuth();
+  if (!user) {
+    throw new Error("useProtectedAuth must be used within a ProtectedRoute");
+  }
+  return { user, setUser };
+}
