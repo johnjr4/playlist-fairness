@@ -16,7 +16,7 @@ function ProfileMenu() {
     ]
 
     return (
-        <Dropdown items={dropdownItems} hasCaret={false}>
+        <Dropdown items={dropdownItems} hasCaret={false} color='bg-background-400'>
             <div>{user.displayName}</div>
             <ProfilePicture />
         </Dropdown>

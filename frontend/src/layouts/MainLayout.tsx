@@ -1,12 +1,10 @@
 import { Outlet } from "react-router";
-import { useTheme } from "../utils/ThemeContext";
 import Navbar from "../components/Navbar";
 
 function MainLayout() {
-    const { isDarkMode } = useTheme();
 
     return (
-        <div className={`${isDarkMode ? 'dark' : null} min-h-screen flex flex-col bg-bgCol text-textPrimary`}>
+        <div className={`min-h-screen flex flex-col bg-background text-textPrimary`}>
             <header>
                 <Navbar />
             </header>
