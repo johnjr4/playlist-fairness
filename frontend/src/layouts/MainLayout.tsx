@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 function MainLayout() {
 
     return (
-        <div className={`min-h-screen flex flex-col bg-background text-textPrimary`}>
+        <div className={`min-h-screen flex flex-col bg-background-600 text-textPrimary`}>
             <header>
                 <Navbar />
             </header>

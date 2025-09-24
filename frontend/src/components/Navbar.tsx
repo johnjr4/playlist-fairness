@@ -4,7 +4,7 @@ import ProfileMenu from "./ProfileMenu";
 function Navbar() {
 
     return (
-        <div className="h-16 z-20 px-4 py-1.5 w-full fixed bg-background-700 text-textPrimary flex justify-between items-center">
+        <div className="h-16 z-20 px-4 py-1.5 w-full fixed bg-background-800 text-textPrimary flex justify-between items-center">
             <NavLink to='/u' className={({ isActive }) =>
                 isActive ? 'underline' : undefined
             }>

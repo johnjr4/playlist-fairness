@@ -16,7 +16,7 @@ function ProfileMenu() {
     ]
 
     return (
-        <Dropdown items={dropdownItems} hasCaret={false} color='bg-background-700' hoverColor="red">
+        <Dropdown items={dropdownItems} hasCaret={false} color='bg-inherit' hoverColor="red">
             <div>{user.displayName}</div>
             <ProfilePicture />
         </Dropdown>

@@ -18,7 +18,7 @@ function Button({ children, variant = 'primary', onClick, className }: ButtonPro
     return (
         <button
             onClick={onClick}
-            className={`px-4 py-2 rounded-md font-medium box-border border-2 ${variantStyles[variant]} ${className}`}
+            className={`text-xs md:text-base px-2 py-1 md:px-4 md:py-2 rounded-md font-medium box-border border-2 ${variantStyles[variant]} ${className}`}
         >
             <div className="brightness-100">
                 {children}

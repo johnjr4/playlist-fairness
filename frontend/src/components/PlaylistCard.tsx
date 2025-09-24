@@ -9,7 +9,7 @@ function PlaylistCard({ playlist, className }: { playlist: Public.Playlist, clas
     }
     return (
         <li>
-            <button className={`p-2 rounded-sm ${className}`} onClick={() => handleClick()}>
+            <button className={`p-3 rounded-sm ${className}`} onClick={() => handleClick()}>
                 <CoverArt
                     coverUrl={playlist.coverUrl}
                     alt={`${playlist.name} cover art`}
