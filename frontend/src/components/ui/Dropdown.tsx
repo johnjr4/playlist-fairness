@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AiFillCaretDown } from 'react-icons/ai';
+import hoverClasses from '../../styling/hovereffect.module.css'
 
 type DropdownProps = {
     onLogout?: () => void;
@@ -15,7 +16,7 @@ export type DropdownItem = {
     onClick: () => void;
 };
 
-function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary', hoverColor = 'bg-secondary-light' }: DropdownProps) {
+function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary' }: DropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     // Will simply maintain a reference to the 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +49,7 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary', ho
             {/* Main button component */}
             <button
                 onClick={() => setIsOpen((prev) => !prev)}
-                className={`flex items-center px-3 py-1 gap-1.5 ${color} rounded-sm hover:${hoverColor}`}
+                className={`flex items-center px-3 py-1 gap-1.5 ${color} rounded-sm ${hoverClasses.hover3D}`}
             >
                 {children}
                 {hasCaret && <AiFillCaretDown size='12' color='var(--text-primary)' />}
@@ -56,12 +57,12 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary', ho
 
             {/* Dropdown menu */}
             {isOpen && (
-                <div className={`absolute right-0 mt-1.5 w-40 ${color} rounded-sm shadow-lg z-50`}>
+                <div className={`absolute right-0 mt-1.5 w-40 ${color} rounded-sm outline-1 outline-background-500 shadow-lg z-50`}>
                     {items.map((item, idx) => (
                         <button
                             key={idx}
                             onClick={() => handleItemClick(item.onClick)}
-                            className={`block w-full text-left px-4 py-2 rounded-sm text-sm hover:${hoverColor}`}
+                            className={`block w-full text-left px-4 py-2 rounded-sm text-sm ${hoverClasses.hover3D}`}
                         >
                             {item.label}
                         </button>

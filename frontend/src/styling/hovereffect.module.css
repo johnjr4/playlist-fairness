@@ -1,0 +1,5 @@
+@reference "tailwindcss";
+.hover3D {
+    @apply hover:inset-shadow-sm transition-shadow duration-75;
+    --tw-inset-shadow-color: var(--color-background-100);
+}

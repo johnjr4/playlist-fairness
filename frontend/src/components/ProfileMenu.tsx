@@ -1,4 +1,4 @@
-import { useAuth, useProtectedAuth } from "../utils/AuthContext";
+import { useProtectedAuth } from "../utils/AuthContext";
 import { backendAuthAxios } from "../utils/axiosInstances";
 import Dropdown, { type DropdownItem } from "./ui/Dropdown";
 import ProfilePicture from "./ui/ProfilePicture";
@@ -16,7 +16,7 @@ function ProfileMenu() {
     ]
 
     return (
-        <Dropdown items={dropdownItems} hasCaret={false} color='bg-background-400'>
+        <Dropdown items={dropdownItems} hasCaret={false} color='bg-background-700' hoverColor="red">
             <div>{user.displayName}</div>
             <ProfilePicture />
         </Dropdown>
