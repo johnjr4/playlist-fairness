@@ -3,9 +3,10 @@ import Button from "./ui/Button";
 
 interface SearchBarProps {
     setSearchString: (searchString: string) => void;
+    className?: string,
 }
 
-function SearchBar({ setSearchString }: SearchBarProps) {
+function SearchBar({ setSearchString, className }: SearchBarProps) {
     const [localQuery, setLocalQuery] = useState('');
 
     function setQuery(newQuery: string) {
@@ -21,7 +22,7 @@ function SearchBar({ setSearchString }: SearchBarProps) {
                 value={localQuery}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search..."
-                className="px-5 py-3 w-full max-h-full rounded-sm bg-background-300"
+                className="relative z-10 px-5 py-3 w-full max-h-full rounded-sm bg-background-300 shadow-sm shadow-background-700"
             />
             <Button onClick={() => setQuery('')} variant="secondary" className="max-h-full">
                 Clear

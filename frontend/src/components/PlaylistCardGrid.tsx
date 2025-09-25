@@ -37,7 +37,7 @@ function PlaylistCardGrid({ filterString = "" }: { filterString?: string }) {
             {playlists!.filter(p => (filterCondition(p.name))).map(p => <PlaylistCard
                 key={p.id}
                 playlist={p}
-                className={`w-32 sm:w-44 md:w-52 lg:w-60  bg-background-400 ${hoverClasses.hover3D}`}
+                className={`w-32 sm:w-44 md:w-52 lg:w-60  bg-background-300 shadow-[0px_0px_20px_1px_var(--color-background-700)] ${hoverClasses.hover3D}`}
             />)}
         </ul>
     )
