@@ -21,7 +21,7 @@ function PlaylistCard({ playlist, className }: PlaylistCardProps) {
                     alt={`${playlist.name} cover art`}
                     size='w-full'
                 />
-                <p className='md:h-5 w-[80%] text-xs/tight sm:text-sm/tight md:text-md/tight line-clamp-1 truncate'>{playlist.name}</p>
+                <p className='md:h-5 w-[80%] text-xs/tight sm:text-sm/tight md:text-base/tight line-clamp-1 truncate'>{playlist.name}</p>
                 <FaSyncAlt
                     color={playlist.syncEnabled ? 'var(--color-textPrimary)' : 'var(--color-background-100)'}
                     // text size controls the SVG size (apparently)
