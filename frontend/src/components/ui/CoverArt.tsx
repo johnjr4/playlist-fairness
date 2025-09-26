@@ -20,7 +20,7 @@ function CoverArt({ coverUrl, alt = 'Cover Image', size = 'w-48', className }: C
 
 
     return (
-        <div className={`aspect-square ${size} overflow-hidden shadow-md ${className}`}>
+        <div className={`aspect-square ${size} overflow-hidden shadow-md shadow-background-500 ${className}`}>
             <img
                 src={usedUrl}
                 alt={alt}

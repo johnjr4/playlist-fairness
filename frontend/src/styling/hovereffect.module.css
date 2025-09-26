@@ -1,26 +1,39 @@
-@reference "tailwindcss";
+.transition {
+    /* un-hover transition time and style */
+    transition: box-shadow 400ms, transform 200ms ease-in, scale 200ms;
+}
+
+.transition:hover {
+    /* hover transition time and style */
+    transition: box-shadow 100ms, transform 50ms ease-out, scale 50ms;
+}
 
 .hover3D {
-    @apply hover:inset-shadow-sm transition-shadow duration-75;
-    --tw-inset-shadow-color: var(--color-background-100);
+    box-shadow: 0px 0px 10px 1px var(--color-background-700), inset 0 0 transparent, inset 0 0 transparent;
+}
+
+.hover3D:hover {
+    /* @apply hover:inset-shadow-sm transition-shadow duration-75; */
+    box-shadow: 0px 0px 40px 1px var(--color-background-500), inset 0px 2px 3px 1px var(--color-background-100), inset 0px -1px 4px 0px var(--color-primary-600);
+    /* --tw-inset-shadow-color: var(--color-background-100); */
 }
 
 /* Main rise effects */
 .hoverRise:hover {
-    transform: translateY(-5px) rotate(1deg);
+    transform: translateY(-8px) rotate(1deg);
     scale: 103%;
-    transition: transform 50ms ease-out;
+    z-index: 20;
 }
 
 /* Series of variants to make rotation look random */
 .hoverRise:nth-of-type(2n):hover {
-    transform: translateY(-5px) rotate(5deg);
+    transform: translateY(-8px) rotate(5deg);
 }
 
 .hoverRise:nth-of-type(3n):hover {
-    transform: translateY(-5px) rotate(-2deg);
+    transform: translateY(-8px) rotate(-2deg);
 }
 
 .hoverRise:nth-of-type(3n+1):hover {
-    transform: translateY(-5px) rotate(-2deg);
+    transform: translateY(-8px) rotate(-3deg);
 }

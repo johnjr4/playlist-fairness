@@ -1,5 +1,6 @@
 import useQuery from "../utils/api/useQuery";
 import hoverClasses from '../styling/hovereffect.module.css';
+import gradientClasses from '../styling/gradient.module.css';
 import PlaylistCard from "./PlaylistCard";
 import * as Public from 'spotifair';
 
@@ -20,25 +21,31 @@ function PlaylistCardGrid({ filterString = "" }: { filterString?: string }) {
         }
     }
 
+    // Sort by if sync is enabled
+    playlists!.sort((a, b) => {
+        return (a.syncEnabled === b.syncEnabled) ? 0 : (a.syncEnabled ? -1 : 1);
+    });
+
     return (
         <ul className="
                 grid
                 grid-cols-[repeat(auto-fill,theme(width.32))] 
                 sm:grid-cols-[repeat(auto-fill,theme(width.44))] 
                 md:grid-cols-[repeat(auto-fill,theme(width.52))] 
-                lg:grid-cols-[repeat(auto-fill,theme(width.60))] 
+                lg:grid-cols-[repeat(auto-fill,theme(width.64))] 
                 gap-4
                 justify-center 
                 w-full
                 px-5
                 md:px-20
                 max-w-[1920px]
+                relative
+                z-10
             ">
             {playlists!.filter(p => (filterCondition(p.name))).map(p => <PlaylistCard
                 key={p.id}
                 playlist={p}
-                className={`w-32 sm:w-44 md:w-52 lg:w-60   `}
-                wrapperClassName={` bg-background-300 shadow-[0px_0px_20px_1px_var(--color-background-700)] ${hoverClasses.hover3D} ${hoverClasses.hoverRise}`}
+                className={`w-32 sm:w-44 md:w-52 lg:w-64 bg-background-300 ${hoverClasses.transition} ${hoverClasses.hover3D} ${hoverClasses.hoverRise}`}
             />)}
         </ul>
     )
