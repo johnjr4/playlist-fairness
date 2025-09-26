@@ -9,7 +9,7 @@ function MainLayout() {
             <header>
                 <Navbar />
             </header>
-            <main className={`mt-16 flex-grow ${gradientClasses.bgGradient}`}>
+            <main className={`relative mt-16 flex-grow ${gradientClasses.bgGradient}`}>
                 <Outlet />
             </main>
         </div>
