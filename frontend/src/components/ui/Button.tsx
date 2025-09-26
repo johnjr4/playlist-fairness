@@ -1,6 +1,8 @@
+import hoverClasses from '../../styling/hovereffect.module.css'
+
 type ButtonProps = {
     children: React.ReactNode;
-    variant?: 'primary' | 'secondary' | 'secondaryInvert' | 'danger';
+    variant?: 'primary' | 'secondary' | 'danger';
     onClick?: () => void;
     className?: string;
 }
@@ -8,17 +10,16 @@ type ButtonProps = {
 function Button({ children, variant = 'primary', onClick, className }: ButtonProps) {
 
     const variantStyles = {
-        primary: 'bg-primary border-primary text-textSecondary hover:brightness-115',
-        secondary: `bg-transparent border-textPrimary text-textPrimary hover:brightness-105`,
-        secondaryInvert: `bg-transparent border-textSecondary text-textSecondary hover:brightness-105`,
-        danger: 'bg-red-800 border-red-800 text-white hover:brightness-110',
+        primary: `bg-primary border-primary text-textSecondary ${hoverClasses.hover3DPrimary}`,
+        secondary: `bg-transparent border-transparent text-textPrimary ${hoverClasses.hover3D}`,
+        danger: `bg-red-900 border-red-900 text-white ${hoverClasses.hover3DDanger}`,
     };
 
 
     return (
         <button
             onClick={onClick}
-            className={`text-xs md:text-base px-2 py-1 md:px-4 md:py-2 rounded-md font-medium box-border border-2 cursor-pointer ${variantStyles[variant]} ${className}`}
+            className={`text-xs md:text-base px-2 py-1 md:px-4 md:py-2 rounded-md font-medium cursor-pointer ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
         >
             <div className="brightness-100">
                 {children}
