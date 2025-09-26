@@ -22,7 +22,7 @@ function ProfilePicture({ pictureUrl = null, alt = 'Cover Image', size = 'w-11',
 
 
     return (
-        <div className={`aspect-square ${size} overflow-hidden shadow-sm shadow-gray-800 ${className} rounded-full`}>
+        <div className={`aspect-square ${size} overflow-hidden ${className} rounded-full`}>
             <img
                 src={usedUrl!}
                 alt={alt}

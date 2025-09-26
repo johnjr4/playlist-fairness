@@ -12,6 +12,7 @@ import CallbackPage from './pages/auth/CallbackPage.tsx'
 import ProtectedRoute from './layouts/ProtectedRoute.tsx'
 import LandingPage from './pages/LandingPage.tsx'
 import PlaylistPage from './pages/PlaylistPage.tsx'
+import ProfilePage from './pages/ProfilePage.tsx'
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
     children: [
       { index: true, Component: HomePage },
+      { path: 'profile', Component: ProfilePage },
       { path: ':playlistId', Component: PlaylistPage },
     ]
   },

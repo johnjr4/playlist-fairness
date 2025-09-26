@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { useProtectedAuth } from "../utils/AuthContext";
 import { backendAuthAxios } from "../utils/axiosInstances";
 import Dropdown, { type DropdownItem } from "./ui/Dropdown";
@@ -5,6 +6,7 @@ import ProfilePicture from "./ui/ProfilePicture";
 
 function ProfileMenu() {
     const { user, setUser } = useProtectedAuth();
+    const navigate = useNavigate();
 
     async function handleLogout() {
         await backendAuthAxios.post('/logout');
@@ -12,7 +14,8 @@ function ProfileMenu() {
     }
 
     const dropdownItems: DropdownItem[] = [
-        { label: 'Logout', onClick: handleLogout }
+        { label: 'Profile', onClick: () => navigate('/u/profile') },
+        { label: 'Logout', onClick: handleLogout },
     ]
 
     return (
