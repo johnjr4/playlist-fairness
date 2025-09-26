@@ -19,22 +19,22 @@
 }
 
 .hover3DDanger {
-    box-shadow: 0 0 transparent, inset 0 0 transparent, inset 0 0 transparent;
+    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0 0 transparent, inset 0 0 transparent;
 }
 
 .hover3DDanger:hover {
     /* @apply hover:inset-shadow-sm transition-shadow duration-75; */
-    box-shadow: 0px 0px 40px 1px var(--color-background-500), inset 0px 2px 3px 1px var(--color-red-500), inset 0px -1px 3px 0px var(--color-background-400);
+    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0px 2px 3px 1px var(--color-red-500), inset 0px -1px 3px 0px var(--color-background-400);
     /* --tw-inset-shadow-color: var(--color-background-100); */
 }
 
 .hover3DPrimary {
-    box-shadow: 0 0 transparent, inset 0 0 transparent, inset 0 0 transparent;
+    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0 0 transparent, inset 0 0 transparent;
 }
 
 .hover3DPrimary:hover {
     /* @apply hover:inset-shadow-sm transition-shadow duration-75; */
-    box-shadow: 0px 0px 40px 1px var(--color-background-500), inset 0px 2px 3px 1px var(--color-primary-300), inset 0px -1px 4px 0px var(--color-background-300);
+    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0px 2px 3px 1px var(--color-primary-300), inset 0px -1px 4px 0px var(--color-background-300);
     /* --tw-inset-shadow-color: var(--color-background-100); */
 }
 

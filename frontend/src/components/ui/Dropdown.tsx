@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AiFillCaretDown } from 'react-icons/ai';
 import hoverClasses from '../../styling/hovereffect.module.css'
+import useClickOutside from '../../utils/useClickOutside';
 
 type DropdownProps = {
     onLogout?: () => void;
@@ -21,22 +22,8 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary' }: 
     // Will simply maintain a reference to the 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-    // Close dropdown on click outside
-    // This logic is inside useEffect because it is coordinating with an external service: a DOM API
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            // If we have a reference to the dropdown and the event passed to this function is NOT a descendant of that ref...
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                // Then we clicked somewhere else and should close it
-                setIsOpen(false);
-            }
-        };
-
-        // Add this event listener on render
-        document.addEventListener('mousedown', handleClickOutside);
-        // Clean it up on dismount/re-render
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    // Close dropdown when clicking outside
+    useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
     // Event handler
     function handleItemClick(onClick: () => void) {

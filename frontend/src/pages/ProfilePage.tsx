@@ -1,10 +1,14 @@
+import { useState } from "react";
 import Button from "../components/ui/Button";
 import ProfilePicture from "../components/ui/ProfilePicture";
 import ProfileStats from "../components/ui/ProfileStats";
 import { useProtectedAuth } from "../utils/AuthContext";
+import Modal from "../components/ui/Modal";
 
 function ProfilePage() {
     const { user } = useProtectedAuth();
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     return (
         <div className="flex flex-col mt-4 md:flex-row gap-2 md:gap-4 lg:gap-6 rounded-lg p-2mt-4 md:mt-6 lg:mt-10 mx-auto w-80 sm:w-[500px] md:w-2xl lg:w-4xl xl:w-[1000px]">
@@ -18,11 +22,18 @@ function ProfilePage() {
                     <Button variant='secondary'>
                         Log Out
                     </Button>
-                    <Button variant='danger' >
+                    <Button variant='danger' onClick={() => setIsDeleteModalOpen(true)}>
                         Delete Profile
                     </Button>
                 </div>
             </div>
+
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                message="This will delete all data associated with your profile. Are you sure you'd like to continue?"
+                onConfirm={() => alert('delete confirmed')}
+            />
         </div>
     );
 }
