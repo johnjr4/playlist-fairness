@@ -12,6 +12,7 @@
     content: "";
     position: absolute;
     inset: -50px -90px;
+    width: 100%;
     /* shorthand for top: 0; right: 0; bottom: 0; left: 0 */
     /* background: rgba(0, 0, 0, 0.5); */
     background: radial-gradient(var(--color-background-400), transparent 70%);
