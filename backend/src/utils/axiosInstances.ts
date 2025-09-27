@@ -27,8 +27,10 @@ export function getSpotifyAxios(accessToken: string): AxiosInstance {
             config._retryCount += 1;
 
             // Actually retry
-            const retryAfter = parseInt(response.headers['Retry-After'], 10) || 1;
-            const delayMs = retryAfter * 1000;
+            const retryAfter = parseInt(response.headers['Retry-After'], 10) || 1; // Spotify's recommended number of seconds
+            const exponential = Math.pow(2, config._retryCount ?? 1) - 1; // Exponential backoff
+            const jitter = Math.random() * 500; // [0,500] ms of jitter to avoid thundering herd
+            const delayMs = (retryAfter * exponential) * 1000 + jitter;
 
             console.warn(`Rate limited by Spotify. Retrying after ${delayMs}ms... (attempt ${config._retryCount})`);
 

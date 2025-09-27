@@ -133,8 +133,8 @@ async function upsertPlaylistsWithoutData(user: User) {
 export async function syncSpotifyData(user: User, spotifyAxios: AxiosInstance) {
     try {
         const upsertedPlaylists = await upsertPlaylistsWithoutData(user);
-        const toSync = upsertedPlaylists.filter(p => p.syncEnabled);
-        await upsertSpotifyDataFromPlaylists(toSync, getSpotifyAxios(user.accessToken));
+        const toSync = upsertedPlaylists.filter(p => p.syncEnabled === true);
+        await upsertSpotifyDataFromPlaylists(toSync, spotifyAxios);
         console.log("Spotify data synced");
     } catch (err) {
         console.error(err);
@@ -331,7 +331,7 @@ async function markPlaylistSynced(playlist: Playlist) {
 async function getAndUpsertPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance): Promise<PlaylistSyncCounts> {
     const bundledSpotifyPlaylistTracks = await getSpotifyPlaylistTracks(playlist, spotifyAxios);
     const { numTracks, numAlbums, numArtists } = await upsertSpotifyDataFromTracks(bundledSpotifyPlaylistTracks.spotifyPlaylistTracks);
-    console.log(`${numTracks} new tracks for playlist: ${playlist.name}`);
+    console.log(`tracks: ${numTracks}, albums: ${numAlbums}, artists: ${numArtists} for playlist: ${playlist.name}`);
     const dbPlaylistTracks = await upsertPlaylistTracks(bundledSpotifyPlaylistTracks);
     return { numPlaylistTracks: dbPlaylistTracks.length, numTracks, numAlbums, numArtists };
 
@@ -340,6 +340,7 @@ async function getAndUpsertPlaylistTracks(playlist: Playlist, spotifyAxios: Axio
 // Inserts all tracks from playlist and albums and artist from those tracks into my database
 async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.PlaylistTrackObject[], batchSize = 50) {
     try {
+
         let tracks: Track[] = [];
         let numAlbums = 0;
         let numArtists = 0;
@@ -414,10 +415,10 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
             // toInsert == all tracks from spotifyTracksWithNecessaryData that aren't in the db
             const [alreadyInDb, toInsert] = partition(spotifyTracksWithNecessaryData, st => urisInDb.has(st.uri));
 
-            // Select only the tracks which have a name difference somewhere
+            // Select only the tracks which have a difference somewhere
             const toUpdate = alreadyInDb.filter(t => {
                 const dbTrack = urisInDb.get(t.uri)!; // non-null because of partition() call
-                return dbTrack.name !== t.name || dbTrack.album.name !== t.album.name || dbTrack.artist.name !== selectFirstArtist(t.artists).name;
+                return dbTrack.name !== t.name || dbTrack.album.name !== t.album.name || dbTrack.artist.name !== selectFirstArtist(t.artists).name || dbTrack.durationMs !== t.duration_ms;
             });
 
             const metadataMap: Map<string, Spotify.PlaylistTrackMetadata> = new Map(
@@ -435,6 +436,7 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
 
             // Update track batch
             if (toUpdate.length > 0) {
+                console.log(`Updating ${toUpdate.length} tracks`)
                 updatedTracks = await Promise.all(
                     toUpdate.map(spotifyTrack =>
                         prisma.track.update({
@@ -444,6 +446,7 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
                                 // Can assert non-null because we checked for related data above
                                 artistId: uriToArtistId.get(selectFirstArtist(spotifyTrack.artists).uri)!,
                                 albumId: uriToAlbumId.get(spotifyTrack.album.uri)!,
+                                durationMs: spotifyTrack.duration_ms,
 
                             },
                         })
@@ -461,6 +464,7 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
                             // Can assert non-null because we checked for related data above
                             artistId: uriToArtistId.get(selectFirstArtist(spotifyTrack.artists).uri)!,
                             albumId: uriToAlbumId.get(spotifyTrack.album.uri)!,
+                            durationMs: spotifyTrack.duration_ms,
                         };
                     }),
                     skipDuplicates: true,
