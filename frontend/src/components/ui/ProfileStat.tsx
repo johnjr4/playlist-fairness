@@ -8,7 +8,8 @@ function ProfileStat({ children, category, tip }: ProfileStatProps) {
     return (
         <div className="flex flex-col items-end justify-center">
             <div className="w-full flex justify-between items-center">
-                <div className="text-background-50 font-semibold text-xs w-22 sm:text-sm sm:w-26 xl:text-base md:w-30 lg:w-32">
+                <div className="text-background-50 font-semibold text-xs sm:text-sm xl:text-base
+                w-22 sm:w-26 md:w-30 lg:w-32">
                     {category}:
                 </div>
                 <div className="grow shrink text-sm sm:text-base lg:text-xl xl:text-2xl text-right font-bold line-clamp-1 truncate
