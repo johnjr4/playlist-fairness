@@ -8,7 +8,7 @@ export interface UserFull {
     imageUrl: string | null
     playlists: Playlist[]
     listeningHistory: ListeningEvent[]
-    trackingStartTime: Date
+    trackingStartTime: string
 }
 export type User = Omit<UserFull, 'playlists' | 'listeningHistory'>
 
