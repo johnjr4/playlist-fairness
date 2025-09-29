@@ -61,7 +61,7 @@ function CallbackPage() {
                 deletePCKEVals();
 
                 // Navigate to protected routes
-                navigate('/u');
+                navigate('/u/playlists');
             } catch (err) {
                 console.error('Failed to authenticate user with backend', err);
                 // TODO: This is not acceptable error handling!

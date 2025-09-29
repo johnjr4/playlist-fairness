@@ -8,7 +8,7 @@ function LandingPage() {
 
     function onClick() {
         if (user) {
-            navigate('/u');
+            navigate('/u/playlists');
         } else {
             navigate('/auth/login');
         }

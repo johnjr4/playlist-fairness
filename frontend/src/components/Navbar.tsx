@@ -1,4 +1,3 @@
-import { NavLink } from "react-router";
 import ProfileMenu from "./ProfileMenu";
 import gradientClasses from '../styling/gradient.module.css';
 import NavbarLink from "./ui/NavbarLink";
@@ -14,7 +13,7 @@ function Navbar({ ref }: { ref: React.Ref<HTMLElement> }) {
             ${gradientClasses.navGradient} text-textPrimary`}
             ref={ref}
         >
-            <NavbarLink to='/u'>
+            <NavbarLink to='/u/playlists'>
                 Home Page
             </NavbarLink>
             <div className="flex items-center gap-4 bg-background-700">

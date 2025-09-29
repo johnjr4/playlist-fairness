@@ -11,7 +11,7 @@ interface PlaylistCardProps {
 function PlaylistCard({ playlist, className }: PlaylistCardProps) {
     const navigate = useNavigate();
     function handleClick() {
-        navigate(`/u/${playlist.id}`);
+        navigate(`/u/playlists/${playlist.id}`);
     }
     return (
         <li className={`${className} rounded-sm relative p-3.5`}>

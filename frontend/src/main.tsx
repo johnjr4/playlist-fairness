@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Navigate } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import './index.css'
 import AuthLayout from './layouts/AuthLayout.tsx'
@@ -23,9 +23,14 @@ const router = createBrowserRouter([
     path: '/u', // u for user (arbitrary)
     element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
     children: [
-      { index: true, Component: HomePage },
+      { index: true, element: <Navigate to='playlists' replace /> },
+      {
+        path: 'playlists', children: [
+          { index: true, Component: HomePage },
+          { path: ':playlistId', Component: PlaylistPage },
+        ]
+      },
       { path: 'profile', Component: ProfilePage },
-      { path: ':playlistId', Component: PlaylistPage },
     ]
   },
   {
