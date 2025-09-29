@@ -1,23 +1,39 @@
 import { Link } from "react-router";
 import ProfileStat from "./ProfileStat";
+import useQuery from "../../utils/api/useQuery";
+import * as Public from 'spotifair';
+import { msToMin } from "../../utils/unitConvert";
+import { useProtectedAuth } from "../../utils/AuthContext";
 
 function ProfileStats() {
+    const { data: fetchedStats, error, isLoading } = useQuery('/user/stats');
+
+    // TODO: Loading and error states
+    if (isLoading) return <div>Loading...</div>
+    if (error) return <div>Error getting stats...</div>
+
+    const userStats = fetchedStats as Public.UserStats;
+
+    // TODO: Deal with nonexistent top playlist and track
+    const topPlaylist = userStats.playlists.top!;
+    const topTrack = userStats.tracks.top!;
     return (
         <div className="w-full text-sm md:text-base lg:text-lg">
-            <ProfileStat category="Total playlists" tip="3 synced">
-                20
+            <ProfileStat category="Total playlists" tip={`${userStats.playlists.synced.toLocaleString()} synced`}>
+                {userStats.playlists.total.toLocaleString()}
             </ProfileStat>
             <StatDivider />
-            <ProfileStat category="Top playlist" tip="2,503 minutes">
-                <Link to='/u/1'>First Playlist and an Even Longer Name</Link>
+            <ProfileStat category="Top playlist" tip={`${msToMin(topPlaylist.totalMs).toLocaleString()} minutes`}>
+                <Link to={`/u/${topPlaylist.id}`}>{topPlaylist.name}</Link>
             </ProfileStat>
             <StatDivider />
-            <ProfileStat category="Total listens" tip="45,305 minutes">
-                10,082
+            <ProfileStat category="Total listens" tip={`${msToMin(userStats.listens.totalMs).toLocaleString()} minutes`}>
+                {userStats.listens.plays.toLocaleString()}
             </ProfileStat>
             <StatDivider />
-            <ProfileStat category="Top track" tip="203 listens across 5 playlists">
-                Lake Mungo and the Spiders from Mars that went to the Trolly altogether
+            {/* TODO: Add number of playlists that it's on */}
+            <ProfileStat category="Top track" tip={`${topTrack.plays} listens`}>
+                {topTrack.name}
             </ProfileStat>
         </div>
     )
