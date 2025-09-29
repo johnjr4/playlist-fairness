@@ -1,15 +1,11 @@
 import express from 'express';
 import { asyncHandler } from '../../utils/middleware/handleServerError.js';
-import { validateIntId } from '../../utils/middleware/requireIdParam.js';
-import { getAlbum, getAlbumFull } from '../../controllers/albumController.js';
+import { validateUserUuid } from '../../utils/middleware/requireIdParam.js';
 import { errorResponse, successfulResponse } from '../../utils/apiResponses.js';
-import { albumToPublic, albumToPublicFull } from '../../utils/types/frontendTypeMapper.js';
 import { getUser } from '../../controllers/getFromDb.js';
-import * as Public from 'spotifair';
-import { getPlaylistCount, getTopPlaylist } from '../../controllers/playlistsController.js';
-import { getTopTrack, getTrackCount } from '../../controllers/trackController.js';
-import { getListeningHistory, getListeningHistoryStat } from '../../controllers/listeningEventController.js';
 import { getUserStats } from '../../controllers/userController.js';
+import { deleteUserAndOwnedData } from '../../controllers/deleteData.js';
+import { userToPublic } from '../../utils/types/frontendTypeMapper.js';
 
 // Prefix will be '/user'
 const router = express.Router();
@@ -49,5 +45,35 @@ router.get('/stats',
         }
     })
 )
+
+// Require frontend to submit userId for an additional layer of deletion safety
+router.param('userId', validateUserUuid);
+// Delete user
+router.delete('/:userId',
+    asyncHandler(async (req, res) => {
+        const requestedId = req.params.userId as string;
+        const sessionId = req.session.user!.id as string;
+        console.log(`requestedId: ${requestedId}`);
+        console.log(`sessionId: ${sessionId}`);
+        if (requestedId !== sessionId) {
+            return res.status(400).json(errorResponse(
+                "Requested deletion for different user than authenticated",
+                'BAD_REQUEST'
+            ));
+        }
+        // Delete all their data and newly orphaned data
+        const deletedUser = await deleteUserAndOwnedData(sessionId);
+        if (!deletedUser) {
+            return res.status(500).json(errorResponse(
+                'Failed to delete user data',
+                'INTERNAL_SERVER_ERROR'
+            ))
+        }
+        return res.json(successfulResponse(
+            'Successfully deleted user',
+            userToPublic(deletedUser)
+        ));
+    })
+);
 
 export default router;

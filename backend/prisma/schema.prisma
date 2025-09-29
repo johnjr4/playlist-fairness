@@ -93,7 +93,7 @@ model PlaylistTrack {
 
 model ListeningEvent {
   id     Int    @id @default(autoincrement())
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
   playlistId    Int

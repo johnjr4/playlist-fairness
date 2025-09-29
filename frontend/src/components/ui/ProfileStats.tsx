@@ -4,6 +4,7 @@ import useQuery from "../../utils/api/useQuery";
 import * as Public from 'spotifair';
 import { msToMin } from "../../utils/unitConvert";
 import { useProtectedAuth } from "../../utils/AuthContext";
+import { toSpotifyLink } from "../../utils/spotifyLink";
 
 function ProfileStats() {
     const { data: fetchedStats, error, isLoading } = useQuery('/user/stats');
@@ -24,7 +25,7 @@ function ProfileStats() {
             </ProfileStat>
             <StatDivider />
             <ProfileStat category="Top playlist" tip={`${msToMin(topPlaylist.totalMs).toLocaleString()} minutes`}>
-                <Link to={`/u/${topPlaylist.id}`}>{topPlaylist.name}</Link>
+                <Link to={`/u/${topPlaylist.id}`} className="hover:brightness-70">{topPlaylist.name}</Link>
             </ProfileStat>
             <StatDivider />
             <ProfileStat category="Total listens" tip={`${msToMin(userStats.listens.totalMs).toLocaleString()} minutes`}>
@@ -33,7 +34,7 @@ function ProfileStats() {
             <StatDivider />
             {/* TODO: Add number of playlists that it's on */}
             <ProfileStat category="Top track" tip={`${topTrack.plays} listens`}>
-                {topTrack.name}
+                <a href={toSpotifyLink(topTrack.spotifyUri, 'track')} target='_blank' className="hover:brightness-70">{topTrack.name}</a>
             </ProfileStat>
         </div>
     )

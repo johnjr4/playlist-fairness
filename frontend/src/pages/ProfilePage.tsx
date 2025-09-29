@@ -4,11 +4,29 @@ import ProfilePicture from "../components/ui/ProfilePicture";
 import ProfileStats from "../components/ui/ProfileStats";
 import { useProtectedAuth } from "../utils/AuthContext";
 import Modal from "../components/ui/Modal";
+import { backendAuthAxios, backendAxios } from "../utils/axiosInstances";
 
 function ProfilePage() {
-    const { user } = useProtectedAuth();
+    const { user, setUser } = useProtectedAuth();
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    async function handleLogout() {
+        await backendAuthAxios.post('/logout');
+        setUser(null);
+    }
+
+    async function handleDelete() {
+        setIsDeleting(true);
+        const deletedUser = await backendAxios.delete(`/user/${user.id}`);
+        console.log("Deleted user");
+        console.log(deletedUser);
+        setIsDeleting(false);
+        setUser(null);
+    }
+
+    if (isDeleting) return <div>Deleting user...</div>
 
     return (
         <div className="flex flex-col mt-4 md:flex-row justify-center gap-2 md:gap-4 lg:gap-6 rounded-lg p-2mt-4 md:mt-6 lg:mt-10 mx-auto w-80 sm:w-[500px] md:w-2xl lg:w-4xl xl:w-[1000px]">
@@ -19,7 +37,7 @@ function ProfilePage() {
             <div className=" flex flex-col items-end gap-2 my-2 md:mr-15">
                 <ProfileStats />
                 <div className='flex justify-end gap-2 items-center'>
-                    <Button variant='secondary'>
+                    <Button variant='secondary' onClick={() => handleLogout()}>
                         Log Out
                     </Button>
                     <Button variant='danger' onClick={() => setIsDeleteModalOpen(true)}>
@@ -32,7 +50,8 @@ function ProfilePage() {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 message="This will delete all data associated with your profile. Are you sure you'd like to continue?"
-                onConfirm={() => alert('delete confirmed')}
+                secondaryMessage="Note: this will not delete anything from your Spotify account"
+                onConfirm={() => handleDelete()}
             />
         </div>
     );

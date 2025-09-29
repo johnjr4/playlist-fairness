@@ -9,6 +9,7 @@ interface ModalProps {
     onClose: () => void;
     onConfirm: () => void;
     message: string;
+    secondaryMessage?: string
 }
 
 function Modal({
@@ -16,6 +17,7 @@ function Modal({
     onClose,
     onConfirm,
     message,
+    secondaryMessage,
 }: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
 
@@ -33,15 +35,18 @@ function Modal({
                     ref={modalRef}
                     className="
                     flex flex-col items-center
-                    gap-2 xl:gap-4
+                    gap-2 lg:gap-4
                     bg-background-400
-                    text-textPrimary text-sm md:text-base
+                    text-textPrimary text-sm lg:text-base
                     rounded-md
                     shadow-xl shadow-background-700
-                    p-4 lg:p-6 max-w-xs sm:max-w-sm lg:max-w-lg"
+                    p-4 lg:p-6 max-w-xs sm:max-w-sm lg:max-w-xl"
                 >
                     <h2 className='font-bold text-center text-base lg:text-xl'>Warning</h2>
-                    <p className='w-[90%]'>{message}</p>
+                    <div className='w-[90%] flex flex-col gap-2 text-center my-2'>
+                        <p>{message}</p>
+                        {secondaryMessage && <p className='text-sm text-background-50'>{secondaryMessage}</p>}
+                    </div>
                     <div className="self-end flex justify-end gap-2">
                         <Button
                             onClick={onClose}
