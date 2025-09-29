@@ -30,3 +30,10 @@ declare module 'express-session' {
         user: SessionUser,
     }
 }
+
+// Nasty query business
+
+export interface NullableBigIntListeningStat {
+    plays: bigint | null,
+    totalMs: bigint | null,
+}

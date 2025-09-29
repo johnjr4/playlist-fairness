@@ -26,6 +26,7 @@ export type Playlist = Omit<PlaylistFull, 'tracks'>
 export type PlaylistHist = Playlist & {
     tracks: PlaylistTrackHist[]
 }
+export type PlaylistStat = Playlist & ListeningStat;
 
 export interface AlbumFull {
     id: number
@@ -60,6 +61,7 @@ export interface TrackFull {
 // Includes `artist` and `album`
 export type TrackWithMeta = Pick<TrackFull, 'id' | 'spotifyUri' | 'name' | 'artist' | 'album'>
 export type Track = Omit<TrackWithMeta, 'artist' | 'album'>
+export type TrackStat = Track & Pick<ListeningStat, 'plays'>;
 
 export interface PlaylistTrackFull {
     playlist: Playlist
@@ -134,4 +136,22 @@ export interface PlaylistSyncCounts {
     numTracks: number;
     numAlbums: number;
     numArtists: number;
+}
+
+export interface ListeningStat {
+    totalMs: number,
+    plays: number,
+}
+
+export interface UserStats {
+    playlists: {
+        total: number;
+        synced: number;
+        top: PlaylistStat | null;
+    };
+    listens: ListeningStat;
+    tracks: {
+        total: number;
+        top: TrackStat | null;
+    }
 }

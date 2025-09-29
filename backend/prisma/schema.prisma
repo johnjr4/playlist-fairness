@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client"
-  previewFeatures = ["relationJoins"]
+  previewFeatures = ["relationJoins", "typedSql"]
   engineType      = "client"
   output          = "../src/generated/prisma"
   moduleFormat    = "esm"

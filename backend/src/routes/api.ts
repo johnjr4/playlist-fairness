@@ -8,6 +8,7 @@ import { default as albumRouter } from './api/album.js'
 import { default as artistRouter } from './api/artist.js'
 import { default as trackRouter } from './api/track.js'
 import { default as playlistTrackRouter } from './api/playlistTrack.js'
+import { default as userRouter } from './api/user.js'
 
 const router = express.Router();
 
@@ -57,6 +58,7 @@ router.use('/playlists', playlistsRouter);
 router.use('/album', albumRouter);
 router.use('/artist', artistRouter);
 router.use('/track', trackRouter);
-router.use('/playlistTrack', playlistTrackRouter)
+router.use('/playlistTrack', playlistTrackRouter);
+router.use('/user', userRouter);
 
 export default router;

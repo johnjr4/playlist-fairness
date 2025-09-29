@@ -1,6 +1,7 @@
 import * as Public from "spotifair";
 import type { Album, Artist, ListeningEvent, Playlist, PlaylistTrack, Track, User } from "../../generated/prisma/client.js";
 import type { AlbumFull, ArtistFull, ListeningEventFull, PlaylistFull, PlaylistHist, PlaylistTrackFull, TrackFull, UserFull } from "./includeTypes.js";
+import type { NullableBigIntListeningStat } from "./helperTypes.js";
 
 export function userToPublic(user: User): Public.User {
     const { id, spotifyUri, spotifyId, displayName, imageUrl, trackingStartTime } = user;
@@ -80,4 +81,11 @@ export function listeningEventToPublic(listeningEvent: ListeningEvent): Public.L
 export function listeningEventToPublicFull(listeningEvent: ListeningEventFull): Public.ListeningEventFull {
     const { id, user, userId, playlistId, trackId, playlistTrack, playedAt } = listeningEvent;
     return { id, user, userId, playlistId, trackId, playlistTrack, playedAt };
+}
+
+export function nullableListeningStatToPublic(nullableListeningStat: NullableBigIntListeningStat): Public.ListeningStat {
+    const { plays, totalMs } = nullableListeningStat;
+    const fixedPlays = (plays ? Number(plays) : 0);
+    const fixedTotalMs = (totalMs ? Number(totalMs) : 0);
+    return { plays: fixedPlays, totalMs: fixedTotalMs };
 }
