@@ -13,9 +13,11 @@ function Navbar({ ref }: { ref: React.Ref<HTMLElement> }) {
             ${gradientClasses.navGradient} text-textPrimary`}
             ref={ref}
         >
-            <NavbarLink to='/u/playlists'>
-                Home Page
-            </NavbarLink>
+            <div>
+                <NavbarLink to='/u/playlists'>
+                    Home Page
+                </NavbarLink>
+            </div>
             <div className="flex items-center gap-4 bg-background-700">
                 <ProfileMenu />
             </div>
