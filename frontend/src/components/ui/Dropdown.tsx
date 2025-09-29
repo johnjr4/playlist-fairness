@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AiFillCaretDown } from 'react-icons/ai';
 import hoverClasses from '../../styling/hovereffect.module.css'
 import useClickOutside from '../../utils/useClickOutside';
+import Button from './Button';
 
 type DropdownProps = {
     onLogout?: () => void;
@@ -34,22 +35,23 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary' }: 
     return (
         <div className="relative inline-block text-left bg-inherit cursor-pointer" ref={dropdownRef}>
             {/* Main button component */}
-            <button
+            <Button
+                variant='secondary'
                 onClick={() => setIsOpen((prev) => !prev)}
                 className={`flex items-center px-3 py-1 gap-1.5 ${color} rounded-sm ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
             >
                 {children}
                 {hasCaret && <AiFillCaretDown size='12' color='var(--text-primary)' />}
-            </button>
+            </Button>
 
             {/* Dropdown menu */}
             {isOpen && (
-                <div className={`absolute right-0 mt-1.5 w-40 ${color} rounded-sm outline-2 outline-background-500 shadow-lg z-50 `}>
+                <div className={`absolute right-0 mt-1.5 w-30 md:w-40 ${color} rounded-sm outline-2 outline-background-500 shadow-lg z-50 md:text-base`}>
                     {items.map((item, idx) => (
                         <button
                             key={idx}
                             onClick={() => handleItemClick(item.onClick)}
-                            className={`block w-full text-left px-4 py-2 rounded-sm text-sm ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
+                            className={`block w-full text-left px-4 py-2 rounded-sm text-xs md:text-sm ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
                         >
                             {item.label}
                         </button>

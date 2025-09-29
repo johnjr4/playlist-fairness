@@ -21,9 +21,7 @@ function Button({ children, variant = 'primary', onClick, className }: ButtonPro
             onClick={onClick}
             className={`text-xs md:text-sm lg:text-base px-2 py-1 lg:px-4 lg:py-1.5 rounded-md font-medium cursor-pointer ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
         >
-            <div className="brightness-100">
-                {children}
-            </div>
+            {children}
         </button>
     )
 }
