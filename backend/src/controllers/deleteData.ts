@@ -28,7 +28,7 @@ export async function deleteUserAndOwnedData(userId: string): Promise<User | nul
 
 // Delete all playlists in ids specified
 // Returns num playlists deleted
-export async function deletePlaylists(playlistIds: number[]): Promise<number> {
+export async function deleteUnsyncedPlaylists(playlistIds: number[]): Promise<number> {
     if (playlistIds.length == 0) {
         console.warn("Empty array of playlist ids. No deletion will occur");
         return 0;
@@ -39,13 +39,14 @@ export async function deletePlaylists(playlistIds: number[]): Promise<number> {
                 id: {
                     in: playlistIds,
                 },
+                syncEnabled: false,
             },
         });
         if (deletedPlaylsits.count !== playlistIds.length) {
             if (deletedPlaylsits.count > playlistIds.length) {
                 console.error("Deleted more playlists than ids given (somehow)");
             } else {
-                console.warn("Deleted fewer playlists than ids given. Did you pass in ids that were already deleted?");
+                console.warn("Deleted fewer playlists than ids given. Did you pass in ids that were already deleted? Synced playlists?");
             }
         }
         return deletedPlaylsits.count;

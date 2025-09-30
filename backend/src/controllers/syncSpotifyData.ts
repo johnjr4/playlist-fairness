@@ -4,7 +4,7 @@ import type { Playlist, PlaylistTrack, Track, User } from "../generated/prisma/c
 import * as Spotify from "../utils/types/spotifyTypes.js";
 import type { Axios, AxiosInstance } from "axios";
 import { getUserPlaylists } from "./playlistsController.js";
-import { deletePlaylists, unsyncPlaylist } from "./deleteData.js";
+import { deleteUnsyncedPlaylists, unsyncPlaylist } from "./deleteData.js";
 import pLimit from "p-limit";
 import { SPOTIFY_CONCURRENCY_LIMIT } from "../utils/envLoader.js";
 import type { BundledSpotifyPlaylistTracks } from "../utils/types/helperTypes.js";
@@ -84,7 +84,8 @@ async function upsertPlaylistsWithoutData(user: User) {
         // Delete playlists that the Spotify user no longer has
         if (toDelete.length > 0) {
             // No await because these playlists are effectively irrelevant to other calls
-            deletePlaylists(toDelete);
+            const numDeleted = await deleteUnsyncedPlaylists(toDelete);
+            console.log(`Deleted ${numDeleted} playlists`);
         }
 
         // Tracking array
@@ -93,6 +94,7 @@ async function upsertPlaylistsWithoutData(user: User) {
         const toUpsert = toInsert.concat(toUpdate);
         for (const playlist of toUpsert) {
             // Upsert playlist into database
+            console.log(`Upserting ${playlist.name}`);
             const upsertedPlaylist = await prisma.playlist.upsert({
                 where: {
                     spotifyUri: playlist.uri
@@ -101,13 +103,13 @@ async function upsertPlaylistsWithoutData(user: User) {
                     name: playlist.name,
                     coverUrl: selectProperImage(playlist.images),
                     spotifySnapshotId: playlist.snapshot_id,
-                    syncCompleted: false,
+                    syncCompleted: true,
                 },
                 create: {
                     spotifyUri: playlist.uri,
                     spotifyId: playlist.id,
                     spotifySnapshotId: playlist.snapshot_id,
-                    syncCompleted: false,
+                    syncCompleted: true,
                     name: playlist.name,
                     coverUrl: selectProperImage(playlist.images),
                     owner: {
@@ -156,11 +158,9 @@ async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) 
             const data = res.data;
             if (data.total > 0) {
                 playlists = playlists.concat(data.items);
-                morePlaylists = data.next != null;
                 offset += maxLimit;
-            } else {
-                morePlaylists = false;
             }
+            morePlaylists = data.next != null;
         }
         console.log("Spotify playlists obtained");
         return playlists.filter(playlist => !playlist.collaborative && playlist.owner.uri == user.spotifyUri);
@@ -228,7 +228,10 @@ function categorizePlaylists(spotifyPlaylists: (Spotify.SimplifiedPlaylistObject
     for (const [spotifyId, dbPlaylist] of dbMap.entries()) {
         if (!spotifyMap.has(spotifyId)) {
             // Case 1: Playlist exists in DB but not Spotify -> Delete from db
-            toDelete.push(dbPlaylist.id);
+            if (!dbPlaylist.syncEnabled) {
+                // Limit to only unsynced playlists because one time Spotify fed me fewer playlists than I had and it deleted them all
+                toDelete.push(dbPlaylist.id);
+            }
         } else {
             const spotifyPlaylist = spotifyMap.get(spotifyId)!; // Assertion because we checked if spotifyMap has it
             if (spotifyPlaylist.snapshot_id !== dbPlaylist.spotifySnapshotId || !dbPlaylist.syncCompleted) {
@@ -289,8 +292,9 @@ export async function disableAndDeletePlaylistSync(playlist: Playlist): Promise<
 }
 
 async function upsertSpotifyDataFromPlaylist(playlist: Playlist, spotifyAxios: AxiosInstance): Promise<PlaylistSyncCounts> {
+    await markPlaylistSynced(playlist, false);
     const playlistSyncCounts = await getAndUpsertPlaylistTracks(playlist, spotifyAxios);
-    await markPlaylistSynced(playlist);
+    await markPlaylistSynced(playlist, true);
     return playlistSyncCounts;
 }
 
@@ -312,14 +316,14 @@ async function upsertSpotifyDataFromPlaylists(upsertedPlaylists: Array<Playlist>
     }
 }
 
-async function markPlaylistSynced(playlist: Playlist) {
+async function markPlaylistSynced(playlist: Playlist, isSynced: boolean) {
     try {
         await prisma.playlist.update({
             where: {
                 id: playlist.id,
             },
             data: {
-                syncCompleted: true,
+                syncCompleted: isSynced,
             },
         })
     } catch (err) {
