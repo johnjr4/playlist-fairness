@@ -10,7 +10,7 @@ type ButtonProps = {
 function Button({ children, variant = 'primary', onClick, className }: ButtonProps) {
 
     const variantStyles = {
-        primary: `bg-primary border-primary text-textSecondary ${hoverClasses.hover3DPrimary}`,
+        primary: `bg-primary border-primary text-textPrimary ${hoverClasses.hover3DPrimary}`,
         secondary: `bg-transparent border-transparent text-textPrimary ${hoverClasses.hover3D}`,
         danger: `bg-red-900 border-red-900 text-white ${hoverClasses.hover3DDanger}`,
     };

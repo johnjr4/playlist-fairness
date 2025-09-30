@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { AiFillCaretDown } from 'react-icons/ai';
 import hoverClasses from '../../styling/hovereffect.module.css'
 import useClickOutside from '../../utils/useClickOutside';
@@ -18,7 +18,7 @@ export type DropdownItem = {
     onClick: () => void;
 };
 
-function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary' }: DropdownProps) {
+function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700' }: DropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     // Will simply maintain a reference to the 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -41,7 +41,7 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-secondary' }: 
                 className={`flex items-center px-3 py-1 gap-1.5 ${color} rounded-sm ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
             >
                 {children}
-                {hasCaret && <AiFillCaretDown size='12' color='var(--text-primary)' />}
+                {hasCaret && <AiFillCaretDown size='12' color='var(--textPrimary)' />}
             </Button>
 
             {/* Dropdown menu */}

@@ -4,13 +4,9 @@
 @theme {
   --font-mont: "Montserrat", sans-serif;
   
-  --color-bgCol: #111827;
-  /* Looks good on bgCol */
-  --color-bgHighlight: #1c2a49;
-  /* Looks good on bgCol and bgHighlight */
+  /* Looks good on background and bgHighlight */
   --color-textPrimary: #f9fafb; 
-  /* Looks good on primary and secondary */
-  --color-textSecondary: #f9fafb;
+  
   --color-primary: #225a2c;
   /* Looks good on primary */
   --color-secondary: #24854c;

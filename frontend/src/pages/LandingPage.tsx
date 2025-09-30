@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import Button from "../components/ui/Button";
 import { useAuth } from "../utils/AuthContext";
+import gradientClasses from '../styling/gradient.module.css';
 
 function LandingPage() {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ function LandingPage() {
     }
 
     return (
-        <div className="flex flex-col justify-center items-center h-full text-textPrimary bg-bgCol">
+        <div className={`flex flex-col justify-center items-center h-full text-textPrimary ${gradientClasses.bgGradient}`}>
             <h1 className="font-bold text-7xl p-6">Spotifair</h1>
             <Button onClick={onClick} variant='primary'>
                 Get Started
