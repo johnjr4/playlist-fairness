@@ -1,6 +1,6 @@
-import { useQueryGeneric } from "../../utils/api/useQuery";
-import loadingCoverUrl from '../../assets/covers/loading_cover.png'
-import errorCoverUrl from '../../assets/covers/error_cover.png'
+import loadingCoverUrl from '../../assets/covers/loading_cover.svg'
+import ErrorImage from "./ErrorImage";
+import { useState } from "react";
 
 interface CoverArtProps {
     coverUrl: string | null,
@@ -10,24 +10,27 @@ interface CoverArtProps {
 }
 
 function CoverArt({ coverUrl, alt = 'Cover Image', size = 'w-48', className }: CoverArtProps) {
-    let usedUrl = loadingCoverUrl;
-    if (!coverUrl) {
-        usedUrl = errorCoverUrl;
-    } else {
-        const { error, isLoading } = useQueryGeneric(coverUrl);
-        usedUrl = isLoading ? loadingCoverUrl : (!error ? coverUrl! : errorCoverUrl);
-    }
-
+    const [status, setStatus] = useState<'loading' | 'error' | 'loaded'>(!coverUrl ? 'error' : 'loading');
 
     return (
         <div className={`aspect-square ${size} overflow-hidden shadow-md shadow-background-400 ${className}`}>
-            <img
-                src={usedUrl}
-                alt={alt}
-                className="w-full h-full object-cover"
-            />
+            {status === 'loading' && <img src={loadingCoverUrl} alt={alt} className="w-full h-full" />}
+            {status !== 'error'
+                ? <img
+                    src={coverUrl!} // Can assert because of initial status state
+                    alt={alt}
+                    className="w-full h-full object-cover"
+                    onLoad={() => setStatus('loaded')}
+                    onError={() => setStatus('error')}
+                />
+                : <ErrorCover />
+            }
         </div>
     )
+}
+
+function ErrorCover() {
+    return <ErrorImage iconSize="text-4xl md:text-5xl lg:text-7xl" className="w-full h-full bg-background-500" />
 }
 
 export default CoverArt;

@@ -28,7 +28,7 @@ export default function useQuery(path: string, dependencies = []) {
                 throw new Error(errRes.data.error.message);
             }
             // Successful response means this is our data
-            const apiData = await res.data.data;
+            const apiData = res.data.data;
             setData(apiData);
             // Set error to null in case there was a previous error in a race condition
             // TODO: Removed this because it seemed like a hacky solution to ignoring setIsLoading on canceled, but should it be here as a safeguard anyway?
@@ -96,7 +96,7 @@ export function useQueryGeneric(url: string | null, config: AxiosRequestConfig =
             setError(null);
 
             try {
-                if (url == null) {
+                if (url === null) {
                     setData(null);
                     setIsLoading(false);
                     throw new Error("URL Is null");
@@ -120,8 +120,7 @@ export function useQueryGeneric(url: string | null, config: AxiosRequestConfig =
                 }
 
                 // Successful response means this is our data
-                const apiData = await res.data.data;
-                setData(apiData);
+                setData(res.data);
                 // Set error to null in case there was a previous error in a race condition
                 // TODO: Removed this because it seemed like a hacky solution to ignoring setIsLoading on canceled, but should it be here as a safeguard anyway?
                 // setError(null);
