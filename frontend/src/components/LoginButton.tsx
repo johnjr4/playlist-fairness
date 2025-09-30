@@ -1,27 +1,16 @@
 import Button from "./ui/Button";
-import { createNewPKCE, setPKCEVals } from "../utils/pkce";
-import { getAuthServerUrl } from "../utils/auth/initiateOAuth";
 import { useAuth } from "../utils/AuthContext";
+import { handleLogin } from "../utils/handleLogin";
 
-function LoginButton() {
+function LoginButton({ className }: { className?: string }) {
     const { user } = useAuth();
     let isLoggedIn = false;
     if (user) {
         isLoggedIn = true;
     }
 
-    async function handleLogin() {
-        // Initiate PKCE
-        const { verifier, challenge, state } = await createNewPKCE();
-        setPKCEVals(verifier, state);
-        // Get auth server URL (with parameters)
-        const spotifyAuthUrl = getAuthServerUrl(challenge, state);
-        // Navigate to it
-        window.location.href = spotifyAuthUrl;
-    }
-
     return (
-        <Button onClick={isLoggedIn ? undefined : handleLogin} variant={isLoggedIn ? 'secondary' : 'primary'}>
+        <Button onClick={isLoggedIn ? undefined : handleLogin} variant={isLoggedIn ? 'secondary' : 'primary'} className={className}>
             {isLoggedIn ? 'Logged In' : 'Log In'}
         </Button>
     )

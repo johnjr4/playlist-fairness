@@ -7,7 +7,6 @@ import AuthLayout from './layouts/AuthLayout.tsx'
 import { AuthProvider } from './layouts/AuthProvider.tsx'
 import MainLayout from './layouts/MainLayout.tsx'
 import HomePage from './pages/HomePage.tsx'
-import LoginPage from './pages/auth/LoginPage.tsx'
 import CallbackPage from './pages/auth/CallbackPage.tsx'
 import ProtectedRoute from './layouts/ProtectedRoute.tsx'
 import LandingPage from './pages/LandingPage.tsx'
@@ -37,7 +36,6 @@ const router = createBrowserRouter([
     path: '/auth',
     Component: AuthLayout,
     children: [
-      { path: 'login', Component: LoginPage },
       { path: 'callback', Component: CallbackPage }
     ]
   }

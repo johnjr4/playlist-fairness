@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import Button from "../components/ui/Button";
 import { useAuth } from "../utils/AuthContext";
 import gradientClasses from '../styling/gradient.module.css';
+import { handleLogin } from "../utils/handleLogin";
 
 function LandingPage() {
     const navigate = useNavigate();
@@ -11,7 +12,7 @@ function LandingPage() {
         if (user) {
             navigate('/u/playlists');
         } else {
-            navigate('/auth/login');
+            handleLogin();
         }
     }
 
