@@ -24,9 +24,9 @@ function PlaylistPage() {
 
     async function handleSyncClick(enabled: boolean) {
         setIsSyncing(true);
-        const playlistRes = await backendAxios.post(`/playlists/${playlistId}/sync`, { enabled: enabled });
+        // TODO: error response handling
+        await backendAxios.post(`/playlists/${playlistId}/sync`, { enabled: enabled });
         setIsSyncing(false);
-        console.log(playlistRes.data.data);
         refetch();
     }
 
