@@ -3,10 +3,9 @@ import Button from "./ui/Button";
 
 interface SearchBarProps {
     setSearchString: (searchString: string) => void;
-    className?: string,
 }
 
-function SearchBar({ setSearchString, className }: SearchBarProps) {
+function SearchBar({ setSearchString }: SearchBarProps) {
     const [localQuery, setLocalQuery] = useState('');
 
     function setQuery(newQuery: string) {
