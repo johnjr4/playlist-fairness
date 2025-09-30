@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="340" height="340">
-  <circle cx='170' cy='170' r='170' fill='white'/>
-  <path fill="#DDD" d="M 57 287 q 27 -35, 67 -35 h 92 q 40 0,67 35 a 164 164, 0, 0, 1, -226 0"/>
-  <circle fill='#DDD' cx='170' cy='170' r='70' />
+  <circle cx='170' cy='170' r='170' fill='#080a12'/>
+  <path fill="#1d2b43" d="M 57 287 q 27 -35, 67 -35 h 92 q 40 0,67 35 a 164 164, 0, 0, 1, -226 0"/>
+  <circle fill='#1d2b43' cx='170' cy='170' r='70' />
 </svg>

@@ -21,7 +21,7 @@ function ProfileMenu() {
     return (
         <Dropdown items={dropdownItems} hasCaret={false} color='bg-inherit' hoverColor="red">
             <div>{user.displayName}</div>
-            <ProfilePicture size="w-6 md:w-10" />
+            <ProfilePicture size="w-6 md:w-10" className="outline-2 outline-gray-700" />
         </Dropdown>
     )
 }
