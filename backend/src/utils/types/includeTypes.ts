@@ -1,135 +1,132 @@
 import type { Prisma } from "../../generated/prisma/client.js";
 import prisma from "../prismaClient.js";
 
-export type TrackWithMeta = Prisma.TrackGetPayload<{
+const trackBasicFields = {
+    id: true,
+    spotifyUri: true,
+    name: true,
+    durationMs: true,
+    artistId: true,
+} as const;
+export const trackWithMetaArgs = {
     select: {
-        id: true,
-        spotifyUri: true,
-        name: true,
-        durationMs: true,
+        ...trackBasicFields,
         album: true,
         artist: true,
     }
-}>
+} as const;
+export type TrackWithMeta = Prisma.TrackGetPayload<typeof trackWithMetaArgs>
 
-export type PlaylistTrackWithMeta = Prisma.PlaylistTrackGetPayload<{
+
+const playlistTrackBasicFields = {
+    playlistPosition: true,
+    currentlyOnPlaylist: true,
+    addedToPlaylistTime: true,
+    trackingStartTime: true,
+    trackingStopTime: true,
+} as const;
+export const playlistTrackWithMetaArgs = {
     select: {
-        playlistPosition: true,
-        currentlyOnPlaylist: true,
-        addedToPlaylistTime: true,
-        trackingStartTime: true,
-        trackingStopTime: true,
-        track: {
-            select: {
-                id: true,
-                spotifyUri: true,
-                name: true,
-                durationMs: true,
-                album: true,
-                artist: true,
-            }
-        }
+        ...playlistTrackBasicFields,
+        track: trackWithMetaArgs,
     }
-}>
+} as const;
+export type PlaylistTrackWithMeta = Prisma.PlaylistTrackGetPayload<typeof playlistTrackWithMetaArgs>
 
-export type PlaylistTrackHist = Prisma.PlaylistTrackGetPayload<{
+export const playlistTrackHistArgs = {
     select: {
-        playlistPosition: true,
-        currentlyOnPlaylist: true,
-        addedToPlaylistTime: true,
-        trackingStartTime: true,
-        trackingStopTime: true,
-        track: {
-            select: {
-                id: true,
-                spotifyUri: true,
-                name: true,
-                durationMs: true,
-                album: true,
-                artist: true,
-            },
-        },
+        ...playlistTrackBasicFields,
+        track: trackWithMetaArgs,
         listeningEvents: {
             select: {
                 playedAt: true,
             },
         },
     }
-}>
+} as const;
+export type PlaylistTrackHist = Prisma.PlaylistTrackGetPayload<typeof playlistTrackHistArgs>
 
-export type UserFull = Prisma.UserGetPayload<{
+export const userFullArgs = {
     include: {
         playlists: true,
         listeningHistory: true,
     }
-}>
+}
+export type UserFull = Prisma.UserGetPayload<typeof userFullArgs>
 
-export type PlaylistFull = Prisma.PlaylistGetPayload<{
+
+export const playlistFullArgs = {
     include: {
         tracks: {
-            select: {
-                track: {
-                    include: {
-                        album: true,
-                        artist: true,
-                    }
-                }
-                playlistPosition: true,
-                currentlyOnPlaylist: true,
-                addedToPlaylistTime: true,
-                trackingStartTime: true,
-                trackingStopTime: true,
-            },
+            ...playlistTrackWithMetaArgs,
+            orderBy: {
+                playlistPosition: "asc",
+            }
         }
-    }
-}>
+    },
+} as const;
+export type PlaylistFull = Prisma.PlaylistGetPayload<typeof playlistFullArgs>;
 
-export type PlaylistHist = Prisma.PlaylistGetPayload<{
+
+export const playlistHistArgs = {
     include: {
         tracks: {
+            ...playlistTrackHistArgs,
+            orderBy: {
+                playlistPosition: "asc",
+            }
+        }
+    },
+} as const;
+export type PlaylistHist = Prisma.PlaylistGetPayload<typeof playlistHistArgs>;
+
+const albumBasicFields = {
+    id: true,
+    spotifyUri: true,
+    name: true,
+    coverUrl: true,
+    artistId: true,
+}
+export const albumFullArgs = {
+    select: {
+        ...albumBasicFields,
+        tracks: {
+            select: trackBasicFields,
+        },
+        artist: true,
+    }
+} as const;
+export type AlbumFull = Prisma.AlbumGetPayload<typeof albumFullArgs>;
+
+export const artistFullArgs = {
+    include: {
+        tracks: {
+            select: trackBasicFields
+        },
+        albums: {
+            select: albumBasicFields
+        },
+    }
+} as const;
+export type ArtistFull = Prisma.ArtistGetPayload<typeof artistFullArgs>
+
+
+export const trackFullArgs = {
+    include: {
+        artist: true,
+        album: {
+            select: albumBasicFields,
+        },
+        playlistTracks: {
             select: {
-                track: {
-                    include: {
-                        album: true,
-                        artist: true,
-                    }
-                }
-                playlistPosition: true,
-                currentlyOnPlaylist: true,
-                addedToPlaylistTime: true,
-                trackingStartTime: true,
-                trackingStopTime: true,
-                listeningEvents: {
-                    select: {
-                        playedAt: true,
-                    }
-                },
-            },
+                ...playlistTrackBasicFields,
+                playlistId: true,
+                trackId: true,
+            }
         }
     }
-}>
-
-export type AlbumFull = Prisma.AlbumGetPayload<{
-    include: {
-        tracks: true,
-        artist: true,
-    }
-}>
-
-export type ArtistFull = Prisma.ArtistGetPayload<{
-    include: {
-        tracks: true,
-        albums: true,
-    }
-}>
-
-export type TrackFull = Prisma.TrackGetPayload<{
-    include: {
-        artist: true,
-        album: true,
-        playlistTracks: true,
-    }
-}>
+} as const;
+export type TrackFull = Prisma.TrackGetPayload<typeof trackFullArgs>
 
 export type PlaylistTrackFull = Prisma.PlaylistTrackGetPayload<{
     include: {

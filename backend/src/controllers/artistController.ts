@@ -1,4 +1,5 @@
 import prisma from "../utils/prismaClient.js";
+import { artistFullArgs } from "../utils/types/includeTypes.js";
 
 export async function getArtist(artistId: number) {
     try {
@@ -20,10 +21,7 @@ export async function getArtistFull(artistId: number) {
             where: {
                 id: artistId,
             },
-            include: {
-                tracks: true,
-                albums: true,
-            }
+            ...artistFullArgs,
         });
         return album;
     } catch (err) {

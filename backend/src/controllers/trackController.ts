@@ -1,6 +1,7 @@
 import { queryTopTrack } from "../generated/prisma/sql.js";
 import prisma from "../utils/prismaClient.js";
 import * as Public from "spotifair";
+import { trackFullArgs } from "../utils/types/includeTypes.js";
 
 export async function getTrack(trackId: number) {
     try {
@@ -65,17 +66,7 @@ export async function getTrackFull(trackId: number, userId: string) {
             where: {
                 id: trackId,
             },
-            include: {
-                album: true,
-                artist: true,
-                playlistTracks: {
-                    where: {
-                        playlist: {
-                            ownerId: userId,
-                        }
-                    }
-                },
-            }
+            ...trackFullArgs,
         });
         return track;
     } catch (err) {
