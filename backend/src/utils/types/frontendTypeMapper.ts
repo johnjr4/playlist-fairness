@@ -1,86 +1,107 @@
 import * as Public from "spotifair";
 import type { Album, Artist, ListeningEvent, Playlist, PlaylistTrack, Track, User } from "../../generated/prisma/client.js";
-import type { AlbumFull, ArtistFull, ListeningEventFull, PlaylistFull, PlaylistHist, PlaylistTrackFull, TrackFull, UserFull } from "./includeTypes.js";
+import type { AlbumFull, ArtistFull, ListeningEventFull, PlaylistFull, PlaylistHist, PlaylistTrackFull, PlaylistTrackHist, PlaylistTrackWithMeta, TrackFull, TrackWithMeta, UserFull } from "./includeTypes.js";
 import type { NullableBigIntListeningStat } from "./helperTypes.js";
 
 export function userToPublic(user: User): Public.User {
-    const { id, spotifyUri, spotifyId, displayName, imageUrl, trackingStartTime } = user;
-    return { id, spotifyUri, spotifyId, displayName, imageUrl, trackingStartTime };
+    const { trackingStartTime } = user;
+    return { ...user, trackingStartTime: trackingStartTime.toISOString() };
 }
 
 export function userToPublicFull(user: UserFull): Public.UserFull {
-    const { id, spotifyUri, spotifyId, displayName, imageUrl, playlists, listeningHistory, trackingStartTime } = user;
-    return { id, spotifyUri, spotifyId, displayName, imageUrl, playlists, listeningHistory, trackingStartTime };
+    const { playlists, listeningHistory } = user;
+    const convertedHistory = listeningHistory.map(le => listeningEventToPublic(le));
+    return { ...user, ...userToPublic(user), playlists, listeningHistory: convertedHistory };
 }
 
 export function playlistToPublic(playlist: Playlist): Public.Playlist {
-    const { id, name, coverUrl, spotifyId, spotifyUri, ownerId, syncEnabled } = playlist;
-    return { id, name, coverUrl, spotifyId, spotifyUri, ownerId, syncEnabled };
+    return playlist;
 }
 
 export function playlistToPublicFull(playlist: PlaylistFull): Public.PlaylistFull {
-    const { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks, syncEnabled } = playlist;
-    return { id, name, coverUrl, spotifyId, spotifyUri, ownerId, tracks, syncEnabled };
+    const { tracks } = playlist;
+    const convertedTracks = tracks.map(t => playlistTrackToPublicWithMeta(t));
+    return { ...playlist, tracks: convertedTracks };
 }
 
 export function playlistToPublicHist(playlist: PlaylistHist): Public.PlaylistHist {
-    const { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks, syncEnabled } = playlist;
-    return { name, id, spotifyUri, spotifyId, coverUrl, ownerId, tracks, syncEnabled };
+    const { tracks } = playlist;
+    const convertedTracks = tracks.map(t => playlistTrackToPublicHist(t));
+    return { ...playlist, tracks: convertedTracks };
 }
 
 
 export function albumToPublic(album: Album): Public.Album {
-    const { id, spotifyUri, name, coverUrl } = album;
-    return { id, spotifyUri, name, coverUrl };
+    return album;
 }
 
 export function albumToPublicFull(album: AlbumFull): Public.AlbumFull {
-    const { id, spotifyUri, name, coverUrl, tracks, artist, artistId } = album;
-    return { id, spotifyUri, name, coverUrl, tracks, artist, artistId };
+    return album;
 }
 
 
 export function artistToPublic(artist: Artist): Public.Artist {
-    const { id, spotifyUri, name } = artist;
-    return { id, spotifyUri, name };
+    return artist;
 }
 
 export function artistToPublicFull(artist: ArtistFull): Public.ArtistFull {
-    const { id, spotifyUri, name, tracks, albums } = artist;
-    return { id, spotifyUri, name, tracks, albums };
+    return artist;
 }
 
 
 export function trackToPublic(track: Track): Public.Track {
-    const { id, spotifyUri, name } = track;
-    return { id, spotifyUri, name };
+    return track;
 }
 
 export function trackToPublicFull(track: TrackFull): Public.TrackFull {
-    const { id, spotifyUri, name, artist, artistId, album, albumId, playlistTracks } = track;
-    return { id, spotifyUri, name, artist, artistId, album, albumId, playlistTracks };
+    const { playlistTracks } = track;
+    const convertedTracks = playlistTracks.map(pt => playlistTrackToPublic(pt));
+    return { ...track, playlistTracks: convertedTracks };
 }
 
 
+function convertPlaylistTrackTimestamps(playlistTrackTimestamps: {
+    trackingStartTime: Date,
+    trackingStopTime: Date | null,
+    addedToPlaylistTime: Date | null,
+}) {
+    const { trackingStartTime, trackingStopTime, addedToPlaylistTime } = playlistTrackTimestamps;
+    return {
+        trackingStartTime: trackingStartTime.toISOString(),
+        trackingStopTime: trackingStopTime ? trackingStopTime?.toISOString() : null,
+        addedToPlaylistTime: addedToPlaylistTime ? addedToPlaylistTime?.toISOString() : null,
+    }
+}
+
 export function playlistTrackToPublic(playlistTrack: PlaylistTrack): Public.PlaylistTrack {
-    const { playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime } = playlistTrack;
-    return { playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime };
+    return { ...playlistTrack, ...convertPlaylistTrackTimestamps(playlistTrack) };
 }
 
 export function playlistTrackToPublicFull(playlistTrack: PlaylistTrackFull): Public.PlaylistTrackFull {
-    const { playlist, playlistId, track, trackId, playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime, listeningEvents } = playlistTrack;
-    return { playlist, playlistId, track, trackId, playlistPosition, currentlyOnPlaylist, addedToPlaylistTime, trackingStartTime, trackingStopTime, listeningEvents };
+    const { listeningEvents } = playlistTrack;
+    const convertedListeningEvents = listeningEvents.map(le => listeningEventToPublic(le));
+    return { ...playlistTrack, ...convertPlaylistTrackTimestamps(playlistTrack), listeningEvents: convertedListeningEvents };
+}
+
+export function playlistTrackToPublicWithMeta(playlistTrack: PlaylistTrackWithMeta): Public.PlaylistTrackWithMeta {
+    return { ...playlistTrack, ...convertPlaylistTrackTimestamps(playlistTrack) };
+}
+
+export function playlistTrackToPublicHist(playlistTrack: PlaylistTrackHist): Public.PlaylistTrackHist {
+    const { listeningEvents } = playlistTrack;
+    const convertedListeningEvents = listeningEvents.map(le => ({ playedAt: le.playedAt.toISOString() }));
+    return { ...playlistTrack, ...convertPlaylistTrackTimestamps(playlistTrack), listeningEvents: convertedListeningEvents };
 }
 
 
 export function listeningEventToPublic(listeningEvent: ListeningEvent): Public.ListeningEvent {
-    const { id, playlistId, trackId, playedAt } = listeningEvent;
-    return { id, playlistId, trackId, playedAt };
+    const { playedAt } = listeningEvent;
+    return { ...listeningEvent, playedAt: playedAt.toISOString() };
 }
 
 export function listeningEventToPublicFull(listeningEvent: ListeningEventFull): Public.ListeningEventFull {
-    const { id, user, userId, playlistId, trackId, playlistTrack, playedAt } = listeningEvent;
-    return { id, user, userId, playlistId, trackId, playlistTrack, playedAt };
+    const { user, playlistTrack } = listeningEvent;
+    return { ...listeningEvent, ...listeningEventToPublic(listeningEvent), user: userToPublic(user), playlistTrack: playlistTrackToPublic(playlistTrack) };
 }
 
 export function nullableListeningStatToPublic(nullableListeningStat: NullableBigIntListeningStat): Public.ListeningStat {

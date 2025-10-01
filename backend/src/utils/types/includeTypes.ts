@@ -6,6 +6,7 @@ export type TrackWithMeta = Prisma.TrackGetPayload<{
         id: true,
         spotifyUri: true,
         name: true,
+        durationMs: true,
         album: true,
         artist: true,
     }
@@ -23,10 +24,36 @@ export type PlaylistTrackWithMeta = Prisma.PlaylistTrackGetPayload<{
                 id: true,
                 spotifyUri: true,
                 name: true,
+                durationMs: true,
                 album: true,
                 artist: true,
             }
         }
+    }
+}>
+
+export type PlaylistTrackHist = Prisma.PlaylistTrackGetPayload<{
+    select: {
+        playlistPosition: true,
+        currentlyOnPlaylist: true,
+        addedToPlaylistTime: true,
+        trackingStartTime: true,
+        trackingStopTime: true,
+        track: {
+            select: {
+                id: true,
+                spotifyUri: true,
+                name: true,
+                durationMs: true,
+                album: true,
+                artist: true,
+            },
+        },
+        listeningEvents: {
+            select: {
+                playedAt: true,
+            },
+        },
     }
 }>
 

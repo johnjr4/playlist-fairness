@@ -52,6 +52,7 @@ export interface TrackFull {
     id: number
     spotifyUri: string
     name: string
+    durationMs: number,
     artist: Artist
     artistId: number
     album: Album
@@ -59,7 +60,7 @@ export interface TrackFull {
     playlistTracks: PlaylistTrack[]
 }
 // Includes `artist` and `album`
-export type TrackWithMeta = Pick<TrackFull, 'id' | 'spotifyUri' | 'name' | 'artist' | 'album'>
+export type TrackWithMeta = Pick<TrackFull, 'id' | 'spotifyUri' | 'name' | 'artist' | 'album' | 'durationMs'>
 export type Track = Omit<TrackWithMeta, 'artist' | 'album'>
 export type TrackStat = Track & Pick<ListeningStat, 'plays'>;
 
@@ -70,9 +71,9 @@ export interface PlaylistTrackFull {
     trackId: number
     playlistPosition: number
     currentlyOnPlaylist: boolean
-    addedToPlaylistTime: Date | null
-    trackingStartTime: Date
-    trackingStopTime: Date | null
+    addedToPlaylistTime: string | null
+    trackingStartTime: string
+    trackingStopTime: string | null
     listeningEvents: ListeningEvent[]
 }
 // Includes `track` with album and artist
@@ -94,7 +95,7 @@ export interface ListeningEventFull {
     trackId: number
     playlistTrack: PlaylistTrack
 
-    playedAt: Date
+    playedAt: string
 }
 export type ListeningEvent = Omit<ListeningEventFull, 'user' | 'userId' | 'playlistTrack'>
 export type ListeningEventHist = Pick<ListeningEvent, 'playedAt'>
