@@ -1,16 +1,23 @@
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../../utils/AuthContext";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { backendAuthAxios } from "../../utils/axiosInstances";
 import { type HTTPResponseSuccess } from "spotifair";
 import { deletePCKEVals, getPKCEVals } from "../../utils/pkce";
 import { REDIRECT_URI } from "../../utils/envLoader";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../../styling/loading.module.css';
+import Button from "../../components/ui/Button";
+import { handleLogin } from "../../utils/handleLogin";
+
+interface CallbackError {
+    message: string,
+}
 
 function CallbackPage() {
     const [searchParams] = useSearchParams();
     const { user: stateUser, setUser, setLoading } = useAuth();
+    const [error, setError] = useState<CallbackError | null>(null); // TODO: Replace with typed object and display error that went wrong
     // Will prevent error from double API call in StrictMode
     // TODO: Is this a hack?
     const hasRun = useRef(false);
@@ -29,64 +36,88 @@ function CallbackPage() {
 
         if (!code || !state || !codeVerifier) {
             console.error("Missing code, state, or code verifier");
-            // TODO: Not okay for error handling!
-            navigate('/auth/login');
-            return;
-        }
-
-        if (state !== oldState) {
+            setError({
+                message: "Missing OAuth query parameters"
+            });
+        } else if (state !== oldState) {
             console.error("State does not match old state");
-            // TODO: Not okay for error handling!
-            navigate('/auth/login');
-            return;
-        }
+            setError({
+                message: "Incorrect OAuth state"
+            });
+        } else {
+            // Construct backend route
+            const backendCallbackRoute = `/callback?code=${code}&state=${state}&verifier=${codeVerifier}&redirect=${REDIRECT_URI}`
+            async function exchangeCode() {
+                try {
+                    // Query backend
+                    const authRes = await backendAuthAxios.get(backendCallbackRoute);
+                    // Check success
+                    if (authRes.status !== 200 && !authRes.data.success) {
+                        console.error(authRes.data.error.message);
+                        throw new Error("Failed to exchange authorization code");
+                    }
+                    // Get user from response
+                    const response = authRes.data as HTTPResponseSuccess;
+                    const user = response.data;
 
-        const backendCallbackRoute = `/callback?code=${code}&state=${state}&verifier=${codeVerifier}&redirect=${REDIRECT_URI}`
-        console.log(backendCallbackRoute);
-        async function exchangeCode() {
-            try {
-                const authRes = await backendAuthAxios.get(backendCallbackRoute);
+                    // Set AuthProvider variables
+                    setUser(user);
+                    setLoading(false);
 
-                if (authRes.status !== 200 && !authRes.data.success) {
-                    console.error(authRes.data.error.message);
-                    throw new Error("Failed to exchange authorization code");
+                    // Clean up PKCE
+                    deletePCKEVals();
+
+                    // Navigate to protected routes
+                    navigate('/u/playlists');
+                } catch (err) {
+                    console.error('Failed to authenticate user with backend', err);
+                    setError({
+                        message: "Failed to authenticate user with backend"
+                    })
                 }
-                console.log(authRes)
-                const response = authRes.data as HTTPResponseSuccess;
-                const user = response.data;
+            }
 
-                // Set AuthProvider variables
-                setUser(user);
-                setLoading(false);
-
-                // Clean up PKCE
-                deletePCKEVals();
-
-                // Navigate to protected routes
-                navigate('/u/playlists');
-            } catch (err) {
-                console.error('Failed to authenticate user with backend', err);
-                // TODO: This is not acceptable error handling!
-                navigate('/auth/login');
+            if (!stateUser) {
+                console.log("Sending request!");
+                exchangeCode();
             }
         }
 
-        if (!stateUser) {
-            console.log("Sending request!");
-            exchangeCode();
-        }
     }, []);
 
+    // Set error or regular content
+    let content;
+    if (!error) {
+        content = (
+            <>
+                <p className="text-base lg:text-lg">Syncing your Spotify Playlists</p>
+                <div className="p-2 text-center flex justify-center">
+                    <ScaleLoader color="var(--color-textPrimary)" height={12} barCount={10} radius={5} speedMultiplier={1.2} />
+                </div>
+                <p className={`text-sm lg:text-base ${loadingClasses['fade-in']}`}>
+                    This may take a while
+                </p>
+            </>
+        );
+    } else {
+        // Error found
+        content = (
+            <>
+                <div className="text-center flex flex-col gap-1">
+                    <h2 className="text-xl lg:text-3xl font-semibold">Sorry, something went wrong</h2>
+                    <p className="text-sm lg:text-base text-background-50">Error: {error.message}</p>
+                </div>
+                <Button onClick={() => handleLogin()}>
+                    Try again
+                </Button>
+            </>
+        )
+    }
+
+
     return (
-        <div className="flex flex-col justify-center items-center gap-4">
-            <p className="text-base lg:text-lg">Syncing your Spotify Playlists</p>
-            <div className="p-2 text-center flex justify-center">
-                <ScaleLoader color="var(--color-textPrimary)" height={12} barCount={10} radius={5} speedMultiplier={1.2} />
-            </div>
-            <p className={`text-sm lg:text-base ${loadingClasses['fade-in']}`}
-            >
-                This may take a while
-            </p>
+        <div className="flex flex-col justify-center items-center gap-3">
+            {content}
         </div>
     );
 }
