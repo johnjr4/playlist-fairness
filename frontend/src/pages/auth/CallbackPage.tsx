@@ -5,6 +5,8 @@ import { backendAuthAxios } from "../../utils/axiosInstances";
 import { type HTTPResponseSuccess } from "spotifair";
 import { deletePCKEVals, getPKCEVals } from "../../utils/pkce";
 import { REDIRECT_URI } from "../../utils/envLoader";
+import { ScaleLoader } from "react-spinners";
+import loadingClasses from '../../styling/loading.module.css';
 
 function CallbackPage() {
     const [searchParams] = useSearchParams();
@@ -75,7 +77,18 @@ function CallbackPage() {
         }
     }, []);
 
-    return <p>Auth callback</p>
+    return (
+        <div className="flex flex-col justify-center items-center gap-4">
+            <p className="text-base lg:text-lg">Syncing your Spotify Playlists</p>
+            <div className="p-2 text-center flex justify-center">
+                <ScaleLoader color="var(--color-textPrimary)" height={12} barCount={10} radius={5} speedMultiplier={1.2} />
+            </div>
+            <p className={`text-sm lg:text-base ${loadingClasses['fade-in']}`}
+            >
+                This may take a while
+            </p>
+        </div>
+    );
 }
 
 export default CallbackPage;
