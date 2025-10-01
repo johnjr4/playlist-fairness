@@ -1,12 +1,14 @@
 import { useParams } from "react-router";
 import useQuery from "../utils/api/useQuery";
 import * as Public from 'spotifair';
-import CoverArt from "../components/ui/CoverArt";
-import PlaylistTrackRow from "../components/PlaylistTrackRow";
-import playlistTrackRowClasses from '../styling/playlistTrackRow.module.css'
+
 import Button from "../components/ui/Button";
 import { useState } from "react";
 import { backendAxios } from "../utils/axiosInstances";
+import PlaylistHeader from "../components/PlaylistHeader";
+import PlaylistSummary from "../components/PlaylistSummary";
+import SearchBar from "../components/SearchBar";
+import TrackList from "../components/TrackList";
 
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
@@ -18,9 +20,6 @@ function PlaylistPage() {
     if (error) return <div>Error!</div>
 
     const playlistData = data as Public.PlaylistHist;
-    const maxCount = playlistData.tracks.reduce((accumulator, currentValue) => {
-        return Math.max(accumulator, currentValue.listeningEvents.length);
-    }, 0);
 
     async function handleSyncClick(enabled: boolean) {
         setIsSyncing(true);
@@ -43,28 +42,9 @@ function PlaylistPage() {
 
     return (
         <div className='flex flex-col items-center'>
-            <div className='flex gap-4 items-center justify-center'>
-                <CoverArt coverUrl={playlistData.coverUrl} size='w-32' />
-                <h1>{playlistData.name}</h1>
-                <p>{playlistData.tracks.length} Tracks</p>
-                <Button variant='danger' onClick={() => handleSyncClick(false)}>Disable Sync</Button>
-            </div>
-            <div className='my-4'>
-                <h1 className='font-bold text-4xl'>Your playlist is <span className='text-green-600'>mostly fair</span></h1>
-            </div>
-            <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2`}>
-                <div></div>
-                <div>Title</div>
-                <div>Artist</div>
-                <div>Album</div>
-                <div className='text-right'>Plays</div>
-            </div>
-            <ul className="flex flex-col w-full gap-2">
-                {playlistData.tracks.map(t => <PlaylistTrackRow
-                    playlistTrack={t}
-                    key={t.track.id}
-                    fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
-            </ul>
+            <PlaylistHeader playlist={playlistData} handleSyncClick={handleSyncClick} />
+            <PlaylistSummary playlist={playlistData} />
+            <TrackList playlist={playlistData} />
         </div>
     );
 }
