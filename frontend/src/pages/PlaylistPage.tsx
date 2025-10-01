@@ -13,6 +13,7 @@ import TrackList from "../components/TrackList";
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
     const [isSyncing, setIsSyncing] = useState(false);
+    const [searchString, setSearchString] = useState('');
     const { data, isLoading, error, refetch } = useQuery(`/playlists/${playlistId}/tracks/hist`);
 
     if (isLoading) return <div>It's the loading page...</div>
@@ -44,7 +45,8 @@ function PlaylistPage() {
         <div className='flex flex-col items-center'>
             <PlaylistHeader playlist={playlistData} handleSyncClick={handleSyncClick} />
             <PlaylistSummary playlist={playlistData} />
-            <TrackList playlist={playlistData} />
+            <SearchBar setSearchString={setSearchString} />
+            <TrackList playlist={playlistData} searchString={searchString} />
         </div>
     );
 }
