@@ -17,7 +17,7 @@ router.get('/',
         if (user) {
             res.json(successfulResponse(
                 'Successfully got user',
-                user
+                userToPublic(user)
             ));
         } else {
             res.status(404).json(errorResponse(

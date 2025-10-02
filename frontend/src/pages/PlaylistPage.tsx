@@ -10,7 +10,7 @@ import type PlaylistMetadata from "../utils/types/playlistMeta";
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
     const [isSyncing, setIsSyncing] = useState(false);
-    const { data, isLoading, error, refetch } = useQuery(`/playlists/${playlistId}/tracks/hist`);
+    const { data, isLoading, error, refetch } = useQuery<Public.PlaylistHist>(`/playlists/${playlistId}/tracks/hist`);
 
     if (isLoading) return <div>It's the loading page...</div>
     if (error) return <div>Error!</div>
@@ -25,14 +25,14 @@ function PlaylistPage() {
     async function setPlaylistSync(enabled: boolean) {
         setIsSyncing(true);
         // TODO: error response handling
-        await backendAxios.post(`/playlists/${playlistId}/sync`, { enabled: enabled });
+        await backendAxios.post<Public.PlaylistSyncRes>(`/playlists/${playlistId}/sync`, { enabled: enabled });
         setIsSyncing(false);
         refetch();
     }
 
     return (
         <div className='flex flex-col items-center mt-4 w-full'>
-            <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isSyncing={isSyncing} />
+            <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isLoading={isLoading} isSyncing={isSyncing} error={error} />
             <TrackList playlist={playlist} setPlaylistSync={setPlaylistSync} isSyncing={isSyncing} />
         </div>
     );

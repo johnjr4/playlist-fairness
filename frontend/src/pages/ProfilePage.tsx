@@ -5,6 +5,7 @@ import ProfileStats from "../components/ui/ProfileStats";
 import { useProtectedAuth } from "../utils/AuthContext";
 import Modal from "../components/ui/Modal";
 import { backendAuthAxios, backendAxios } from "../utils/axiosInstances";
+import * as Public from "spotifair";
 
 function ProfilePage() {
     const { user, setUser } = useProtectedAuth();
@@ -13,13 +14,13 @@ function ProfilePage() {
     const [isDeleting, setIsDeleting] = useState(false);
 
     async function handleLogout() {
-        await backendAuthAxios.post('/logout');
+        await backendAuthAxios.post<null>('/logout');
         setUser(null);
     }
 
     async function handleDelete() {
         setIsDeleting(true);
-        const deletedUser = await backendAxios.delete(`/user/${user.id}`);
+        const deletedUser = await backendAxios.delete<Public.User>(`/user/${user.id}`);
         console.log("Deleted user");
         console.log(deletedUser);
         setIsDeleting(false);

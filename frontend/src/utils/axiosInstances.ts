@@ -17,18 +17,18 @@ export const untypedBackendAuthAxios = axios.create({
 
 // Define the functions we expect of this axios instance
 type TypedAxiosInstance = {
-    get: (url: string, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse>>;
-    post: (url: string, data?: any, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse>>;
-    put: (url: string, data?: any, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse>>;
-    delete: (url: string, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse>>;
+    get: <T>(url: string, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse<T>>>;
+    post: <T>(url: string, data?: any, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse<T>>>;
+    put: <T>(url: string, data?: any, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse<T>>>;
+    delete: <T>(url: string, config?: AxiosRequestConfig) => Promise<AxiosResponse<HTTPResponse<T>>>;
 }
 
 function toTypedAxios(untyped: AxiosInstance): TypedAxiosInstance {
     return {
-        get: (url, config) => untyped.get<HTTPResponse>(url, config),
-        post: (url, data, config) => untyped.post<HTTPResponse>(url, data, config),
-        put: (url, data, config) => untyped.put<HTTPResponse>(url, data, config),
-        delete: (url, config) => untyped.delete<HTTPResponse>(url, config),
+        get: <T>(url: string, config?: AxiosRequestConfig) => untyped.get<HTTPResponse<T>>(url, config),
+        post: <T>(url: string, data?: any, config?: AxiosRequestConfig) => untyped.post<HTTPResponse<T>>(url, data, config),
+        put: <T>(url: string, data?: any, config?: AxiosRequestConfig) => untyped.put<HTTPResponse<T>>(url, data, config),
+        delete: <T>(url: string, config?: AxiosRequestConfig) => untyped.delete<HTTPResponse<T>>(url, config),
     }
 }
 

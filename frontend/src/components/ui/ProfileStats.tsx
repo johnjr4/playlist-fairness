@@ -8,7 +8,7 @@ import { toSpotifyLink } from "../../utils/spotifyLink";
 
 function ProfileStats() {
     const { user } = useProtectedAuth();
-    const { data: fetchedStats, error, isLoading } = useQuery('/user/stats');
+    const { data: fetchedStats, error, isLoading } = useQuery<Public.UserStats>('/user/stats');
 
     let content;
     if (isLoading) {

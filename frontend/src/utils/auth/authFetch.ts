@@ -1,5 +1,7 @@
 import * as Public from 'spotifair';
 import { backendAuthAxios } from '../axiosInstances';
+import { isSuccess } from '../resParser';
+import type { AxiosResponse } from 'axios';
 
 // const debugUser: Public.User = {
 //     id: 'abcd',
@@ -13,14 +15,14 @@ import { backendAuthAxios } from '../axiosInstances';
 export async function getMe(): Promise<Public.User | null> {
     // TODO: Implement actual authentication
     try {
-        const res = await backendAuthAxios.get('/check-session');
-        if (res.status !== 200 && !res.data.success) {
-            console.error(res.data.error.message);
+        const res = await backendAuthAxios.get<Public.User>('/check-session');
+        if (!isSuccess(res)) {
+            const errRes = res as AxiosResponse<Public.HTTPResponseFailure>;
+            console.error(errRes.data.error.message);
             throw new Error("Non-successful response for session user");
         }
 
-        const successRes = res.data as Public.HTTPResponseSuccess;
-        const user = successRes.data;
+        const user = res.data.data;
         return user;
     } catch (err) {
         console.warn('Failed to get session user from backend', err);

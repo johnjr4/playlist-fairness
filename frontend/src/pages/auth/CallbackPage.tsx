@@ -2,13 +2,15 @@ import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../../utils/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import { backendAuthAxios } from "../../utils/axiosInstances";
-import { type HTTPResponseSuccess } from "spotifair";
+import * as Public from "spotifair";
 import { deletePCKEVals, getPKCEVals } from "../../utils/pkce";
 import { REDIRECT_URI } from "../../utils/envLoader";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../../styling/loading.module.css';
 import Button from "../../components/ui/Button";
 import { handleLogin } from "../../utils/handleLogin";
+import { isSuccess } from "../../utils/resParser";
+import type { AxiosResponse } from "axios";
 
 interface CallbackError {
     message: string,
@@ -50,15 +52,15 @@ function CallbackPage() {
             async function exchangeCode() {
                 try {
                     // Query backend
-                    const authRes = await backendAuthAxios.get(backendCallbackRoute);
+                    const authRes = await backendAuthAxios.get<Public.User>(backendCallbackRoute);
                     // Check success
-                    if (authRes.status !== 200 && !authRes.data.success) {
-                        console.error(authRes.data.error.message);
+                    if (!isSuccess(authRes)) {
+                        const errRes = authRes as AxiosResponse<Public.HTTPResponseFailure>;
+                        console.error(errRes.data.error.message);
                         throw new Error("Failed to exchange authorization code");
                     }
                     // Get user from response
-                    const response = authRes.data as HTTPResponseSuccess;
-                    const user = response.data;
+                    const user = authRes.data.data;
 
                     // Set AuthProvider variables
                     setUser(user);

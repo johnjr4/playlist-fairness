@@ -1,6 +1,6 @@
 import type { HTTPResponseFailure, HTTPResponseSuccess } from "spotifair"
 
-export function successfulResponse(message: string, data: any): HTTPResponseSuccess {
+export function successfulResponse<T>(message: string, data: T): HTTPResponseSuccess<T> {
     return {
         success: true,
         message: message,

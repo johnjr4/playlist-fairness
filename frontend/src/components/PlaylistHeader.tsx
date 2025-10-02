@@ -15,12 +15,27 @@ interface PlaylistHeaderProps {
     playlist: Public.PlaylistHist;
     playlistMetadata: PlaylistMetadata;
     setPlaylistSync: (setSyncTo: boolean) => void;
+    isLoading: boolean;
     isSyncing: boolean;
+    error: string | null;
 }
 
-function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isSyncing }: PlaylistHeaderProps) {
+// Consult playlist_page_fsm in the planning document
+type PlaylistHeaderState = 'loading' | 'error' | 'loadedS' | 'loadedU' | 'syncing' | 'unsyncing';
+
+function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isLoading, isSyncing, error }: PlaylistHeaderProps) {
     const overviewRef = useRef<HTMLDivElement>(null);
     const [syncModalOpen, setSyncModalOpen] = useState(false);
+
+    // let state = 'loading';
+    // if (!isLoading) {
+    //     if (error) {
+    //         state = 'error';
+    //     } else {
+    //         // By here, we know playlist exists
+    //     }
+    // }
+
     const settingsDropdownItems = [
         playlist.syncEnabled ? { label: 'Disable sync', onClick: () => setSyncModalOpen(true) } : { label: 'Enable sync', onClick: () => setPlaylistSync(true) }
     ]

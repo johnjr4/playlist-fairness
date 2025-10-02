@@ -108,10 +108,10 @@ export interface PlaylistSyncBody {
 
 // HTTP Response types
 
-export interface HTTPResponseSuccess {
+export interface HTTPResponseSuccess<T> {
     success: true,
     message: string,
-    data: any,
+    data: T,
 }
 
 export interface HTTPResponseFailure {
@@ -122,7 +122,7 @@ export interface HTTPResponseFailure {
     }
 }
 
-export type HTTPResponse = HTTPResponseSuccess | HTTPResponseFailure;
+export type HTTPResponse<T> = HTTPResponseSuccess<T> | HTTPResponseFailure;
 
 
 // etc.

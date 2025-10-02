@@ -7,20 +7,20 @@ import axios from "axios";
 
 // Adapted from https://ui.dev/why-react-query (next time I'll use React Query)
 // Handy query hook for my backend specifically
-export default function useQuery(path: string, dependencies = []) {
-    const [data, setData] = React.useState<any>(null);
+export default function useQuery<T>(path: string, dependencies = []) {
+    const [data, setData] = React.useState<T | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
 
 
-    const handleFetch = async (signal: AbortSignal) => {
+    async function handleFetch(signal: AbortSignal) {
         setData(null);
         setIsLoading(true);
         setError(null);
 
         try {
             // Make request
-            const res = await backendAxios.get(path, { signal: signal });
+            const res = await backendAxios.get<T>(path, { signal: signal });
 
             if (!isSuccess(res)) {
                 // Manual type narrowing after isSuccess failed

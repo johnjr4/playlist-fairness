@@ -9,7 +9,7 @@ function ProfileMenu() {
     const navigate = useNavigate();
 
     async function handleLogout() {
-        await backendAuthAxios.post('/logout');
+        await backendAuthAxios.post<null>('/logout');
         setUser(null);
     }
 

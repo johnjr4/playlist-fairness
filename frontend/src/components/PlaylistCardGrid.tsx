@@ -5,8 +5,7 @@ import * as Public from 'spotifair';
 
 
 function PlaylistCardGrid({ filterString: searchString = "" }: { filterString?: string }) {
-    const { data: fetchedPlaylists, isLoading, error } = useQuery('/playlists');
-    const playlists = fetchedPlaylists as Public.Playlist[] | null;
+    const { data: playlists, isLoading, error } = useQuery<Public.Playlist[]>('/playlists');
 
     if (isLoading) return <div>Loading...</div>
     if (error) return <div>Error getting playlists</div>
