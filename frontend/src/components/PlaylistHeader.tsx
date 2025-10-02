@@ -8,11 +8,10 @@ import { useRef, useState } from "react";
 import Modal from "./ui/Modal";
 import AutoResizeText from "./ui/AutoResizeText";
 import { CgSpinner } from "react-icons/cg";
-import PlaylistAnalysis from "./PlaylistAnalysis";
 import cardClasses from "../styling/cards.module.css";
 
 interface PlaylistHeaderProps {
-    playlist: Public.PlaylistHist;
+    playlist: Public.Playlist;
     playlistMetadata: PlaylistMetadata;
     setPlaylistSync: (setSyncTo: boolean) => void;
     isLoading: boolean;
@@ -23,18 +22,32 @@ interface PlaylistHeaderProps {
 // Consult playlist_page_fsm in the planning document
 type PlaylistHeaderState = 'loading' | 'error' | 'loadedS' | 'loadedU' | 'syncing' | 'unsyncing';
 
+function getHeaderState(isLoading: boolean, error: string | null, isSyncing: boolean, playlist: Public.Playlist | null) {
+    let state = 'loading';
+    if (!isLoading) {
+        if (error) {
+            state = 'error';
+        } else {
+            // By here, we know playlist exists
+            if (isSyncing) {
+                state = 'syncing';
+            } else {
+                if (playlist!.syncEnabled) {
+                    state = 'loadedS';
+                } else {
+                    state = 'loadedU';
+                }
+            }
+        }
+    }
+    return state;
+}
+
 function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isLoading, isSyncing, error }: PlaylistHeaderProps) {
     const overviewRef = useRef<HTMLDivElement>(null);
     const [syncModalOpen, setSyncModalOpen] = useState(false);
 
-    // let state = 'loading';
-    // if (!isLoading) {
-    //     if (error) {
-    //         state = 'error';
-    //     } else {
-    //         // By here, we know playlist exists
-    //     }
-    // }
+    const state = getHeaderState(isLoading, error, isSyncing, playlist);
 
     const settingsDropdownItems = [
         playlist.syncEnabled ? { label: 'Disable sync', onClick: () => setSyncModalOpen(true) } : { label: 'Enable sync', onClick: () => setPlaylistSync(true) }
@@ -84,7 +97,6 @@ function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isLoading
                     </Dropdown>
                 }
             </div>
-            <PlaylistAnalysis playlist={playlist} className={`w-4xl ${cardClasses['glass-card']}`} />
 
             <Modal
                 isOpen={syncModalOpen}

@@ -2,9 +2,14 @@
 
 .glass-card {
     /* @apply bg-[var(--color-background-300)]/30; */
-    background-color: color-mix(in oklab, var(--color-background-300) 30%, transparent);
+    background-color: color-mix(in oklab, var(--color-background-300) 40%, transparent);
     outline-color: color-mix(in oklab, var(--color-background-50) 30%, transparent);
     @apply outline md:outline-2;
-    --tw-shadow-color: var(--color-background-500) /* oklch(17.835% 0.02421 265.25) = #0c111c */;
+    --tw-shadow-color: var(--color-background-500);
     @apply shadow-sm md:shadow-md;
+    z-index: 15;
+}
+
+.glass-filter {
+    backdrop-filter: brightness(80%) blur(25px);
 }

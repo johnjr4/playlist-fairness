@@ -6,15 +6,17 @@ import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
 import SearchBar from "./SearchBar";
 import { useState } from "react";
+import cardClasses from '../styling/cards.module.css';
 
 interface TrackListProps {
+    className?: string,
     playlist: Public.PlaylistHist;
     setPlaylistSync: (setSyncTo: boolean) => void;
     isSyncing: boolean;
+    searchString: string;
 }
 
-function TrackList({ playlist, setPlaylistSync, isSyncing }: TrackListProps) {
-    const [searchString, setSearchString] = useState('');
+function TrackList({ className, playlist, setPlaylistSync, isSyncing, searchString }: TrackListProps) {
 
     const maxCount = playlist.tracks.reduce((accumulator, currentValue) => {
         return Math.max(accumulator, currentValue.listeningEvents.length);
@@ -55,8 +57,7 @@ function TrackList({ playlist, setPlaylistSync, isSyncing }: TrackListProps) {
     } else {
         mainContent = (
             <>
-                <SearchBar setSearchString={setSearchString} />
-                <div className="flex flex-col gap-2">
+                <div className="w-full flex flex-col gap-2">
                     <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2 py-1`}>
                         <div></div>
                         <div>Title</div>
@@ -76,7 +77,7 @@ function TrackList({ playlist, setPlaylistSync, isSyncing }: TrackListProps) {
     }
 
     return (
-        <div className="w-full flex flex-col items-center gap-2 mt-6">
+        <div className={`w-full flex flex-col items-center gap-2 ${className}`}>
             {mainContent}
         </div>
     )

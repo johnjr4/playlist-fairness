@@ -7,9 +7,9 @@ interface PlaylistAnalysisProps {
 
 function PlaylistAnalysis({ playlist, className }: PlaylistAnalysisProps) {
     return (
-        <div className={`${className} my-4
+        <div className={`block ${className}
             rounded-sm gap-2 py-4 px-3 lg:gap-4 lg:px-5 lg:py-5`}>
-            <h1 className='font-semibold text-4xl'>Your playlist is <span className='text-green-600'>mostly fair</span></h1>
+            <h1 className='sticky top-20 font-semibold text-4xl'>Your playlist is <span className='text-green-600'>mostly fair</span></h1>
         </div>
     )
 }

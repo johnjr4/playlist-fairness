@@ -6,6 +6,7 @@ import { backendAxios } from "../utils/axiosInstances";
 import PlaylistHeader from "../components/PlaylistHeader";
 import TrackList from "../components/TrackList";
 import type PlaylistMetadata from "../utils/types/playlistMeta";
+import PlaylistBody from "../components/PlaylistBody";
 
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
@@ -33,7 +34,7 @@ function PlaylistPage() {
     return (
         <div className='flex flex-col items-center mt-4 w-full'>
             <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isLoading={isLoading} isSyncing={isSyncing} error={error} />
-            <TrackList playlist={playlist} setPlaylistSync={setPlaylistSync} isSyncing={isSyncing} />
+            <PlaylistBody playlist={playlist} isSyncing={isSyncing} setPlaylistSync={setPlaylistSync} />
         </div>
     );
 }
