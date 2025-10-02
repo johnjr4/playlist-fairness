@@ -9,6 +9,7 @@ import PlaylistHeader from "../components/PlaylistHeader";
 import PlaylistSummary from "../components/PlaylistSummary";
 import SearchBar from "../components/SearchBar";
 import TrackList from "../components/TrackList";
+import type PlaylistMetadata from "../utils/types/playlistMeta";
 
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
@@ -20,9 +21,14 @@ function PlaylistPage() {
     if (isSyncing) return <div>Syncing playlist...</div>
     if (error) return <div>Error!</div>
 
-    const playlistData = data as Public.PlaylistHist;
+    const playlist = data as Public.PlaylistHist;
+    console.log(playlist);
+    const playlistMetadata: PlaylistMetadata = {
+        numTracks: playlist.tracks.length,
+        totalMs: playlist.tracks.reduce((acc, curr) => acc + curr.track.durationMs, 0),
+    };
 
-    async function handleSyncClick(enabled: boolean) {
+    async function setPlaylistSync(enabled: boolean) {
         setIsSyncing(true);
         // TODO: error response handling
         await backendAxios.post(`/playlists/${playlistId}/sync`, { enabled: enabled });
@@ -30,23 +36,21 @@ function PlaylistPage() {
         refetch();
     }
 
-    console.log(playlistData);
-
-    if (!playlistData.syncEnabled) {
+    if (!playlist.syncEnabled) {
         return (
             <>
                 <div>Sync not enabled for this playlist</div>
-                <Button onClick={() => handleSyncClick(true)}>Enable it</Button>
+                <Button onClick={() => setPlaylistSync(true)}>Enable it</Button>
             </>
         )
     }
 
     return (
-        <div className='flex flex-col items-center'>
-            <PlaylistHeader playlist={playlistData} handleSyncClick={handleSyncClick} />
-            <PlaylistSummary playlist={playlistData} />
+        <div className='flex flex-col items-center mt-4 w-full'>
+            <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} />
+            <PlaylistSummary playlist={playlist} />
             <SearchBar setSearchString={setSearchString} />
-            <TrackList playlist={playlistData} searchString={searchString} />
+            <TrackList playlist={playlist} searchString={searchString} />
         </div>
     );
 }

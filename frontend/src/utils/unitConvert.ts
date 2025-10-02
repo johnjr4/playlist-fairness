@@ -10,6 +10,16 @@ export function msToMin(totalMs: number) {
     return minutes;
 }
 
+export function msToHour(totalMs: number, isAbbreviated = false) {
+    const hours = Math.floor(totalMs / msPerHour);
+    totalMs %= msPerHour;
+
+    const minutes = Math.floor(totalMs / msPerMin);
+    totalMs %= msPerMin;
+
+    return `${msTimeHelper(hours, isAbbreviated ? 'hr' : 'hour')}${msTimeHelper(minutes, isAbbreviated ? 'min' : 'minute', true)}`
+}
+
 export function msToMore(totalMs: number) {
     const years = Math.floor(totalMs / msPerYear);
     totalMs %= msPerYear;
