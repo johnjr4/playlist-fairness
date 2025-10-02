@@ -1,11 +1,11 @@
 .transition {
     /* un-hover transition time and style */
-    transition: box-shadow 400ms, transform 200ms ease-in, scale 200ms;
+    transition: box-shadow 400ms, transform 200ms ease-in, scale 200ms, background-color 200ms, z-index 200ms;
 }
 
 .transition:hover {
     /* hover transition time and style */
-    transition: box-shadow 100ms, transform 50ms ease-out, scale 50ms;
+    transition: box-shadow 100ms, transform 50ms ease-out, scale 50ms, background-color 50ms, z-index 50ms;
 }
 
 .hover3D {
@@ -60,4 +60,14 @@
 
 .hoverRise:nth-of-type(3n+1):hover {
     transform: translateY(-8px) rotate(-3deg);
+}
+
+
+.hoverGlint {
+    /* backdrop-filter: none; */
+}
+
+.hoverGlint:hover {
+    /* backdrop-filter: brightness(250%) blur(10px); */
+    background-color: var(--color-background-300);
 }
