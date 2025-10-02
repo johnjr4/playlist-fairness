@@ -7,20 +7,30 @@ import { LuEllipsis } from "react-icons/lu";
 import { useRef, useState } from "react";
 import Modal from "./ui/Modal";
 import AutoResizeText from "./ui/AutoResizeText";
-import Tilter from "./ui/Tilter";
+import { CgSpinner } from "react-icons/cg";
 
 interface PlaylistHeaderProps {
     playlist: Public.PlaylistHist;
     playlistMetadata: PlaylistMetadata;
     setPlaylistSync: (setSyncTo: boolean) => void;
+    isSyncing: boolean;
 }
 
-function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync }: PlaylistHeaderProps) {
+function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isSyncing }: PlaylistHeaderProps) {
     const overviewRef = useRef<HTMLDivElement>(null);
     const [syncModalOpen, setSyncModalOpen] = useState(false);
     const settingsDropdownItems = [
-        { label: 'Disable sync', onClick: () => setSyncModalOpen(true) }
+        playlist.syncEnabled ? { label: 'Disable sync', onClick: () => setSyncModalOpen(true) } : { label: 'Enable sync', onClick: () => setPlaylistSync(true) }
     ]
+
+    let contentSummaryText;
+    if (isSyncing) {
+        contentSummaryText = 'Syncing...';
+    } else if (!playlist.syncEnabled) {
+        contentSummaryText = 'Playlist not synced';
+    } else {
+        contentSummaryText = `${playlistMetadata.numTracks} Tracks • ${msToHour(playlistMetadata.totalMs, true)}`;
+    }
 
     return (
         <div className='relative w-full flex gap-4 justify-around mt-5 md:mt-2'>
@@ -42,16 +52,20 @@ function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync }: Playlis
                     "
                 />
                 <div className="w-80 sm:w-110 md:w-120 lg:w-2xl xl:w-3xl" ref={overviewRef}>
-                    {/* <h1>{playlist.name}</h1> */}
                     <AutoResizeText text={playlist.name} parentRef={overviewRef} maxFontSize={60} minFontSize={18} textStyle="font-bold" />
                     <p className="flex text-dark-highlight gap-1 text-xs md:text-sm">
-                        {playlistMetadata.numTracks} Tracks • {msToHour(playlistMetadata.totalMs, true)}
+                        {contentSummaryText}
                     </p>
                 </div>
             </div>
-            <Dropdown positionClassName='absolute -top-8 right-2 md:top-0 md:right-0 md:mx-2' items={settingsDropdownItems} hasCaret={false}>
-                <LuEllipsis className="text-2xl lg:text-4xl" />
-            </Dropdown>
+            <div className="absolute -top-8 right-2 md:top-0 md:right-0 flex justify-center">
+                {isSyncing
+                    ? <div className="px-2 py-1 lg:px-4 lg:py-1.5"><CgSpinner className="animate-spin text-2xl lg:text-4xl" /></div>
+                    : <Dropdown items={settingsDropdownItems} hasCaret={false}>
+                        <LuEllipsis className="text-2xl lg:text-4xl" />
+                    </Dropdown>
+                }
+            </div>
 
             <Modal
                 isOpen={syncModalOpen}

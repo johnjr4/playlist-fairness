@@ -1,8 +1,6 @@
 import { useParams } from "react-router";
 import useQuery from "../utils/api/useQuery";
 import * as Public from 'spotifair';
-
-import Button from "../components/ui/Button";
 import { useState } from "react";
 import { backendAxios } from "../utils/axiosInstances";
 import PlaylistHeader from "../components/PlaylistHeader";
@@ -18,7 +16,7 @@ function PlaylistPage() {
     const { data, isLoading, error, refetch } = useQuery(`/playlists/${playlistId}/tracks/hist`);
 
     if (isLoading) return <div>It's the loading page...</div>
-    if (isSyncing) return <div>Syncing playlist...</div>
+    // if (isSyncing) return <div>Syncing playlist...</div>
     if (error) return <div>Error!</div>
 
     const playlist = data as Public.PlaylistHist;
@@ -36,21 +34,12 @@ function PlaylistPage() {
         refetch();
     }
 
-    if (!playlist.syncEnabled) {
-        return (
-            <>
-                <div>Sync not enabled for this playlist</div>
-                <Button onClick={() => setPlaylistSync(true)}>Enable it</Button>
-            </>
-        )
-    }
-
     return (
         <div className='flex flex-col items-center mt-4 w-full'>
-            <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} />
+            <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isSyncing={isSyncing} />
             <PlaylistSummary playlist={playlist} />
             <SearchBar setSearchString={setSearchString} />
-            <TrackList playlist={playlist} searchString={searchString} />
+            <TrackList playlist={playlist} searchString={searchString} setPlaylistSync={setPlaylistSync} isSyncing={isSyncing} />
         </div>
     );
 }

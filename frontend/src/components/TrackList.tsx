@@ -1,13 +1,20 @@
 import PlaylistTrackRow from "../components/PlaylistTrackRow";
 import playlistTrackRowClasses from '../styling/playlistTrackRow.module.css'
 import * as Public from 'spotifair';
+import Button from "./ui/Button";
+import { ScaleLoader } from "react-spinners";
+import loadingClasses from '../styling/loading.module.css';
 
 interface TrackListProps {
-    playlist: Public.PlaylistHist
-    searchString?: string,
+    playlist: Public.PlaylistHist;
+    searchString?: string;
+    setPlaylistSync: (setSyncTo: boolean) => void;
+    isSyncing: boolean;
 }
 
-function TrackList({ playlist, searchString }: TrackListProps) {
+function TrackList({ playlist, searchString, setPlaylistSync, isSyncing }: TrackListProps) {
+
+
     const maxCount = playlist.tracks.reduce((accumulator, currentValue) => {
         return Math.max(accumulator, currentValue.listeningEvents.length);
     }, 0);
@@ -24,21 +31,49 @@ function TrackList({ playlist, searchString }: TrackListProps) {
     }
 
 
+    let mainContent;
+    if (isSyncing) {
+        mainContent = (
+            <div className="w-full h-full flex flex-col gap-2 justify-center items-center">
+                <p className="text-base lg:text-lg">Syncing playlist</p>
+                <div className="p-2 text-center flex justify-center">
+                    <ScaleLoader color="var(--color-textPrimary)" height={12} barCount={10} radius={5} speedMultiplier={1.2} />
+                </div>
+                <p className={`text-sm lg:text-base ${loadingClasses['fade-in']}`}>
+                    This may take a while
+                </p>
+            </div>
+        )
+    } else if (!playlist.syncEnabled) {
+        mainContent = (
+            <div className="w-full h-full flex flex-col gap-2 justify-center items-center">
+                <div>Sync not enabled for this playlist</div>
+                <Button onClick={() => setPlaylistSync(true)}>Enable it</Button>
+            </div>
+        )
+    } else {
+        mainContent = (
+            <>
+                <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2`}>
+                    <div></div>
+                    <div>Title</div>
+                    <div>Artist</div>
+                    <div>Album</div>
+                    <div className='text-right'>Plays</div>
+                </div>
+                <ul className="flex flex-col w-full gap-2">
+                    {playlist.tracks.filter(t => filterTrack(t.track)).map(t => <PlaylistTrackRow
+                        playlistTrack={t}
+                        key={t.track.id}
+                        fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
+                </ul>
+            </>
+        )
+    }
+
     return (
         <div className="w-full">
-            <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2`}>
-                <div></div>
-                <div>Title</div>
-                <div>Artist</div>
-                <div>Album</div>
-                <div className='text-right'>Plays</div>
-            </div>
-            <ul className="flex flex-col w-full gap-2">
-                {playlist.tracks.filter(t => filterTrack(t.track)).map(t => <PlaylistTrackRow
-                    playlistTrack={t}
-                    key={t.track.id}
-                    fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
-            </ul>
+            {mainContent}
         </div>
     )
 }
