@@ -4,16 +4,17 @@ import * as Public from 'spotifair';
 import Button from "./ui/Button";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
+import SearchBar from "./SearchBar";
+import { useState } from "react";
 
 interface TrackListProps {
     playlist: Public.PlaylistHist;
-    searchString?: string;
     setPlaylistSync: (setSyncTo: boolean) => void;
     isSyncing: boolean;
 }
 
-function TrackList({ playlist, searchString, setPlaylistSync, isSyncing }: TrackListProps) {
-
+function TrackList({ playlist, setPlaylistSync, isSyncing }: TrackListProps) {
+    const [searchString, setSearchString] = useState('');
 
     const maxCount = playlist.tracks.reduce((accumulator, currentValue) => {
         return Math.max(accumulator, currentValue.listeningEvents.length);
@@ -54,25 +55,28 @@ function TrackList({ playlist, searchString, setPlaylistSync, isSyncing }: Track
     } else {
         mainContent = (
             <>
-                <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2`}>
-                    <div></div>
-                    <div>Title</div>
-                    <div>Artist</div>
-                    <div>Album</div>
-                    <div className='text-right'>Plays</div>
+                <SearchBar setSearchString={setSearchString} />
+                <div className="flex flex-col gap-2">
+                    <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2 py-1`}>
+                        <div></div>
+                        <div>Title</div>
+                        <div>Artist</div>
+                        <div>Album</div>
+                        <div className='text-right'>Plays</div>
+                    </div>
+                    <ul className="flex flex-col w-full gap-2">
+                        {playlist.tracks.filter(t => filterTrack(t.track)).map(t => <PlaylistTrackRow
+                            playlistTrack={t}
+                            key={t.track.id}
+                            fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
+                    </ul>
                 </div>
-                <ul className="flex flex-col w-full gap-2">
-                    {playlist.tracks.filter(t => filterTrack(t.track)).map(t => <PlaylistTrackRow
-                        playlistTrack={t}
-                        key={t.track.id}
-                        fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
-                </ul>
             </>
         )
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full flex flex-col items-center gap-2 mt-6">
             {mainContent}
         </div>
     )

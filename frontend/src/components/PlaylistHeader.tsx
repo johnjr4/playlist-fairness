@@ -8,6 +8,8 @@ import { useRef, useState } from "react";
 import Modal from "./ui/Modal";
 import AutoResizeText from "./ui/AutoResizeText";
 import { CgSpinner } from "react-icons/cg";
+import PlaylistAnalysis from "./PlaylistAnalysis";
+import cardClasses from "../styling/cards.module.css";
 
 interface PlaylistHeaderProps {
     playlist: Public.PlaylistHist;
@@ -33,12 +35,13 @@ function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isSyncing
     }
 
     return (
-        <div className='relative w-full flex gap-4 justify-around mt-5 md:mt-2'>
-            <div className="flex items-center flex-col md:flex-row
-            rounded-md gap-2 py-2 px-3 lg:gap-4 lg:px-5 lg:py-1
-            bg-background-300/30
-            outline md:outline-2 outline-background-50/30
-            shadow-sm md:shadow-md shadow-background-500">
+        <div className='relative w-full flex flex-col gap-4 justify-around items-center mt-5 md:mt-2'>
+            <div className={`
+                flex items-center flex-col md:flex-row
+                rounded-md gap-2 py-2 px-3 lg:gap-4 lg:px-5 lg:py-1
+                ${cardClasses['glass-card']}
+                `}
+            >
                 <CoverArt
                     coverUrl={playlist.coverUrl}
                     size='w-50 sm:w-60 md:w-32 lg:w-40'
@@ -66,6 +69,7 @@ function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isSyncing
                     </Dropdown>
                 }
             </div>
+            <PlaylistAnalysis playlist={playlist} className={`w-4xl ${cardClasses['glass-card']}`} />
 
             <Modal
                 isOpen={syncModalOpen}

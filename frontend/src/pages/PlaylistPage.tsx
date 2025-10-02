@@ -4,19 +4,15 @@ import * as Public from 'spotifair';
 import { useState } from "react";
 import { backendAxios } from "../utils/axiosInstances";
 import PlaylistHeader from "../components/PlaylistHeader";
-import PlaylistSummary from "../components/PlaylistSummary";
-import SearchBar from "../components/SearchBar";
 import TrackList from "../components/TrackList";
 import type PlaylistMetadata from "../utils/types/playlistMeta";
 
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
     const [isSyncing, setIsSyncing] = useState(false);
-    const [searchString, setSearchString] = useState('');
     const { data, isLoading, error, refetch } = useQuery(`/playlists/${playlistId}/tracks/hist`);
 
     if (isLoading) return <div>It's the loading page...</div>
-    // if (isSyncing) return <div>Syncing playlist...</div>
     if (error) return <div>Error!</div>
 
     const playlist = data as Public.PlaylistHist;
@@ -37,9 +33,7 @@ function PlaylistPage() {
     return (
         <div className='flex flex-col items-center mt-4 w-full'>
             <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isSyncing={isSyncing} />
-            <PlaylistSummary playlist={playlist} />
-            <SearchBar setSearchString={setSearchString} />
-            <TrackList playlist={playlist} searchString={searchString} setPlaylistSync={setPlaylistSync} isSyncing={isSyncing} />
+            <TrackList playlist={playlist} setPlaylistSync={setPlaylistSync} isSyncing={isSyncing} />
         </div>
     );
 }
