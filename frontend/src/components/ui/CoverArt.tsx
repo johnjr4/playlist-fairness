@@ -1,5 +1,6 @@
 import loadingCoverUrl from '../../assets/covers/loading_cover.svg'
 import ErrorImage from "./ErrorImage";
+import errorCoverUrl from '../../assets/covers/error_cover.svg'
 import { useState } from "react";
 
 interface CoverArtProps {
@@ -23,7 +24,11 @@ function CoverArt({ coverUrl, alt = 'Cover Image', size = 'w-48', className }: C
                     onLoad={() => setStatus('loaded')}
                     onError={() => setStatus('error')}
                 />
-                : <ErrorCover />
+                : <img
+                    src={errorCoverUrl} // Can assert because of initial status state
+                    alt={alt}
+                    className="w-full h-full object-cover"
+                />
             }
         </div>
     )
