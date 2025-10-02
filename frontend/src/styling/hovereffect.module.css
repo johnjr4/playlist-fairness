@@ -5,7 +5,7 @@
 
 .transition:hover {
     /* hover transition time and style */
-    transition: box-shadow 100ms, transform 50ms ease-out, scale 50ms, background-color 50ms, z-index 50ms;
+    transition: box-shadow 70ms, transform 50ms ease-out, scale 80ms, background-color 30ms, z-index 30ms;
 }
 
 .hover3D {

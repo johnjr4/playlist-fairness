@@ -2,9 +2,10 @@
 
 .glass-card {
     /* @apply bg-[var(--color-background-300)]/30; */
-    --start-col: color-mix(in oklab, var(--color-background-200) 60%, transparent);
-    --end-col: color-mix(in oklab, var(--color-background-200) 30%, transparent);
-    background: linear-gradient(150deg, var(--start-col) 100px, var(--end-col));
+    /* --start-col: color-mix(in oklab, var(--color-background-200) 60%, transparent);
+    --end-col: color-mix(in oklab, var(--color-background-200) 30%, transparent); */
+    /* background: linear-gradient(150deg, var(--start-col) 100px, var(--end-col)); */
+    background-color: color-mix(in oklab, var(--color-background-200) 30%, transparent);
     outline-color: color-mix(in oklab, var(--color-background-50) 30%, transparent);
     @apply outline md:outline-2;
     --tw-shadow-color: var(--color-background-500);

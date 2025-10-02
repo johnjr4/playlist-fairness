@@ -14,7 +14,7 @@ function PlaylistCard({ playlist, className }: PlaylistCardProps) {
         navigate(`/u/playlists/${playlist.id}`);
     }
     return (
-        <li className={`${className} rounded-xs relative p-1.5 md:p-3.5`}>
+        <li className={`${className} rounded-sm relative p-1.5 md:p-3.5`}>
             <button className={`w-full flex flex-col items-center gap-2 cursor-pointer`} onClick={() => handleClick()}>
                 <CoverArt
                     coverUrl={playlist.coverUrl}

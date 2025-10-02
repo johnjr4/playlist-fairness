@@ -45,7 +45,7 @@ function PlaylistCardGrid({ filterString: searchString = "" }: { filterString?: 
                 <PlaylistCard
                     key={p.id}
                     playlist={p}
-                    className={`w-28 sm:w-44 md:w-52 lg:w-64 ${cardClasses['glass-card']} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${hoverClasses.hoverRise}`}
+                    className={`w-28 sm:w-44 md:w-52 lg:w-64 bg-background-300/80 ${hoverClasses.hover3D} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${hoverClasses.hoverRise}`}
                 />)}
         </ul>
     )
