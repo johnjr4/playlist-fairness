@@ -10,16 +10,17 @@ type ButtonProps = {
 function Button({ children, variant = 'primary', onClick, className }: ButtonProps) {
 
     const variantStyles = {
-        primary: `bg-primary border-primary text-textPrimary ${hoverClasses.hover3DPrimary}`,
-        secondary: `bg-transparent border-transparent text-textPrimary ${hoverClasses.hover3D}`,
-        danger: `bg-red-900 border-red-900 text-white ${hoverClasses.hover3DDanger}`,
+        primary: `bg-radial-[at_30%_40%] from-primary-500 from-30% to-primary-700 to-110% ${hoverClasses.hover3DPrimary}`,
+        secondary: `bg-transparent ${hoverClasses.hover3D}`,
+        danger: `bg-radial-[at_30%_40%] from-red-700 from-30% to-red-950 to-110%  ${hoverClasses.hover3DDanger}`,
     };
 
 
     return (
         <button
             onClick={onClick}
-            className={`text-xs md:text-sm lg:text-base px-2 py-1 lg:px-4 lg:py-1.5 rounded-md font-medium cursor-pointer ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
+            className={`text-textPrimary text-xs md:text-sm lg:text-base px-2 py-1 lg:px-4 lg:py-1.5 rounded-md font-medium cursor-pointer ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
+            style={{ lineHeight: 'normal' }}
         >
             {children}
         </button>
