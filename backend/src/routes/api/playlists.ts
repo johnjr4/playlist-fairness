@@ -1,6 +1,6 @@
 import express, { type Request } from 'express';
 import { asyncHandler } from '../../utils/middleware/handleServerError.js';
-import { setPlaylistSync, getPlaylist, getPlaylistHist, getPlaylistWithTracks, getUserPlaylists } from '../../controllers/playlistsController.js';
+import { setPlaylistSync, getPlaylist, getPlaylistHist, getPlaylistWithTracks, getUserPlaylists, getPlaylistWithStats } from '../../controllers/playlistsController.js';
 import { playlistToPublic, playlistToPublicFull, playlistToPublicHist } from '../../utils/types/frontendTypeMapper.js';
 import { errorResponse, successfulResponse } from '../../utils/apiResponses.js';
 import { validateIntId } from '../../utils/middleware/requireIdParam.js';
@@ -41,6 +41,24 @@ router.get('/:id',
         }
     })
 );
+
+router.get('/:id/stat',
+    asyncHandler(async (req, res) => {
+        const playlistId = parseInt(req.params.id!);
+        const playlistStat = await getPlaylistWithStats(playlistId, req.session.user!.id);
+        if (playlistStat) {
+            res.json(successfulResponse(
+                `Playlist ${playlistId} stats fetched successfully`,
+                playlistStat
+            ));
+        } else {
+            res.status(404).json(errorResponse(
+                `Playlist ${playlistId} stats not found for user ${req.session.user!.id}`,
+                'NOT_FOUND'
+            ))
+        }
+    })
+)
 
 router.get('/:id/tracks',
     asyncHandler(async (req, res) => {

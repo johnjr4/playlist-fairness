@@ -44,3 +44,20 @@ export async function getPlaylistTrackFull(playlistId: number, trackId: number, 
         return null;
     }
 }
+
+export async function getPlaylistTrackCount(playlistId: number, ownerId: string) {
+    try {
+        const numPlaylistTracks = await prisma.playlistTrack.count({
+            where: {
+                playlistId: playlistId,
+                playlist: {
+                    ownerId: ownerId,
+                }
+            }
+        });
+        return numPlaylistTracks;
+    } catch (err) {
+        console.error("Error getting playlist track count", err);
+        return null;
+    }
+}

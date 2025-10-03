@@ -39,8 +39,8 @@ function Tilter({ children, maxAngle = 10, className }: TilterProps) {
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateX = ((y - centerY) / centerY) * -maxAngle;
-        const rotateY = ((x - centerX) / centerX) * maxAngle;
+        const rotateX = ((y - centerY) / centerY) * maxAngle;
+        const rotateY = ((x - centerX) / centerX) * -maxAngle;
 
         return `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
     }

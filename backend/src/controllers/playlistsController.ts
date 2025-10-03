@@ -5,6 +5,7 @@ import { disableAndDeletePlaylistSync, enableAndSyncPlaylist } from "./syncSpoti
 import { queryTopPlaylist } from "../generated/prisma/sql.js";
 import * as Public from 'spotifair';
 import { playlistFullArgs, playlistHistArgs, playlistTrackHistArgs, type PlaylistHist } from "../utils/types/includeTypes.js";
+import { getPlaylistTrackCount } from "./playlistTrackController.js";
 
 export async function getUserPlaylists(userId: string): Promise<Playlist[]> {
     try {
@@ -82,7 +83,54 @@ export async function getPlaylistHist(playlistId: number, ownerId: string | null
     }
 }
 
-export async function getTopPlaylist(ownerId: string): Promise<Public.PlaylistStat | null> {
+export async function getTotalMs(playlistId: number) {
+    try {
+        const totalMs = await prisma.track.aggregate({
+            where: {
+                playlistTracks: {
+                    some: {
+                        playlistId: playlistId,
+                    }
+                }
+            },
+            _sum: {
+                durationMs: true,
+            }
+        });
+        return totalMs._sum.durationMs;
+    } catch (err) {
+        console.error(`Failed to get totalMs for ${playlistId}`, err);
+        return null;
+    }
+
+}
+
+export async function getPlaylistWithStats(playlistId: number, ownerId: string): Promise<Public.PlaylistWithStats | null> {
+    try {
+        const playlist = await getPlaylist(playlistId, ownerId);
+        if (!playlist) {
+            // Playlist doesn't exist in database
+            throw new Error('No playlists found');
+        }
+
+        // By this point we are sure playlist exists
+        const numPlaylistTracks = await getPlaylistTrackCount(playlistId, ownerId);
+        const totalMs = await getTotalMs(playlistId);
+
+        return {
+            ...playlist,
+            stats: {
+                numTracks: numPlaylistTracks ? numPlaylistTracks : 0,
+                totalMs: totalMs ? totalMs : 0,
+            },
+        };
+    } catch (err) {
+        console.error(`Failed to get playlist stat ${playlistId} for user ${ownerId}`, err);
+        return null;
+    }
+}
+
+export async function getTopPlaylist(ownerId: string): Promise<Public.TopPlaylist | null> {
     try {
         const topPlaylists = await prisma.$queryRawTyped<Public.Playlist & { plays: bigint | null, totalMs: bigint | null }>(queryTopPlaylist(ownerId));
         if (!topPlaylists || topPlaylists.length < 1) {
@@ -92,14 +140,16 @@ export async function getTopPlaylist(ownerId: string): Promise<Public.PlaylistSt
             // Something went wrong with the aggregation
             throw new Error('Playlist aggregation error');
         }
-        const plays = Number(topPlaylists[0]!.plays!);
-        const totalMs = Number(topPlaylists[0]!.totalMs!);
-        const topPlaylist: Public.Playlist = topPlaylists[0]!;
+        const { totalMs: bigIntTotalMs, plays: bigIntPlays, ...topPlaylist } = topPlaylists[0]!;
+        const plays = Number(bigIntPlays);
+        const totalMs = Number(bigIntTotalMs);
 
         return {
             ...topPlaylist,
-            plays: plays,
-            totalMs: totalMs,
+            listening: {
+                plays: plays,
+                totalMs: totalMs,
+            }
         };
     } catch (err) {
         console.error(`Failed to get top playlist for user ${ownerId}`, err);

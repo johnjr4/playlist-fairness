@@ -26,7 +26,12 @@ export type Playlist = Omit<PlaylistFull, 'tracks'>
 export type PlaylistHist = Playlist & {
     tracks: PlaylistTrackHist[]
 }
-export type PlaylistStat = Playlist & ListeningStat;
+export type PlaylistStat = {
+    numTracks: number,
+    totalMs: number,
+};
+export type TopPlaylist = Playlist & { listening: ListeningStat }
+export type PlaylistWithStats = Playlist & { stats: PlaylistStat }
 
 export interface AlbumFull {
     id: number
@@ -148,7 +153,7 @@ export interface UserStats {
     playlists: {
         total: number;
         synced: number;
-        top: PlaylistStat | null;
+        top: TopPlaylist | null;
     };
     listens: ListeningStat;
     tracks: {

@@ -13,8 +13,7 @@ import errorCoverUrl from "../assets/covers/error_cover.svg";
 import loadingCoverUrl from "../assets/covers/loading_cover.svg";
 
 interface PlaylistHeaderProps {
-    playlist: Public.Playlist;
-    playlistMetadata: PlaylistMetadata;
+    playlist: Public.PlaylistWithStats | null;
     setPlaylistSync: (setSyncTo: boolean) => void;
     isLoading: boolean;
     isSyncing: boolean;
@@ -24,7 +23,7 @@ interface PlaylistHeaderProps {
 // Consult playlist_page_fsm in the planning document
 type PlaylistHeaderState = 'loading' | 'error' | 'loadedS' | 'loadedU' | 'syncing';
 
-function getHeaderState(isLoading: boolean, error: string | null, isSyncing: boolean, playlist: Public.Playlist | null): PlaylistHeaderState {
+function getHeaderState(isLoading: boolean, error: string | null, isSyncing: boolean, playlist: Public.PlaylistWithStats | null): PlaylistHeaderState {
     // 1: is it loading?
     if (!isLoading) {
         // 2: was there an error?
@@ -72,33 +71,35 @@ function getDropdown(state: PlaylistHeaderState, setSyncModalOpen: (setOpen: boo
     );
 }
 
-function getHeaderContent(state: PlaylistHeaderState, playlist: Public.Playlist, playlistMetadata: PlaylistMetadata) {
+function getHeaderContent(state: PlaylistHeaderState, playlist: Public.PlaylistWithStats | null) {
     switch (state) {
         case 'error':
             return { title: 'Error', summary: 'Error getting playlist', coverUrl: errorCoverUrl };
         case 'loading':
             return { title: '', summary: '', coverUrl: loadingCoverUrl }
         default:
+            // Non-null playlist because not error or loading
             let contentSummaryText = 'Syncing...';
             if (state === 'loadedU') {
                 contentSummaryText = 'Playlist not synced';
             } else if (state === 'loadedS') {
-                contentSummaryText = `${playlistMetadata.numTracks.toLocaleString()} Tracks • ${msToHour(playlistMetadata.totalMs, true)}`;
+                contentSummaryText = `${playlist!.stats.numTracks.toLocaleString()} Tracks • ${msToHour(playlist!.stats.totalMs, true)}`;
             }
-            return { title: playlist.name, summary: contentSummaryText, coverUrl: playlist.coverUrl };
+            return { title: playlist!.name, summary: contentSummaryText, coverUrl: playlist!.coverUrl };
     }
 }
 
-function PlaylistHeader({ playlist, playlistMetadata, setPlaylistSync, isLoading, isSyncing, error }: PlaylistHeaderProps) {
+function PlaylistHeader({ playlist, setPlaylistSync, isLoading, isSyncing, error }: PlaylistHeaderProps) {
     const overviewRef = useRef<HTMLDivElement>(null);
     const [syncModalOpen, setSyncModalOpen] = useState(false);
 
     const state = getHeaderState(isLoading, error, isSyncing, playlist);
     // const state = 'loading';
+    console.log(playlist);
 
     const dropdown = getDropdown(state, setSyncModalOpen, setPlaylistSync);
 
-    const { title, summary, coverUrl } = getHeaderContent(state, playlist, playlistMetadata);
+    const { title, summary, coverUrl } = getHeaderContent(state, playlist);
 
     return (
         <div className='relative w-full max-w-7xl flex flex-col gap-4 justify-around items-center mt-5 md:mt-2'>

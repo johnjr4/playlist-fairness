@@ -6,13 +6,15 @@ import SearchBar from "./SearchBar";
 import { useState } from "react";
 
 interface PlaylistBodyProps {
-    playlist: Public.PlaylistHist;
+    playlist: Public.PlaylistHist | null;
     setPlaylistSync: (setSyncTo: boolean) => void;
     isSyncing: boolean;
 }
 
 function PlaylistBody({ playlist, setPlaylistSync, isSyncing }: PlaylistBodyProps) {
     const [searchString, setSearchString] = useState('');
+
+    if (!playlist) return <div>No playlist found</div>
 
     return (
         <div className='w-full max-w-6xl flex justify-center mt-23 gap-3'>

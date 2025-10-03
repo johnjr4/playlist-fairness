@@ -4,32 +4,24 @@ import * as Public from 'spotifair';
 import { useState } from "react";
 import { backendAxios } from "../utils/axiosInstances";
 import PlaylistHeader from "../components/PlaylistHeader";
-import TrackList from "../components/TrackList";
 import type PlaylistMetadata from "../utils/types/playlistMeta";
 import PlaylistBody from "../components/PlaylistBody";
 
 function PlaylistPage() {
     const { playlistId } = useParams<{ playlistId: string }>();
     const [isSyncing, setIsSyncing] = useState(false);
-    const { data, isLoading, error, refetch } = useQuery<Public.PlaylistHist>(`/playlists/${playlistId}/tracks/hist`);
+    const { data: playlist, isLoading: isPlaylistLoading, error: playlistError, refetch: refetchPlaylist } = useQuery<Public.PlaylistWithStats>(`/playlists/${playlistId}/stat`);
+    const { data: playlistHist, isLoading: isTracksLoading, error: tracksError, refetch: refetchTracks } = useQuery<Public.PlaylistHist>(`/playlists/${playlistId}/tracks/hist`);
 
-    const playlist = data as Public.PlaylistHist;
     console.log(playlist);
-    // const playlistMetadata: PlaylistMetadata = {
-    //     numTracks: playlist.tracks.length,
-    //     totalMs: playlist.tracks.reduce((acc, curr) => acc + curr.track.durationMs, 0),
-    // };
-    const playlistMetadata: PlaylistMetadata = {
-        numTracks: 100000,
-        totalMs: 204204982094,
-    }
 
     async function setPlaylistSync(enabled: boolean) {
         setIsSyncing(true);
         // TODO: error response handling
         await backendAxios.post<Public.PlaylistSyncRes>(`/playlists/${playlistId}/sync`, { enabled: enabled });
         setIsSyncing(false);
-        refetch();
+        refetchPlaylist();
+        refetchTracks();
     }
 
     return (
@@ -40,8 +32,8 @@ function PlaylistPage() {
             // style={{ paddingLeft: 'calc(100vw - 100%)' }}
             // style={{ scrollbarGutter: 'stable', overflow: 'auto' }}
             >
-                <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isLoading={isLoading} isSyncing={isSyncing} error={error} />
-                {(!isLoading && !error) && <PlaylistBody playlist={playlist} isSyncing={isSyncing} setPlaylistSync={setPlaylistSync} />}
+                <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} isLoading={isPlaylistLoading} isSyncing={isSyncing} error={playlistError} />
+                {(!isTracksLoading && !tracksError) && <PlaylistBody playlist={playlistHist} isSyncing={isSyncing} setPlaylistSync={setPlaylistSync} />}
             </div>
         </div>
     );
