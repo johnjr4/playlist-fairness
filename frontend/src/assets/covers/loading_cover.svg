@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
-  <circle cx='100' cy='100' r='5' fill='#f9fafb'/>
-  <circle cx='80' cy='100' r='5' fill='#f9fafb'/>
-  <circle cx='120' cy='100' r='5' fill='#f9fafb'/>
+  <rect fill="#111827ff" width="200" height="200"/>
+  <g fill='#2a4160'>
+    <circle cx='100' cy='100' r='5'/>
+    <circle cx='80' cy='100' r='5'/>
+    <circle cx='120' cy='100' r='5'/>
+  </g>
 </svg>
