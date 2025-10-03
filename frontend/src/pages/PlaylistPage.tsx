@@ -13,15 +13,16 @@ function PlaylistPage() {
     const [isSyncing, setIsSyncing] = useState(false);
     const { data, isLoading, error, refetch } = useQuery<Public.PlaylistHist>(`/playlists/${playlistId}/tracks/hist`);
 
-    if (isLoading) return <div>It's the loading page...</div>
-    if (error) return <div>Error!</div>
-
     const playlist = data as Public.PlaylistHist;
     console.log(playlist);
+    // const playlistMetadata: PlaylistMetadata = {
+    //     numTracks: playlist.tracks.length,
+    //     totalMs: playlist.tracks.reduce((acc, curr) => acc + curr.track.durationMs, 0),
+    // };
     const playlistMetadata: PlaylistMetadata = {
-        numTracks: playlist.tracks.length,
-        totalMs: playlist.tracks.reduce((acc, curr) => acc + curr.track.durationMs, 0),
-    };
+        numTracks: 100000,
+        totalMs: 204204982094,
+    }
 
     async function setPlaylistSync(enabled: boolean) {
         setIsSyncing(true);
@@ -32,9 +33,16 @@ function PlaylistPage() {
     }
 
     return (
-        <div className='flex flex-col items-center mt-4 w-full'>
-            <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isLoading={isLoading} isSyncing={isSyncing} error={error} />
-            <PlaylistBody playlist={playlist} isSyncing={isSyncing} setPlaylistSync={setPlaylistSync} />
+        <div
+            className="overflow-x-clip"
+        >
+            <div className='w-dvw flex flex-col items-center mt-4' // Fixes layout shift when scrollbar appears
+            // style={{ paddingLeft: 'calc(100vw - 100%)' }}
+            // style={{ scrollbarGutter: 'stable', overflow: 'auto' }}
+            >
+                <PlaylistHeader playlist={playlist} setPlaylistSync={setPlaylistSync} playlistMetadata={playlistMetadata} isLoading={isLoading} isSyncing={isSyncing} error={error} />
+                {(!isLoading && !error) && <PlaylistBody playlist={playlist} isSyncing={isSyncing} setPlaylistSync={setPlaylistSync} />}
+            </div>
         </div>
     );
 }

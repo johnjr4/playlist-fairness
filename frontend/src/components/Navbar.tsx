@@ -5,7 +5,7 @@ import NavbarLink from "./ui/NavbarLink";
 function Navbar({ ref }: { ref: React.Ref<HTMLElement> }) {
 
     return (
-        <nav className={`fixed top-0 w-full flex justify-between items-center shadow-md
+        <nav className={`fixed top-0 w-dvw flex justify-between items-center shadow-md
             h-10 sm:h-12 md:h-14 lg:h-16
             z-20
             px-1 lg:px-2 py-1.5
