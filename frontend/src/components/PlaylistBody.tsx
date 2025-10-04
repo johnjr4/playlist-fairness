@@ -4,27 +4,52 @@ import * as Public from 'spotifair';
 import TrackList from "./TrackList";
 import SearchBar from "./SearchBar";
 import { useState } from "react";
+import type { PlaylistHistState } from "../utils/types/playlistMeta";
+import { FaFilter } from "react-icons/fa6";
+import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 
 interface PlaylistBodyProps {
     playlist: Public.PlaylistHist | null;
+    state: PlaylistHistState;
     setPlaylistSync: (setSyncTo: boolean) => void;
-    isSyncing: boolean;
+    className?: string;
+    refetch: () => Promise<void>;
 }
 
-function PlaylistBody({ playlist, setPlaylistSync, isSyncing }: PlaylistBodyProps) {
+function getSearchStyling(state: PlaylistHistState) {
+    switch (state) {
+        case 'synced':
+            return undefined;
+        case 'loading':
+            return 'opacity-0';
+        default:
+            return 'opacity-30';
+    }
+}
+
+function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: PlaylistBodyProps) {
     const [searchString, setSearchString] = useState('');
 
-    if (!playlist) return <div>No playlist found</div>
+    // if (!playlist) return <div>No playlist found</div>
 
     return (
-        <div className='w-full max-w-6xl flex justify-center mt-23 gap-3'>
-            <PlaylistAnalysis playlist={playlist} className={`w-100 ${cardClasses['glass-card']} grow-0 shrink-0`} />
+        <div className={`${className} w-full max-w-6xl flex justify-center mt-14 gap-3 min-h-full`}>
+            <PlaylistAnalysis playlist={playlist} state={state} className={`w-80 ${cardClasses['glass-card']} grow-0 shrink-0`} />
             <div className="w-full flex flex-col gap-3 grow">
-                <div className={`sticky top-15 w-full px-4 flex justify-between items-center ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs`}>
-                    <SearchBar setSearchString={setSearchString} />
-                    <div>Sorting</div>
+                <div className={`sticky top-15 w-full px-4  ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
+                ${state !== 'synced' ? 'pointer-events-none opacity-70' : undefined}`}>
+                    <div className={`flex justify-between items-center ${getSearchStyling(state)}`}>
+                        <SearchBar setSearchString={setSearchString} disabled={state !== 'synced'} />
+                        <div className="flex text-sm items-center gap-6">
+                            <div className="flex items-center">
+                                <TiArrowSortedUp />
+                                <div>Playlist order</div>
+                            </div>
+                            <FaFilter />
+                        </div>
+                    </div>
                 </div>
-                <TrackList playlist={playlist} setPlaylistSync={setPlaylistSync} isSyncing={isSyncing} searchString={searchString} />
+                <TrackList className={`grow ${cardClasses['glass-card']}`} playlist={playlist} setPlaylistSync={setPlaylistSync} state={state} searchString={searchString} refetch={refetch} />
             </div>
         </div>
     )

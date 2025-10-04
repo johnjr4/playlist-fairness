@@ -24,7 +24,7 @@ function MainLayout() {
 
 
     return (
-        <div className={`min-h-screen flex flex-col text-textPrimary`}>
+        <div className={`min-h-screen h-full flex flex-col text-textPrimary`}>
             <header className="relative">
                 <Navbar ref={navbarRef} />
             </header>

@@ -51,15 +51,11 @@ function PlaylistPage() {
     }
 
     return (
-        <div
-            className="overflow-x-clip"
-        >
-            <div className='w-dvw flex flex-col items-center mt-4' // Fixes layout shift when scrollbar appears
-            // style={{ paddingLeft: 'calc(100vw - 100%)' }}
-            // style={{ scrollbarGutter: 'stable', overflow: 'auto' }}
+        <div className="overflow-x-clip min-h-full h-full py-4">
+            <div className='w-dvw min-h-full flex flex-col items-center ' // Fixes layout shift when scrollbar appears
             >
                 <PlaylistHeader playlistId={parseInt(playlistId!)} playlistStats={{ numTracks, totalMs }} setPlaylistSync={setPlaylistSync} playlistHistState={playlistHistState} />
-                {(!isTracksLoading && !tracksError) && <PlaylistBody playlist={playlistHist} isSyncing={isSyncing} setPlaylistSync={setPlaylistSync} />}
+                <PlaylistBody className='grow' playlist={playlistHist} state={playlistHistState} setPlaylistSync={setPlaylistSync} refetch={refetchTracks} />
             </div>
         </div>
     );

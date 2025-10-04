@@ -36,27 +36,6 @@ function getHeaderState(isLoading: boolean, error: string | null): PlaylistHeade
     return 'loaded';
 }
 
-function getStatsState(isLoading: boolean, error: string | null, isSyncing: boolean, playlistWithStats: Public.PlaylistWithStats | null): PlaylistHistState {
-    if (isLoading) {
-        return 'loading';
-    }
-
-    if (error) {
-        return 'error';
-    }
-
-    // By here we know playlist stats exist
-    if (isSyncing) {
-        return 'syncing';
-    }
-
-    if (playlistWithStats!.syncEnabled) {
-        return 'synced';
-    }
-
-    return 'unsynced';
-}
-
 // Functions deriving from state
 
 function getDropdown(state: PlaylistHistState, setSyncModalOpen: (setOpen: boolean) => void, updateSync: (setSync: boolean) => void) {

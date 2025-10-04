@@ -3,9 +3,10 @@ import Button from "./ui/Button";
 
 interface SearchBarProps {
     setSearchString: (searchString: string) => void;
+    disabled?: boolean;
 }
 
-function SearchBar({ setSearchString }: SearchBarProps) {
+function SearchBar({ setSearchString, disabled = false }: SearchBarProps) {
     const [localQuery, setLocalQuery] = useState('');
 
     function setQuery(newQuery: string) {
@@ -18,12 +19,13 @@ function SearchBar({ setSearchString }: SearchBarProps) {
         <div className="flex justify-center items-center gap-2 md:gap-4 my-4 sm:w-lg md:w-xl h-8 md:h-12">
             <input
                 type='text'
+                disabled={disabled}
                 value={localQuery}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search..."
                 className="relative z-10 px-5 py-3 w-full max-h-full rounded-sm bg-background-300 shadow-sm shadow-background-700"
             />
-            <Button onClick={() => setQuery('')} variant="secondary" className="max-h-full">
+            <Button onClick={() => setQuery('')} variant="secondary" className="max-h-full" disabled={disabled}>
                 Clear
             </Button>
         </div>

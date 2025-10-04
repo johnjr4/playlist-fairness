@@ -10,9 +10,9 @@
     @apply outline md:outline-2;
     --tw-shadow-color: var(--color-background-500);
     @apply shadow-sm md:shadow-md;
-    z-index: 15;
 }
 
 .glass-filter {
     backdrop-filter: blur(25px);
+    z-index: 15;
 }

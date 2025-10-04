@@ -1,5 +1,5 @@
 // src/components/Modal.tsx
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import useClickOutside from '../../utils/useClickOutside';
 import ModalPortal from './ModalPortal';
 import Button from './Button';
@@ -23,6 +23,19 @@ function Modal({
 
     // Close when clicking outside
     useClickOutside(modalRef, onClose, isOpen);
+
+    useEffect(() => {
+        if (isOpen) {
+            // Save original overflow
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+
+            // Cleanup on unmount or close
+            return () => {
+                document.body.style.overflow = originalOverflow;
+            };
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

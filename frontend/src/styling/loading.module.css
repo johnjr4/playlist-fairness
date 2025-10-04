@@ -15,3 +15,19 @@
     animation-delay: 4s;
     animation-fill-mode: backwards;
 }
+
+@keyframes fadeUp {
+    from {
+        transform: translateY(16px);
+    }
+    to {
+        transform: translateY(0px);
+    }
+}
+
+.fade-up {
+    animation-duration: 500ms;
+    animation-name: fadeUp;
+    animation-delay: 4s;
+    animation-fill-mode: backwards;
+}

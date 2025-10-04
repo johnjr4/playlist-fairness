@@ -4,23 +4,116 @@ import * as Public from 'spotifair';
 import Button from "./ui/Button";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
-import SearchBar from "./SearchBar";
-import { useState } from "react";
-import cardClasses from '../styling/cards.module.css';
+import type { PlaylistHistState } from "../utils/types/playlistMeta";
+import SpotifyLink from "./ui/SpotifyLink";
 
 interface TrackListProps {
     className?: string,
-    playlist: Public.PlaylistHist;
+    playlist: Public.PlaylistHist | null;
     setPlaylistSync: (setSyncTo: boolean) => void;
-    isSyncing: boolean;
+    state: PlaylistHistState;
     searchString: string;
+    refetch: () => Promise<void>;
 }
 
-function TrackList({ className, playlist, setPlaylistSync, isSyncing, searchString }: TrackListProps) {
+function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public.TrackWithMeta) => boolean) {
+    if (playlist.tracks.length < 1) {
+        return (
+            <div className="grow flex justify-center items-center">
+                <p>This playlist doesn't have any tracks. Try adding some <SpotifyLink text='on Spotify' type='playlist' uri={playlist.spotifyUri} underlined={true} /></p>
+            </div>
+        )
+    }
 
     const maxCount = playlist.tracks.reduce((accumulator, currentValue) => {
         return Math.max(accumulator, currentValue.listeningEvents.length);
     }, 0);
+    return (
+        <ul className="grow flex flex-col w-full gap-2">
+            {playlist.tracks.filter(t => filterTrack(t.track)).map(t => <PlaylistTrackRow
+                playlistTrack={t}
+                key={t.track.id}
+                fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
+        </ul>
+    )
+}
+
+function getTrackListTable(playlist: Public.PlaylistHist, filterTrack: (track: Public.TrackWithMeta) => boolean) {
+    return (
+        <>
+            <div className="w-full flex flex-col gap-2 grow">
+                <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2 py-1`}>
+                    <div></div>
+                    <div>Title</div>
+                    <div>Artist</div>
+                    <div>Album</div>
+                    <div className='text-right'>Plays</div>
+                </div>
+                {getTrackList(playlist, filterTrack)}
+            </div>
+        </>
+    )
+}
+
+function getCenteredContent(children: React.ReactNode) {
+    return (
+        <div className="w-full h-full flex flex-col gap-1 justify-center items-center">
+            {children}
+        </div>
+    )
+}
+
+function getMainContent(
+    state: PlaylistHistState,
+    playlist: Public.PlaylistHist | null,
+    refetch: () => Promise<void>,
+    setPlaylistSync: (setSyncTo: boolean) => void,
+    filterTrack: (track: Public.TrackWithMeta) => boolean) {
+
+    switch (state) {
+        case 'loading':
+            // Loading means card is fully empty
+            return undefined;
+        case 'error':
+            return getCenteredContent(
+                <>
+                    <div>Sorry, something went wrong</div>
+                    <Button onClick={() => refetch()}>Try again</Button>
+                </>
+            );
+        case 'syncing':
+            return getCenteredContent(
+                <>
+                    <div className={`flex flex-col gap-1 ${loadingClasses['fade-up']}`}>
+                        <p className="text-base lg:text-lg">Syncing playlist</p>
+                        <div className="p-2 text-center flex justify-center">
+                            <ScaleLoader color="var(--color-textPrimary)" height={12} barCount={12} radius={5} speedMultiplier={1.2} />
+                        </div>
+                    </div>
+                    <p className={`text-sm lg:text-base ${loadingClasses['fade-in']}`}>
+                        This may take a while
+                    </p>
+                </>
+            );
+        case 'unsynced':
+            return getCenteredContent(
+                <>
+                    <div>Sync not enabled for this playlist</div>
+                    <Button onClick={() => setPlaylistSync(true)}>Enable sync</Button>
+                </>
+            );
+        case 'synced':
+            return getTrackListTable(playlist!, filterTrack);
+        default:
+            return getCenteredContent(
+                <>
+                    <div>Something went wrong</div>
+                </>
+            );
+    }
+}
+
+function TrackList({ className, playlist, setPlaylistSync, state, searchString, refetch }: TrackListProps) {
 
     const lowercaseSearchString = searchString ? searchString.toLowerCase() : null;
     function filterTrack(track: Public.TrackWithMeta) {
@@ -34,50 +127,10 @@ function TrackList({ className, playlist, setPlaylistSync, isSyncing, searchStri
     }
 
 
-    let mainContent;
-    if (isSyncing) {
-        mainContent = (
-            <div className="w-full h-full flex flex-col gap-2 justify-center items-center">
-                <p className="text-base lg:text-lg">Syncing playlist</p>
-                <div className="p-2 text-center flex justify-center">
-                    <ScaleLoader color="var(--color-textPrimary)" height={12} barCount={10} radius={5} speedMultiplier={1.2} />
-                </div>
-                <p className={`text-sm lg:text-base ${loadingClasses['fade-in']}`}>
-                    This may take a while
-                </p>
-            </div>
-        )
-    } else if (!playlist.syncEnabled) {
-        mainContent = (
-            <div className="w-full h-full flex flex-col gap-2 justify-center items-center">
-                <div>Sync not enabled for this playlist</div>
-                <Button onClick={() => setPlaylistSync(true)}>Enable it</Button>
-            </div>
-        )
-    } else {
-        mainContent = (
-            <>
-                <div className="w-full flex flex-col gap-2">
-                    <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2 py-1`}>
-                        <div></div>
-                        <div>Title</div>
-                        <div>Artist</div>
-                        <div>Album</div>
-                        <div className='text-right'>Plays</div>
-                    </div>
-                    <ul className="flex flex-col w-full gap-2">
-                        {playlist.tracks.filter(t => filterTrack(t.track)).map(t => <PlaylistTrackRow
-                            playlistTrack={t}
-                            key={t.track.id}
-                            fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
-                    </ul>
-                </div>
-            </>
-        )
-    }
+    const mainContent = getMainContent(state, playlist, refetch, setPlaylistSync, filterTrack);
 
     return (
-        <div className={`w-full flex flex-col items-center gap-2 ${className}`}>
+        <div className={`w-full flex flex-col items-center gap-2 py-2 px-4 rounded-sm ${className}`}>
             {mainContent}
         </div>
     )
