@@ -1,4 +1,3 @@
-import type PlaylistMetadata from "../utils/types/playlistMeta";
 import { msToHour } from "../utils/unitConvert";
 import CoverArt from "./ui/CoverArt";
 import * as Public from 'spotifair';
@@ -11,45 +10,56 @@ import { CgSpinner } from "react-icons/cg";
 import cardClasses from "../styling/cards.module.css";
 import errorCoverUrl from "../assets/covers/error_cover.svg";
 import loadingCoverUrl from "../assets/covers/loading_cover.svg";
+import useQuery from "../utils/api/useQuery";
+import type { PlaylistHeaderState, PlaylistHistState } from "../utils/types/playlistMeta";
 
 interface PlaylistHeaderProps {
-    playlist: Public.PlaylistWithStats | null;
+    playlistId: number;
+    playlistStats: Public.PlaylistStat;
     setPlaylistSync: (setSyncTo: boolean) => void;
-    isLoading: boolean;
-    isSyncing: boolean;
-    error: string | null;
+    // isSyncing: boolean;
+    playlistHistState: PlaylistHistState;
 }
 
-// Consult playlist_page_fsm in the planning document
-type PlaylistHeaderState = 'loading' | 'error' | 'loadedS' | 'loadedU' | 'syncing';
 
-function getHeaderState(isLoading: boolean, error: string | null, isSyncing: boolean, playlist: Public.PlaylistWithStats | null): PlaylistHeaderState {
+function getHeaderState(isLoading: boolean, error: string | null): PlaylistHeaderState {
     // 1: is it loading?
-    if (!isLoading) {
-        // 2: was there an error?
-        if (error) {
-            return 'error';
-        }
-
-        // By here, we know playlist exists
-        // 3: are we syncing right now? (can only be the case once it's been loaded successfully)
-        if (isSyncing) {
-            return 'syncing';
-        }
-
-        // 4: is sync enabled?
-        if (playlist!.syncEnabled) {
-            return 'loadedS';
-        }
-
-        return 'loadedU';
+    if (isLoading) {
+        return 'loading';
     }
-    return 'loading';
+
+    // 2: was there an error?
+    if (error) {
+        return 'error';
+    }
+
+    return 'loaded';
+}
+
+function getStatsState(isLoading: boolean, error: string | null, isSyncing: boolean, playlistWithStats: Public.PlaylistWithStats | null): PlaylistHistState {
+    if (isLoading) {
+        return 'loading';
+    }
+
+    if (error) {
+        return 'error';
+    }
+
+    // By here we know playlist stats exist
+    if (isSyncing) {
+        return 'syncing';
+    }
+
+    if (playlistWithStats!.syncEnabled) {
+        return 'synced';
+    }
+
+    return 'unsynced';
 }
 
 // Functions deriving from state
 
-function getDropdown(state: PlaylistHeaderState, setSyncModalOpen: (setOpen: boolean) => void, setPlaylistSync: (setSync: boolean) => void) {
+function getDropdown(state: PlaylistHistState, setSyncModalOpen: (setOpen: boolean) => void, updateSync: (setSync: boolean) => void) {
     // Determine dropdown
     if (state === 'syncing' || state === 'loading')
         return (
@@ -61,8 +71,8 @@ function getDropdown(state: PlaylistHeaderState, setSyncModalOpen: (setOpen: boo
 
     // We're in valid loaded state, so determine dropdown items
     const settingsDropdownItems: DropdownItem[] = [];
-    if (state === 'loadedS') settingsDropdownItems.push({ label: 'Disable sync', onClick: () => setSyncModalOpen(true) });
-    else if (state === 'loadedU') settingsDropdownItems.push({ label: 'Enable sync', onClick: () => setPlaylistSync(true) });
+    if (state === 'synced') settingsDropdownItems.push({ label: 'Disable sync', onClick: () => setSyncModalOpen(true) });
+    else if (state === 'unsynced') settingsDropdownItems.push({ label: 'Enable sync', onClick: () => updateSync(true) });
 
     return (
         <Dropdown items={settingsDropdownItems} hasCaret={false}>
@@ -71,35 +81,62 @@ function getDropdown(state: PlaylistHeaderState, setSyncModalOpen: (setOpen: boo
     );
 }
 
-function getHeaderContent(state: PlaylistHeaderState, playlist: Public.PlaylistWithStats | null) {
+function getPlaylistIdentifiers(state: PlaylistHeaderState, playlist: Public.Playlist | null) {
     switch (state) {
         case 'error':
-            return { title: 'Error', summary: 'Error getting playlist', coverUrl: errorCoverUrl };
+            return { title: 'Error', coverUrl: errorCoverUrl };
         case 'loading':
-            return { title: '', summary: '', coverUrl: loadingCoverUrl }
+            return { title: '', coverUrl: loadingCoverUrl }
         default:
             // Non-null playlist because not error or loading
-            let contentSummaryText = 'Syncing...';
-            if (state === 'loadedU') {
-                contentSummaryText = 'Playlist not synced';
-            } else if (state === 'loadedS') {
-                contentSummaryText = `${playlist!.stats.numTracks.toLocaleString()} Tracks • ${msToHour(playlist!.stats.totalMs, true)}`;
-            }
-            return { title: playlist!.name, summary: contentSummaryText, coverUrl: playlist!.coverUrl };
+            return { title: playlist!.name, coverUrl: playlist!.coverUrl };
     }
 }
 
-function PlaylistHeader({ playlist, setPlaylistSync, isLoading, isSyncing, error }: PlaylistHeaderProps) {
+function getSummaryText(statsState: PlaylistHistState, headerState: PlaylistHeaderState, playlistStats: Public.PlaylistStat) {
+    switch (headerState) {
+        // Header error/loading pre-empt sync state
+        case 'error':
+            return 'Error getting playlist';
+        case 'loading':
+            return ''
+        default:
+        // Do nothing if loaded state 
+    }
+    switch (statsState) {
+        case 'error':
+            return 'Error getting playlist tracks';
+        case 'loading':
+            return 'Lodaing tracks...';
+        case 'syncing':
+            return 'Syncing...';
+        case 'synced':
+            return `${playlistStats.numTracks.toLocaleString()} Tracks • ${msToHour(playlistStats.totalMs, true)}`;
+        case 'unsynced':
+            return 'Playlist not synced';
+        default:
+            // Non-null playlist because not error or loading
+            return 'Something went wrong';
+    }
+}
+
+function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playlistStats }: PlaylistHeaderProps) {
+    const { data: playlist, isLoading, error } = useQuery<Public.Playlist>(`/playlists/${playlistId}`);
     const overviewRef = useRef<HTMLDivElement>(null);
     const [syncModalOpen, setSyncModalOpen] = useState(false);
 
-    const state = getHeaderState(isLoading, error, isSyncing, playlist);
+    const state = getHeaderState(isLoading, error);
     // const state = 'loading';
-    console.log(playlist);
 
-    const dropdown = getDropdown(state, setSyncModalOpen, setPlaylistSync);
+    const { title, coverUrl } = getPlaylistIdentifiers(state, playlist);
 
-    const { title, summary, coverUrl } = getHeaderContent(state, playlist);
+    const dropdown = getDropdown(playlistHistState, setSyncModalOpen, updateSync);
+    const summary = getSummaryText(playlistHistState, state, playlistStats);
+
+    function updateSync(setSync: boolean) {
+        console.log(`Updating sync to ${setSync}`);
+        setPlaylistSync(setSync);
+    }
 
     return (
         <div className='relative w-full max-w-7xl flex flex-col gap-4 justify-around items-center mt-5 md:mt-2'>
@@ -138,7 +175,7 @@ function PlaylistHeader({ playlist, setPlaylistSync, isLoading, isSyncing, error
                 message="This will delete all listening history associated with this playlist. Are you sure you want to continue?"
                 secondaryMessage="Your data on Spotify will not be affected"
                 onClose={() => setSyncModalOpen(false)}
-                onConfirm={() => { setPlaylistSync(false); setSyncModalOpen(false); }}
+                onConfirm={() => { setSyncModalOpen(false); updateSync(false); }}
             />
 
         </div>
