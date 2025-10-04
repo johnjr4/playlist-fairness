@@ -120,7 +120,7 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
     return (
         <div className='relative w-full max-w-7xl flex flex-col gap-4 justify-around items-center mt-5 md:mt-2'>
             <div className={`
-                flex items-center flex-col md:flex-row
+                relative flex items-center flex-col md:flex-row
                 rounded-md gap-2 py-2 px-3 lg:gap-4 lg:px-5 lg:py-1
                 ${cardClasses['glass-card']}
                 `}
@@ -144,9 +144,11 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
                         {summary}
                     </p>
                 </div>
-            </div>
-            <div className="absolute -top-8 right-2 md:top-0 md:right-0 flex justify-center">
-                {dropdown}
+                <div className="absolute top-0 flex justify-center
+                    -right-0 md:-right-14 lg:-right-21 xl:-right-30
+                ">
+                    {dropdown}
+                </div>
             </div>
 
             <Modal
