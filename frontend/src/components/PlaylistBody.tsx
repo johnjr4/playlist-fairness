@@ -7,6 +7,7 @@ import { useState } from "react";
 import type { PlaylistHistState } from "../utils/types/playlistMeta";
 import { FaFilter } from "react-icons/fa6";
 import { TiArrowSortedUp } from "react-icons/ti";
+import { useDebounce } from "use-debounce";
 
 interface PlaylistBodyProps {
     playlist: Public.PlaylistHist | null;
@@ -29,6 +30,10 @@ function getSearchStyling(state: PlaylistHistState) {
 
 function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: PlaylistBodyProps) {
     const [searchString, setSearchString] = useState('');
+    const [debouncedSearchString] = useDebounce(searchString, 300);
+
+    // console.log(`search: ${searchString}`)
+    // console.log(`debounced: ${debouncedSearchString}`)
 
     // if (!playlist) return <div>No playlist found</div>
 
@@ -49,7 +54,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                         </div>
                     </div>
                 </div>
-                <TrackList className={`grow ${cardClasses['glass-card']}`} playlist={playlist} setPlaylistSync={setPlaylistSync} state={state} searchString={searchString} refetch={refetch} />
+                <TrackList className={`grow ${cardClasses['glass-card']}`} playlist={playlist} setPlaylistSync={setPlaylistSync} state={state} searchString={debouncedSearchString} refetch={refetch} />
             </div>
         </div>
     )

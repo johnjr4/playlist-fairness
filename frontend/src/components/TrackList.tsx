@@ -7,6 +7,7 @@ import loadingClasses from '../styling/loading.module.css';
 import type { PlaylistHistState } from "../utils/types/playlistMeta";
 import SpotifyLink from "./ui/SpotifyLink";
 import { List } from "react-window";
+import { useMemo } from "react";
 
 interface TrackListProps {
     className?: string,
@@ -17,8 +18,8 @@ interface TrackListProps {
     refetch: () => Promise<void>;
 }
 
-function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public.TrackWithMeta) => boolean) {
-    if (playlist.tracks.length < 1) {
+function getTrackList(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number, maxPlayCount: number) {
+    if (totalNumTracks < 1) {
         return (
             <div className="grow flex justify-center items-center">
                 <p>This playlist doesn't have any tracks. Try adding some <SpotifyLink text='on Spotify' type='playlist' uri={playlist.spotifyUri} underlined={true} /></p>
@@ -26,11 +27,6 @@ function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public
         )
     }
 
-    const maxCount = playlist.tracks.reduce((accumulator, currentValue) => {
-        return Math.max(accumulator, currentValue.listeningEvents.length);
-    }, 0);
-
-    const filteredTracks = playlist.tracks.filter(t => filterTrack(t.track));
 
     if (filteredTracks.length < 1) {
         return (
@@ -46,7 +42,7 @@ function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public
             rowComponent={PlaylistTrackRow}
             rowCount={filteredTracks.length}
             rowHeight={63}
-            rowProps={{ filteredTracks, maxCount }}
+            rowProps={{ filteredTracks, maxPlayCount }}
         />
     );
 
@@ -61,7 +57,7 @@ function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public
     // )
 }
 
-function getTrackListTable(playlist: Public.PlaylistHist, filterTrack: (track: Public.TrackWithMeta) => boolean) {
+function getTrackListTable(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number, maxPlayCount: number) {
     return (
         <>
             <div className="w-full flex flex-col gap-2 grow">
@@ -74,7 +70,7 @@ function getTrackListTable(playlist: Public.PlaylistHist, filterTrack: (track: P
                         <div className='text-right'>Plays</div>
                     </div>
                 </div>
-                {getTrackList(playlist, filterTrack)}
+                {getTrackList(playlist, filteredTracks, totalNumTracks, maxPlayCount)}
             </div>
         </>
     )
@@ -90,10 +86,12 @@ function getCenteredContent(children: React.ReactNode) {
 
 function getMainContent(
     state: PlaylistHistState,
-    playlist: Public.PlaylistHist | null,
+    playlist: Public.Playlist | null,
+    filteredTracks: Public.PlaylistTrackHist[] | null,
+    totalNumTracks: number,
+    maxPlayCount: number,
     refetch: () => Promise<void>,
-    setPlaylistSync: (setSyncTo: boolean) => void,
-    filterTrack: (track: Public.TrackWithMeta) => boolean) {
+    setPlaylistSync: (setSyncTo: boolean) => void) {
 
     switch (state) {
         case 'loading':
@@ -128,7 +126,7 @@ function getMainContent(
                 </>
             );
         case 'synced':
-            return getTrackListTable(playlist!, filterTrack);
+            return getTrackListTable(playlist!, filteredTracks!, totalNumTracks, maxPlayCount);
         default:
             return getCenteredContent(
                 <>
@@ -141,6 +139,8 @@ function getMainContent(
 function TrackList({ className, playlist, setPlaylistSync, state, searchString, refetch }: TrackListProps) {
 
     const lowercaseSearchString = searchString ? searchString.toLowerCase() : null;
+
+    // Declare filtering function
     function filterTrack(track: Public.TrackWithMeta) {
         if (lowercaseSearchString && lowercaseSearchString.length > 0) {
             return track.name.toLowerCase().includes(lowercaseSearchString)
@@ -151,8 +151,22 @@ function TrackList({ className, playlist, setPlaylistSync, state, searchString, 
         return true;
     }
 
+    // Derive relevant playlist data
+    const totalNumTracks = playlist?.tracks.length ?? 0;
+    console.log(`numtracks: ${totalNumTracks}`);
+    const maxPlayCount = useMemo(() => {
+        if (!playlist) return 0;
+        return playlist.tracks.reduce((accumulator, currentValue) => {
+            return Math.max(accumulator, currentValue.listeningEvents.length);
+        }, 0);
+    }, [playlist]);
+    const filteredTracks = useMemo(() => {
+        if (!playlist) return null;
+        return playlist.tracks.filter(t => filterTrack(t.track));
+    }, [playlist, searchString])
 
-    const mainContent = getMainContent(state, playlist, refetch, setPlaylistSync, filterTrack);
+    // Get content from state
+    const mainContent = getMainContent(state, playlist, filteredTracks, totalNumTracks, maxPlayCount, refetch, setPlaylistSync);
 
     return (
         <div className={`w-full flex flex-col items-center gap-2 py-3 px-2 rounded-sm ${className}`}>

@@ -12,24 +12,24 @@ import type { RowComponentProps } from 'react-window';
 
 interface PlaylistTrackRowsProps {
     filteredTracks: Public.PlaylistTrackHist[];
-    maxCount: number;
+    maxPlayCount: number;
 }
 
-function getFillPercent(playlistTrack: Public.PlaylistTrackHist, maxCount: number) {
-    const fillPercent = maxCount > 0 ? (playlistTrack.listeningEvents.length / maxCount) * 100 : 0;
+function getFillPercent(playlistTrack: Public.PlaylistTrackHist, maxPlayCount: number) {
+    const fillPercent = maxPlayCount > 0 ? (playlistTrack.listeningEvents.length / maxPlayCount) * 100 : 0;
     return Math.max(0, Math.min(fillPercent, 100));
 }
 
-function PlaylistTrackRow({ index, style, filteredTracks, maxCount }: RowComponentProps<PlaylistTrackRowsProps>) {
+function PlaylistTrackRow({ index, style, filteredTracks, maxPlayCount }: RowComponentProps<PlaylistTrackRowsProps>) {
     // return <div style={style}>{index}</div>
     const playlistTrack = filteredTracks[index];
     const track = playlistTrack.track;
-    const fillPercent = getFillPercent(playlistTrack, maxCount);
+    const fillPercent = getFillPercent(playlistTrack, maxPlayCount);
 
     return (
         <div className={`w-full ${playlistTrack.currentlyOnPlaylist ? undefined : 'brightness-60'} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}
             style={style}>
-            <div className='text-right text-sm font-mono'>{index.toString().replaceAll('0', 'O')}</div>
+            <div className='text-right text-sm font-mono'>{(index + 1).toString().replaceAll('0', 'O')}</div>
             <div className={`relative px-2 py-1.5 ${ptRowClasses['row-details']} z-10 items-center`}>
                 {/* Background fill */}
                 <div
@@ -39,7 +39,7 @@ function PlaylistTrackRow({ index, style, filteredTracks, maxCount }: RowCompone
                 {/* Content */}
                 <CoverArt coverUrl={track.album.coverUrl} size="w-full" />
                 <div className='flex flex-col'>
-                    <p className='text-textPrimary line-clamp-2'>{track.name}</p>
+                    <p className='text-textPrimary line-clamp-1'>{track.name}</p>
                     <p className='text-sm '>{track.artist.name}</p>
                 </div>
                 <div className='text-sm'>{track.album.name}</div>
