@@ -83,13 +83,14 @@ export async function getPlaylistHist(playlistId: number, ownerId: string | null
     }
 }
 
-export async function getTotalMs(playlistId: number) {
+export async function getTotalMs(playlistId: number, requireOnPlaylist = true) {
     try {
         const totalMs = await prisma.track.aggregate({
             where: {
                 playlistTracks: {
                     some: {
                         playlistId: playlistId,
+                        ...(requireOnPlaylist ? { currentlyOnPlaylist: true } : {}),
                     }
                 }
             },
@@ -116,6 +117,7 @@ export async function getPlaylistWithStats(playlistId: number, ownerId: string):
         // By this point we are sure playlist exists
         const numPlaylistTracks = await getPlaylistTrackCount(playlistId, ownerId);
         const totalMs = await getTotalMs(playlistId);
+        console.log(`numPlaylistTracks: ${numPlaylistTracks}, totalMs: ${totalMs}`);
 
         return {
             ...playlist,

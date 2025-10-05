@@ -16,7 +16,7 @@ function PlaylistTrackRow({ playlistTrack, className, index, fillPercent }: Play
     }
     const cappedPercent = Math.max(0, Math.min(fillPercent, 100));
     return (
-        <li className={`w-full ${className} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}>
+        <li className={`w-full ${className} ${playlistTrack.currentlyOnPlaylist ? 'brightness-100' : 'brightness-60'} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}>
             <div className='text-right text-sm font-mono'>{index.toString().replaceAll('0', 'O')}</div>
             <div className={`relative px-2 py-1.5 ${ptRowClasses['row-details']} items-center`}>
                 {/* Background fill */}

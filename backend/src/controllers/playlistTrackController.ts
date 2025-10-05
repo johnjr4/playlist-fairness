@@ -45,14 +45,15 @@ export async function getPlaylistTrackFull(playlistId: number, trackId: number, 
     }
 }
 
-export async function getPlaylistTrackCount(playlistId: number, ownerId: string) {
+export async function getPlaylistTrackCount(playlistId: number, ownerId: string, requireOnPlaylist = true) {
     try {
         const numPlaylistTracks = await prisma.playlistTrack.count({
             where: {
                 playlistId: playlistId,
                 playlist: {
                     ownerId: ownerId,
-                }
+                },
+                ...(requireOnPlaylist ? { currentlyOnPlaylist: true } : {}),
             }
         });
         return numPlaylistTracks;

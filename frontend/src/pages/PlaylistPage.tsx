@@ -36,9 +36,12 @@ function PlaylistPage() {
 
     // console.log(playlist);
     const playlistHistState = getPlaylistHistState(isTracksLoading, tracksError, isSyncing, playlistHist);
-    const numTracks = playlistHist?.tracks.length ?? 0;
+    const filteredTracks = useMemo(() => {
+        return playlistHist?.tracks.filter(t => t.currentlyOnPlaylist) ?? null;
+    }, [playlistHist]);
+    const numTracks = filteredTracks?.length ?? 0;
     const totalMs = useMemo(() => {
-        return playlistHist?.tracks.reduce((sum, track) => sum + track.track.durationMs, 0) ?? 0;
+        return filteredTracks?.reduce((sum, track) => sum + track.track.durationMs, 0) ?? 0;
     }, [playlistHist]);
 
     async function setPlaylistSync(enabled: boolean) {
