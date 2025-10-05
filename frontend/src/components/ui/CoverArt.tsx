@@ -17,7 +17,7 @@ function CoverArt({ coverUrl, alt = 'Cover Image', size = 'w-48', className }: C
             {(coverUrl === null || coverUrl === '' || status === 'error')
                 ?
                 <img
-                    src={errorCoverUrl} // Can assert because of initial status state
+                    src={errorCoverUrl}
                     alt={alt}
                     className="w-full h-full object-cover"
                 />
@@ -31,6 +31,7 @@ function CoverArt({ coverUrl, alt = 'Cover Image', size = 'w-48', className }: C
                             className="w-full h-full object-cover"
                             onLoad={() => setStatus('loaded')}
                             onError={() => setStatus('error')}
+                            loading='lazy'
                         />
                     </>
                 )

@@ -6,6 +6,7 @@ import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
 import type { PlaylistHistState } from "../utils/types/playlistMeta";
 import SpotifyLink from "./ui/SpotifyLink";
+import { List } from "react-window";
 
 interface TrackListProps {
     className?: string,
@@ -40,14 +41,24 @@ function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public
     }
 
     return (
-        <ul className="grow flex flex-col w-full gap-2">
-            {filteredTracks.map((t, i) => <PlaylistTrackRow
-                index={i + 1}
-                playlistTrack={t}
-                key={t.track.id}
-                fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
-        </ul>
-    )
+        <List
+            className="grow flex flex-col w-full"
+            rowComponent={PlaylistTrackRow}
+            rowCount={filteredTracks.length}
+            rowHeight={63}
+            rowProps={{ filteredTracks, maxCount }}
+        />
+    );
+
+    // return (
+    //     <ul className="grow flex flex-col w-full gap-2">
+    //         {filteredTracks.map((t, i) => <PlaylistTrackRow
+    //             index={i}
+    //             playlistTrack={t}
+    //             key={t.track.id}
+    //             fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
+    //     </ul>
+    // )
 }
 
 function getTrackListTable(playlist: Public.PlaylistHist, filterTrack: (track: Public.TrackWithMeta) => boolean) {
