@@ -28,9 +28,20 @@ function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public
     const maxCount = playlist.tracks.reduce((accumulator, currentValue) => {
         return Math.max(accumulator, currentValue.listeningEvents.length);
     }, 0);
+
+    const filteredTracks = playlist.tracks.filter(t => filterTrack(t.track));
+
+    if (filteredTracks.length < 1) {
+        return (
+            <div className="grow flex justify-center items-center">
+                <p>No search results</p>
+            </div>
+        )
+    }
+
     return (
         <ul className="grow flex flex-col w-full gap-2">
-            {playlist.tracks.filter(t => filterTrack(t.track)).map((t, i) => <PlaylistTrackRow
+            {filteredTracks.map((t, i) => <PlaylistTrackRow
                 index={i}
                 playlistTrack={t}
                 key={t.track.id}
