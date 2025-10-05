@@ -33,7 +33,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
     // if (!playlist) return <div>No playlist found</div>
 
     return (
-        <div className={`${className} w-full max-w-6xl flex justify-center mt-14 gap-3 min-h-full`}>
+        <div className={`${className} w-full max-w-7xl flex justify-center mt-14 gap-3 min-h-full`}>
             <PlaylistAnalysis playlist={playlist} state={state} className={`w-80 ${cardClasses['glass-card']} grow-0 shrink-0`} />
             <div className="w-full flex flex-col gap-3 grow">
                 <div className={`sticky top-15 w-full px-4  ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs

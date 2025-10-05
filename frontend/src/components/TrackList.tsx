@@ -1,5 +1,5 @@
 import PlaylistTrackRow from "../components/PlaylistTrackRow";
-import playlistTrackRowClasses from '../styling/playlistTrackRow.module.css'
+import ptRowClasses from '../styling/playlistTrackRow.module.css'
 import * as Public from 'spotifair';
 import Button from "./ui/Button";
 import { ScaleLoader } from "react-spinners";
@@ -30,7 +30,8 @@ function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public
     }, 0);
     return (
         <ul className="grow flex flex-col w-full gap-2">
-            {playlist.tracks.filter(t => filterTrack(t.track)).map(t => <PlaylistTrackRow
+            {playlist.tracks.filter(t => filterTrack(t.track)).map((t, i) => <PlaylistTrackRow
+                index={i}
                 playlistTrack={t}
                 key={t.track.id}
                 fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
@@ -42,12 +43,14 @@ function getTrackListTable(playlist: Public.PlaylistHist, filterTrack: (track: P
     return (
         <>
             <div className="w-full flex flex-col gap-2 grow">
-                <div className={`${playlistTrackRowClasses.playlistTrackRow} font-bold w-full px-2 py-1`}>
-                    <div></div>
-                    <div>Title</div>
-                    <div>Artist</div>
-                    <div>Album</div>
-                    <div className='text-right'>Plays</div>
+                <div className={`${ptRowClasses['row-full']} font-bold w-full pr-4`}>
+                    <div className="text-right">#</div>
+                    <div className={`${ptRowClasses['row-details']}`}>
+                        <div>Title</div>
+                        <div />
+                        <div>Album</div>
+                        <div className='text-right'>Plays</div>
+                    </div>
                 </div>
                 {getTrackList(playlist, filterTrack)}
             </div>
@@ -130,7 +133,7 @@ function TrackList({ className, playlist, setPlaylistSync, state, searchString, 
     const mainContent = getMainContent(state, playlist, refetch, setPlaylistSync, filterTrack);
 
     return (
-        <div className={`w-full flex flex-col items-center gap-2 py-2 px-4 rounded-sm ${className}`}>
+        <div className={`w-full flex flex-col items-center gap-2 py-3 px-2 rounded-sm ${className}`}>
             {mainContent}
         </div>
     )
