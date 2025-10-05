@@ -14,8 +14,8 @@ interface TrackListProps {
     playlist: Public.PlaylistHist | null;
     setPlaylistSync: (setSyncTo: boolean) => void;
     state: PlaylistHistState;
-    searchString: string;
     refetch: () => Promise<void>;
+    filterTrack: (track: Public.PlaylistTrackHist) => boolean;
 }
 
 function getTrackList(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number, maxPlayCount: number) {
@@ -136,20 +136,7 @@ function getMainContent(
     }
 }
 
-function TrackList({ className, playlist, setPlaylistSync, state, searchString, refetch }: TrackListProps) {
-
-    const lowercaseSearchString = searchString ? searchString.toLowerCase() : null;
-
-    // Declare filtering function
-    function filterTrack(track: Public.TrackWithMeta) {
-        if (lowercaseSearchString && lowercaseSearchString.length > 0) {
-            return track.name.toLowerCase().includes(lowercaseSearchString)
-                || track.album.name.toLowerCase().includes(lowercaseSearchString)
-                || track.artist.name.toLowerCase().includes(lowercaseSearchString);
-        }
-        // Search string is empty/null, just return true
-        return true;
-    }
+function TrackList({ className, playlist, setPlaylistSync, filterTrack, state, refetch }: TrackListProps) {
 
     // Derive relevant playlist data
     const totalNumTracks = playlist?.tracks.length ?? 0;
@@ -162,8 +149,8 @@ function TrackList({ className, playlist, setPlaylistSync, state, searchString, 
     }, [playlist]);
     const filteredTracks = useMemo(() => {
         if (!playlist) return null;
-        return playlist.tracks.filter(t => filterTrack(t.track));
-    }, [playlist, searchString])
+        return playlist.tracks.filter(t => filterTrack(t));
+    }, [playlist, filterTrack])
 
     // Get content from state
     const mainContent = getMainContent(state, playlist, filteredTracks, totalNumTracks, maxPlayCount, refetch, setPlaylistSync);
