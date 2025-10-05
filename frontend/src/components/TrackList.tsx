@@ -42,7 +42,7 @@ function getTrackList(playlist: Public.PlaylistHist, filterTrack: (track: Public
     return (
         <ul className="grow flex flex-col w-full gap-2">
             {filteredTracks.map((t, i) => <PlaylistTrackRow
-                index={i}
+                index={i + 1}
                 playlistTrack={t}
                 key={t.track.id}
                 fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
