@@ -18,6 +18,7 @@ type DropdownProps = {
 export type DropdownItem = {
     label: string;
     onClick: () => void;
+    className?: string;
 };
 
 function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700', className, positionClassName }: DropdownProps) {
@@ -54,7 +55,7 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700
                             <button
                                 key={idx}
                                 onClick={() => handleItemClick(item.onClick)}
-                                className={`block w-full text-left px-4 py-2 rounded-sm text-xs md:text-sm ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
+                                className={`${item.className} block w-full text-left px-4 py-2 rounded-sm text-xs md:text-sm ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
                             >
                                 {item.label}
                             </button>

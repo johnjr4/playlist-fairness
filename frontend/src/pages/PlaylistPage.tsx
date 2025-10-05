@@ -4,7 +4,7 @@ import * as Public from 'spotifair';
 import { useMemo, useState } from "react";
 import { backendAxios } from "../utils/axiosInstances";
 import PlaylistHeader from "../components/PlaylistHeader";
-import type { PlaylistHistState } from "../utils/types/playlistMeta";
+import type { PlaylistHistState } from "../utils/types/playlistPage";
 import PlaylistBody from "../components/PlaylistBody";
 
 function getPlaylistHistState(isLoading: boolean, error: string | null, isSyncing: boolean, playlistHist: Public.PlaylistHist | null): PlaylistHistState {

@@ -4,7 +4,7 @@ import * as Public from 'spotifair';
 import Button from "./ui/Button";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
-import type { PlaylistHistState } from "../utils/types/playlistMeta";
+import type { PlaylistHistState, SortingOption } from "../utils/types/playlistPage";
 import SpotifyLink from "./ui/SpotifyLink";
 import { List } from "react-window";
 import { useMemo } from "react";
@@ -15,7 +15,9 @@ interface TrackListProps {
     setPlaylistSync: (setSyncTo: boolean) => void;
     state: PlaylistHistState;
     refetch: () => Promise<void>;
-    filterTrack: (track: Public.PlaylistTrackHist) => boolean;
+    filterBySearch: (playlistTrack: Public.PlaylistTrackHist) => boolean;
+    filterByOptions: (playlistTrack: Public.PlaylistTrackHist) => boolean;
+    comparator: (a: Public.PlaylistTrackHist, b: Public.PlaylistTrackHist) => number;
 }
 
 function getTrackList(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number, maxPlayCount: number) {
@@ -136,21 +138,28 @@ function getMainContent(
     }
 }
 
-function TrackList({ className, playlist, setPlaylistSync, filterTrack, state, refetch }: TrackListProps) {
+function TrackList({ className, playlist, setPlaylistSync, filterBySearch, filterByOptions, comparator, state, refetch }: TrackListProps) {
 
     // Derive relevant playlist data
     const totalNumTracks = playlist?.tracks.length ?? 0;
-    console.log(`numtracks: ${totalNumTracks}`);
     const maxPlayCount = useMemo(() => {
         if (!playlist) return 0;
         return playlist.tracks.reduce((accumulator, currentValue) => {
             return Math.max(accumulator, currentValue.listeningEvents.length);
         }, 0);
     }, [playlist]);
-    const filteredTracks = useMemo(() => {
+    const filteredBySearch = useMemo(() => {
+        console.log('filtering by SEARCH');
         if (!playlist) return null;
-        return playlist.tracks.filter(t => filterTrack(t));
-    }, [playlist, filterTrack])
+        return playlist.tracks.filter(t => filterBySearch(t));
+    }, [playlist, filterBySearch]);
+    const filteredTracks = useMemo(() => {
+        console.log('filtering by options');
+        if (!filteredBySearch) return null;
+        const filteredByOptions = filteredBySearch.filter(t => filterByOptions(t))
+        filteredByOptions.sort(comparator);
+        return filteredByOptions;
+    }, [filteredBySearch, filterByOptions]);
 
     // Get content from state
     const mainContent = getMainContent(state, playlist, filteredTracks, totalNumTracks, maxPlayCount, refetch, setPlaylistSync);

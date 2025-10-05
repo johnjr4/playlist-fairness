@@ -1,5 +1,5 @@
 import * as Public from 'spotifair';
-import type { PlaylistHistState } from '../utils/types/playlistMeta';
+import type { PlaylistHistState } from '../utils/types/playlistPage';
 
 interface PlaylistAnalysisProps {
     playlist: Public.PlaylistHist | null;

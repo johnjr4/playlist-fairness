@@ -11,7 +11,7 @@ import cardClasses from "../styling/cards.module.css";
 import errorCoverUrl from "../assets/covers/error_cover.svg";
 import loadingCoverUrl from "../assets/covers/loading_cover.svg";
 import useQuery from "../utils/api/useQuery";
-import type { PlaylistHeaderState, PlaylistHistState } from "../utils/types/playlistMeta";
+import type { PlaylistHeaderState, PlaylistHistState } from "../utils/types/playlistPage";
 
 interface PlaylistHeaderProps {
     playlistId: number;

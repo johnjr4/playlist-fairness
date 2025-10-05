@@ -4,11 +4,10 @@ import * as Public from 'spotifair';
 import TrackList from "./TrackList";
 import SearchBar from "./SearchBar";
 import { useState } from "react";
-import type { FilterOptions, PlaylistHistState } from "../utils/types/playlistMeta";
-import { FaFilter } from "react-icons/fa6";
-import { TiArrowSortedUp } from "react-icons/ti";
+import type { SortingOption, FilterOptions, PlaylistHistState, SortDropdownOption } from "../utils/types/playlistPage";
 import { useDebounce } from "use-debounce";
 import Toggle from "./ui/Toggle";
+import SortDropdown from "./ui/SortDropdown";
 
 interface PlaylistBodyProps {
     playlist: Public.PlaylistHist | null;
@@ -32,7 +31,9 @@ function getSearchStyling(state: PlaylistHistState) {
 function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: PlaylistBodyProps) {
     const [searchString, setSearchString] = useState('');
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({ showRemoved: false, });
+    const [sortOption, setSortOption] = useState<SortingOption>({ ascending: true, sortedOn: 'playlist_order' })
     const [debouncedSearchString] = useDebounce(searchString, 300);
+    const [debouncedFilterOptions] = useDebounce(filterOptions, 200);
 
     // console.log(`search: ${searchString}`)
     // console.log(`debounced: ${debouncedSearchString}`)
@@ -41,22 +42,102 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
 
     const lowercaseSearchString = debouncedSearchString ? debouncedSearchString.toLowerCase() : null;
     // Declare filtering function
-    function filterTrack(playlistTrack: Public.PlaylistTrackHist) {
+    function filterBySearch(playlistTrack: Public.PlaylistTrackHist) {
         const track = playlistTrack.track;
-        let matchesSearchString = true;
         // Only filter with search string if it exists and is not empty
         if (lowercaseSearchString && lowercaseSearchString.length > 0) {
-            matchesSearchString = track.name.toLowerCase().includes(lowercaseSearchString)
+            return track.name.toLowerCase().includes(lowercaseSearchString)
                 || track.album.name.toLowerCase().includes(lowercaseSearchString)
                 || track.artist.name.toLowerCase().includes(lowercaseSearchString);
         }
+        return true;
+    }
 
-        let matchesFilterOptions = true;
-        if (!filterOptions.showRemoved) {
-            matchesFilterOptions = playlistTrack.currentlyOnPlaylist;
+    function filterByOptions(playlistTrack: Public.PlaylistTrackHist) {
+        if (!debouncedFilterOptions.showRemoved) {
+            return playlistTrack.currentlyOnPlaylist;
         }
+        return true;
+    }
 
-        return matchesSearchString && matchesFilterOptions;
+    const sortDropdownOptions: SortDropdownOption[] = [
+        {
+            label: 'Spotify order',
+            option: {
+                sortedOn: 'playlist_order',
+                ascending: true,
+            }
+        },
+        {
+            label: 'Recently played',
+            option: {
+                sortedOn: 'last_played_at',
+                ascending: false,
+            }
+        },
+        {
+            label: 'Most plays',
+            option: {
+                sortedOn: 'num_plays',
+                ascending: false,
+            }
+        },
+        {
+            label: 'Fewest plays',
+            option: {
+                sortedOn: 'num_plays',
+                ascending: true,
+            }
+        },
+        {
+            label: 'A-Z',
+            option: {
+                sortedOn: 'name',
+                ascending: true,
+            }
+        },
+        {
+            label: 'Z-A',
+            option: {
+                sortedOn: 'name',
+                ascending: false,
+            }
+        },
+
+    ];
+
+    function comparator(a: Public.PlaylistTrackHist, b: Public.PlaylistTrackHist) {
+        const ascendingMultipler = sortOption.ascending ? 1 : -1;
+        switch (sortOption.sortedOn) {
+            case 'num_plays':
+                return ascendingMultipler * (a.listeningEvents.length - b.listeningEvents.length);
+            case 'name':
+                return ascendingMultipler * (a.track.name.localeCompare(b.track.name));
+            case 'playlist_order':
+                return ascendingMultipler * (a.playlistPosition - b.playlistPosition);
+            case 'last_played_at':
+                let retVal = null;
+                if (a.listeningEvents.length < 1) {
+                    // If a was never played...
+                    if (b.listeningEvents.length < 1) {
+                        // and b was never played, they're equal
+                        retVal = 0;
+                    } else {
+                        // and b was played, it should come after
+                        retVal = -1;
+                    }
+                } else if (b.listeningEvents.length < 1) {
+                    // If only a was played, it should come after
+                    retVal = 1;
+                }
+                // If any of those were fulfilled, return straightaway
+                if (retVal !== null) return ascendingMultipler * retVal;
+
+                const lastA = Date.parse(a.listeningEvents[a.listeningEvents.length - 1].playedAt);
+                const lastB = Date.parse(b.listeningEvents[b.listeningEvents.length - 1].playedAt);
+
+                return ascendingMultipler * (lastA - lastB);
+        }
     }
 
     return (
@@ -69,8 +150,9 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                         <SearchBar setSearchString={setSearchString} disabled={state !== 'synced'} />
                         <div className="flex text-sm items-center gap-8">
                             <div className="flex items-center">
-                                <TiArrowSortedUp />
-                                <div>Playlist order</div>
+                                {/* <TiArrowSortedUp />
+                                <div>Playlist order</div> */}
+                                <SortDropdown onChange={(val) => setSortOption(val)} sortingOptions={sortDropdownOptions} value={sortOption} />
                             </div>
                             {/* <FaFilter /> */}
                             <div className="text-xs flex flex-col items-center justify-center gap-0.5">
@@ -85,7 +167,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                         </div>
                     </div>
                 </div>
-                <TrackList className={`grow ${cardClasses['glass-card']}`} playlist={playlist} setPlaylistSync={setPlaylistSync} filterTrack={filterTrack} state={state} refetch={refetch} />
+                <TrackList className={`grow ${cardClasses['glass-card']}`} playlist={playlist} setPlaylistSync={setPlaylistSync} filterBySearch={filterBySearch} filterByOptions={filterByOptions} comparator={comparator} state={state} refetch={refetch} />
             </div>
         </div>
     )

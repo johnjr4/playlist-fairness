@@ -10,3 +10,12 @@ export type PlaylistHistState = 'loading' | 'error' | 'synced' | 'unsynced' | 's
 export type FilterOptions = {
     showRemoved: boolean;
 }
+
+export type SortingOption = {
+    sortedOn: 'name' | 'playlist_order' | 'num_plays' | 'last_played_at';
+    ascending: boolean;
+}
+export type SortDropdownOption = {
+    label: string;
+    option: SortingOption;
+}
