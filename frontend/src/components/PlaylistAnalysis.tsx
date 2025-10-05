@@ -31,10 +31,11 @@ function getDisabledStyling(state: PlaylistHistState) {
 }
 
 function PlaylistAnalysis({ playlist, className, state }: PlaylistAnalysisProps) {
+    const length = playlist?.tracks.length ?? 0; // Just to get the compiler to shut up about unused playlist
     return (
         <div className={`block ${className}
             rounded-sm gap-2 py-4 px-3 lg:gap-4 lg:px-5 lg:py-5 ${getDisabledStyling(state)}`}>
-            <h1 className={`sticky top-20 font-semibold text-4xl ${state === 'synced' ? undefined : 'opacity-30'}`}>{getAnaylsisText(state, 20)}</h1>
+            <h1 className={`sticky top-20 font-semibold text-4xl ${state === 'synced' ? undefined : 'opacity-30'}`}>{getAnaylsisText(state, length - 40)}</h1>
         </div>
     )
 }

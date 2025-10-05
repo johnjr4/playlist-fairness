@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface AutoResizeTextProps {
     text: string;
@@ -11,7 +11,7 @@ interface AutoResizeTextProps {
 function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }: AutoResizeTextProps) {
     // const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
-    const [fontSize, setFontSize] = useState(maxFontSize);
+    // const [fontSize, setFontSize] = useState(maxFontSize);
 
     // Helper function to resize text
     function resizeText() {
@@ -37,7 +37,7 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }
             newFontSize -= 1
         }
 
-        setFontSize(newFontSize)
+        // setFontSize(newFontSize)
 
         // If still overflowing at minFontSize, allow wrapping
         if (newFontSize <= minFontSize && textEl.scrollWidth > container.clientWidth) {

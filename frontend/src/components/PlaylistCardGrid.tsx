@@ -1,6 +1,5 @@
 import useQuery from "../utils/api/useQuery";
 import hoverClasses from '../styling/hovereffect.module.css';
-import cardClasses from '../styling/cards.module.css';
 import PlaylistCard from "./PlaylistCard";
 import * as Public from 'spotifair';
 

@@ -6,7 +6,7 @@ import SearchBar from "./SearchBar";
 import { useState } from "react";
 import type { PlaylistHistState } from "../utils/types/playlistMeta";
 import { FaFilter } from "react-icons/fa6";
-import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
+import { TiArrowSortedUp } from "react-icons/ti";
 
 interface PlaylistBodyProps {
     playlist: Public.PlaylistHist | null;

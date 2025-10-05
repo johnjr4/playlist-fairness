@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import DebugRect from "./debug/DebugRect";
+// import DebugRect from "./debug/DebugRect";
 
 interface TilterProps {
     children: React.ReactNode;
@@ -9,28 +9,28 @@ interface TilterProps {
 
 function Tilter({ children, maxAngle = 10, className }: TilterProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [rect, setRect] = useState<DOMRect | null>(null);
+    // const [rect, setRect] = useState<DOMRect | null>(null);
     const hoverDelay = 30; // ms
     const hoverFadeOut = 200; // ms
     const [transitionTime, setTransitionTime] = useState(hoverDelay);
-    const hoverPadding = 2; // px
+    // const hoverPadding = 2; // px
 
     const [enterTimeoutId, setEnterTimeoutId] = useState(-1);
     const [leaveTimeoutId, setLeaveTimeoutId] = useState(-1);
 
     useEffect(() => {
         if (containerRef.current) {
-            const measuredRect = containerRef.current.getBoundingClientRect();
-            setRect(measuredRect);
+            // const measuredRect = containerRef.current.getBoundingClientRect();
+            // setRect(measuredRect);
         }
     }, []);
 
-    function isInside(clientX: number, clientY: number, rect: DOMRect) {
-        return clientX >= rect.left + hoverPadding &&
-            clientX <= rect.right - hoverPadding &&
-            clientY >= rect.top + hoverPadding &&
-            clientY <= rect.bottom - hoverPadding;
-    }
+    // function isInside(clientX: number, clientY: number, rect: DOMRect) {
+    //     return clientX >= rect.left + hoverPadding &&
+    //         clientX <= rect.right - hoverPadding &&
+    //         clientY >= rect.top + hoverPadding &&
+    //         clientY <= rect.bottom - hoverPadding;
+    // }
 
     function calcTilt(clientX: number, clientY: number, rect: DOMRect) {
         const x = clientX - rect.left; // mouse X inside element

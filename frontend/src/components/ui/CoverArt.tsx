@@ -1,5 +1,4 @@
 import loadingCoverUrl from '../../assets/covers/loading_cover.svg'
-import ErrorImage from "./ErrorImage";
 import errorCoverUrl from '../../assets/covers/error_cover.svg'
 import { useState } from "react";
 
@@ -38,10 +37,6 @@ function CoverArt({ coverUrl, alt = 'Cover Image', size = 'w-48', className }: C
             }
         </div>
     )
-}
-
-function ErrorCover() {
-    return <ErrorImage iconSize="text-4xl md:text-5xl lg:text-7xl" className="w-full h-full bg-background-500" />
 }
 
 export default CoverArt;
