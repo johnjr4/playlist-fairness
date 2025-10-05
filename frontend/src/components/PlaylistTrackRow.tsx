@@ -16,7 +16,7 @@ function PlaylistTrackRow({ playlistTrack, className, index, fillPercent }: Play
     }
     const cappedPercent = Math.max(0, Math.min(fillPercent, 100));
     return (
-        <li className={`w-full ${className} ${playlistTrack.currentlyOnPlaylist ? 'brightness-100' : 'brightness-60'} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}>
+        <li className={`w-full ${className} ${playlistTrack.currentlyOnPlaylist ? undefined : 'brightness-60'} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}>
             <div className='text-right text-sm font-mono'>{index.toString().replaceAll('0', 'O')}</div>
             <div className={`relative px-2 py-1.5 ${ptRowClasses['row-details']} items-center`}>
                 {/* Background fill */}
@@ -28,7 +28,7 @@ function PlaylistTrackRow({ playlistTrack, className, index, fillPercent }: Play
                 <CoverArt coverUrl={track.album.coverUrl} size="w-full" />
                 <div className='flex flex-col'>
                     <p className='text-textPrimary line-clamp-2'>{track.name}</p>
-                    <p className='text-sm'>{track.artist.name}</p>
+                    <p className='text-sm '>{track.artist.name}</p>
                 </div>
                 <div className='text-sm'>{track.album.name}</div>
                 <div className='text-sm text-right'>{playlistTrack.listeningEvents.length.toLocaleString()}</div>
