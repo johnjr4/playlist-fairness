@@ -8,6 +8,7 @@ import type { SortingOption, FilterOptions, PlaylistHistState, SortDropdownOptio
 import { useDebounce } from "use-debounce";
 import Toggle from "./ui/Toggle";
 import SortDropdown from "./ui/SortDropdown";
+import { lastPlayedAtComparator, nameComparator, numPlaysComparator, playlistOrderComparator } from "../utils/comparators";
 
 interface PlaylistBodyProps {
     playlist: Public.PlaylistHist | null;
@@ -110,33 +111,13 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
         const ascendingMultipler = sortOption.ascending ? 1 : -1;
         switch (sortOption.sortedOn) {
             case 'num_plays':
-                return ascendingMultipler * (a.listeningEvents.length - b.listeningEvents.length);
+                return numPlaysComparator(ascendingMultipler, a, b);
             case 'name':
-                return ascendingMultipler * (a.track.name.localeCompare(b.track.name));
+                return nameComparator(ascendingMultipler, a, b);
             case 'playlist_order':
-                return ascendingMultipler * (a.playlistPosition - b.playlistPosition);
+                return playlistOrderComparator(ascendingMultipler, a, b);
             case 'last_played_at':
-                let retVal = null;
-                if (a.listeningEvents.length < 1) {
-                    // If a was never played...
-                    if (b.listeningEvents.length < 1) {
-                        // and b was never played, they're equal
-                        retVal = 0;
-                    } else {
-                        // and b was played, it should come after
-                        retVal = -1;
-                    }
-                } else if (b.listeningEvents.length < 1) {
-                    // If only a was played, it should come after
-                    retVal = 1;
-                }
-                // If any of those were fulfilled, return straightaway
-                if (retVal !== null) return ascendingMultipler * retVal;
-
-                const lastA = Date.parse(a.listeningEvents[a.listeningEvents.length - 1].playedAt);
-                const lastB = Date.parse(b.listeningEvents[b.listeningEvents.length - 1].playedAt);
-
-                return ascendingMultipler * (lastA - lastB);
+                return lastPlayedAtComparator(ascendingMultipler, a, b);
         }
     }
 
