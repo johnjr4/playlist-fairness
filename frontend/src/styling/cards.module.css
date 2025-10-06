@@ -16,3 +16,7 @@
     backdrop-filter: blur(25px);
     z-index: 15;
 }
+
+.card-3D {
+    box-shadow: 0px 0px 30px 1px var(--color-background-500), inset 0px 2px 3px 1px var(--color-background-100), inset 0px -1px 4px 0px var(--color-primary-600);
+}
