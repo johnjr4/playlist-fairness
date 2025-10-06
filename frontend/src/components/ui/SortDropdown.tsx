@@ -1,6 +1,6 @@
-import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import type { SortDropdownOption, SortingOption } from "../../utils/types/playlistPage";
 import Dropdown, { type DropdownItem } from "./Dropdown";
+import { FaSortAmountDown, FaSortAmountUpAlt } from "react-icons/fa";
 
 interface SortDropdownProps {
     sortingOptions: SortDropdownOption[];
@@ -27,9 +27,9 @@ function SortDropdown({ sortingOptions, value, onChange }: SortDropdownProps) {
         <Dropdown
             items={getRegularDropdownProps(sortingOptions, onChange, value)}
             hasCaret={false}
-            className="text-sm"
+            className="text-sm text-left"
         >
-            {sortingOptions.find(o => optionsEqual(o.option, value))?.label ?? 'Error'}{value.ascending ? <TiArrowSortedUp /> : <TiArrowSortedDown />}
+            {!value.ascending ? <FaSortAmountDown /> : <FaSortAmountUpAlt />}{sortingOptions.find(o => optionsEqual(o.option, value))?.label ?? 'Error'}
         </Dropdown>
     )
 }
