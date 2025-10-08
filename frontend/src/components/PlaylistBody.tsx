@@ -3,7 +3,7 @@ import cardClasses from "../styling/cards.module.css";
 import * as Public from 'spotifair';
 import TrackList from "./TrackList";
 import SearchBar from "./SearchBar";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { SortingOption, FilterOptions, PlaylistHistState, SortDropdownOption } from "../utils/types/playlistPage";
 import { useDebounce } from "use-debounce";
 import Toggle from "./ui/Toggle";
@@ -121,9 +121,25 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
         }
     }
 
+    // Derive relevant playlist data
+    const totalNumTracks = playlist?.tracks.length ?? 0;
+    const filteredBySearch = useMemo(() => {
+        console.log('filtering by SEARCH');
+        if (!playlist) return null;
+        return playlist.tracks.filter(t => filterBySearch(t));
+    }, [playlist, filterBySearch]);
+    const filteredTracks = useMemo(() => {
+        console.log('filtering by options');
+        if (!filteredBySearch) return null;
+        const filteredByOptions = filteredBySearch.filter(t => filterByOptions(t))
+        filteredByOptions.sort(comparator);
+        return filteredByOptions;
+    }, [filteredBySearch, filterByOptions]);
+
+
     return (
         <div className={`${className} w-full max-w-7xl flex justify-center mt-14 gap-3 min-h-full`}>
-            <PlaylistAnalysis playlist={playlist} state={state} className={`w-80 ${cardClasses['glass-card']} grow-0 shrink-0`} />
+            <PlaylistAnalysis filteredTracks={filteredTracks} state={state} className={`w-80 ${cardClasses['glass-card']} grow-0 shrink-0`} />
             <div className="w-full flex flex-col gap-3 grow">
                 <div className={`sticky top-15 w-full px-4  ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
                 ${state !== 'synced' ? 'pointer-events-none opacity-70' : undefined}`}>
@@ -148,7 +164,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                         </div>
                     </div>
                 </div>
-                <TrackList className={`grow ${cardClasses['glass-card']}`} playlist={playlist} setPlaylistSync={setPlaylistSync} filterBySearch={filterBySearch} filterByOptions={filterByOptions} comparator={comparator} state={state} refetch={refetch} />
+                <TrackList className={`grow ${cardClasses['glass-card']}`} playlist={playlist} filteredTracks={filteredTracks} totalNumTracks={totalNumTracks} setPlaylistSync={setPlaylistSync} state={state} refetch={refetch} />
             </div>
         </div>
     )

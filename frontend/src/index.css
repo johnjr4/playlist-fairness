@@ -18,6 +18,11 @@
   /* Generated from tailwindshades.com */
   --color-background: oklch(17.835% 0.02421 265.25);--color-background-50: oklch(48.825% 0.07714 249.67);--color-background-100: oklch(44.85% 0.07243 252.27);--color-background-200: oklch(37.137% 0.06101 256.16);--color-background-300: oklch(28.884% 0.04824 260.75);--color-background-400: oklch(21.008% 0.03176 264.66);--color-background-500: oklch(17.835% 0.02421 265.25);--color-background-600: oklch(14.677% 0.01776 272.54);--color-background-700: oklch(10.69% 0.0107 266.51);--color-background-800: oklch(0% 0 none);--color-background-900: oklch(0% 0 none);--color-background-950: oklch(0% 0 none);
   --color-primary: oklch(41.786% 0.09501 147.19);--color-primary-50: oklch(80.834% 0.11805 142.41);--color-primary-100: oklch(77.763% 0.13747 143.06);--color-primary-200: oklch(71.905% 0.1731 143.68);--color-primary-300: oklch(63.779% 0.16358 144.48);--color-primary-400: oklch(53.085% 0.12915 145.76);--color-primary-500: oklch(41.786% 0.09501 147.19);--color-primary-600: oklch(34.732% 0.0725 149.08);--color-primary-700: oklch(27.197% 0.05237 150.57);--color-primary-800: oklch(18.838% 0.02702 154.74);--color-primary-900: oklch(6.0847% 0.01039 194.77);--color-primary-950: oklch(0% 0 none);
+
+  --color-fair: var(--color-green-600);
+  --color-fair-small: var(--color-green-400);
+  --color-unfair: oklch(0.58 0.22 27.51);
+  --color-unfair-small: oklch(64.847% 0.22464 26.133);
 }
 
 :root {

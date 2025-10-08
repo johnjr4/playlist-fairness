@@ -1,28 +1,85 @@
 import * as Public from 'spotifair';
-import type { PlaylistHistState } from '../utils/types/playlistPage';
+import type { AnalysisStats, PlaylistHistState } from '../utils/types/playlistPage';
+import { monteCarloFairness } from '../utils/monteCarlo';
+import seedrandom from 'seedrandom';
+import { evaluateFairness, fairColor, fairColorSmall, isFair, top20Plays } from '../utils/fairness';
+import type { JSX } from 'react';
+import { roundToDecimals } from '../utils/numberUtils';
 
 interface PlaylistAnalysisProps {
-    playlist: Public.PlaylistHist | null;
+    filteredTracks: Public.PlaylistTrackHist[] | null;
     state: PlaylistHistState;
     className?: string;
 }
 
-function getAnaylsisText(state: PlaylistHistState, fairnessScore: number) {
+interface PlaylistAnalysisContent {
+    header: JSX.Element | undefined;
+    stats?: AnalysisStats;
+}
+
+function getAnalysis(state: PlaylistHistState, filteredTracks: Public.PlaylistTrackHist[] | null): PlaylistAnalysisContent {
     switch (state) {
         case 'loading':
-            return <>{''}</>;
+            return {
+                header: undefined,
+            };
         case 'error':
-            return <>Your playlist <span className='text-gray-500'>encountered a problem</span></>;
+            return {
+                header: getAnalysisHeader('Your playlist', 'encountered a problem', 'neutral'),
+            }
         case 'syncing':
-            return <>Your playlist is <span className='text-gray-500'>syncing...</span></>
+            return {
+                header: getAnalysisHeader('Your playlist is', 'syncing...', 'neutral'),
+            }
         case 'unsynced':
-            return <>Your playlist is <span className='text-gray-500'>not synced</span></>
+            return {
+                header: getAnalysisHeader('Your playlist is', 'not synced', 'neutral'),
+            }
         case 'synced':
+            if (filteredTracks!.length < 1) {
+                return {
+                    header: getAnalysisHeader('Your playlist', 'has no tracks', 'neutral'),
+                }
+            }
             // TODO: Actually display the analysis score somehow
-            const scoreAnalysis = (fairnessScore > 0 ? <span className='text-green-600'>mostly fair</span> : <span className='text-red-400'>mostly unfair</span>)
-            return <>Your playlist is {scoreAnalysis}</>;
+            const stats = getAnalysisStats(filteredTracks!);
+            if (stats.totalPlays <= 0) {
+                return {
+                    header: getAnalysisHeader('Your playlist', 'has no activity', 'neutral'),
+                }
+            }
+            // const scoreAnalysis = (stats!.fairnessScore > 0 ? <span className='text-green-600'>mostly fair</span> : <span className='text-red-400'>mostly unfair</span>)
+            return {
+                header: getAnalysisHeader('Your playlist is', stats.fairness, stats.isFair ? 'fair' : 'unfair'),
+                stats: stats,
+            }
         default:
-            return <>Something went wrong</>;
+            return {
+                header: <>Something went wrong</>
+            }
+    }
+}
+
+function getAnalysisHeader(startText: string, statusText: string, statusType: 'unfair' | 'fair' | 'neutral') {
+    const textColor = statusType === 'neutral' ? 'text-gray-500' : fairColor(statusType === 'fair');
+    return <>{startText} <span className={textColor}>{statusText}</span></>
+}
+
+function getAnalysisStats(filteredTracks: Public.PlaylistTrackHist[]): AnalysisStats {
+    const newRng = seedrandom(filteredTracks.length.toString());
+    const trackPlayCounts = filteredTracks.map(pt => pt.listeningEvents.length);
+    const totalPlays = trackPlayCounts.reduce((acc, count) => acc + count, 0);
+    const avgPlays = totalPlays / filteredTracks.length;
+    const fairnessScore = monteCarloFairness(trackPlayCounts, newRng, totalPlays);
+    const fairness = evaluateFairness(fairnessScore);
+    return {
+        trackCounts: trackPlayCounts,
+        totalPlays: totalPlays,
+        avgPlays: avgPlays,
+        fairnessScore: fairnessScore,
+        fairness: fairness,
+        isFair: isFair(fairness),
+        top20Share: top20Plays(trackPlayCounts) / totalPlays,
     }
 }
 
@@ -30,12 +87,45 @@ function getDisabledStyling(state: PlaylistHistState) {
     return (state === 'synced') ? undefined : 'opacity-70 pointer-events-none';
 }
 
-function PlaylistAnalysis({ playlist, className, state }: PlaylistAnalysisProps) {
-    const length = playlist?.tracks.length ?? 0; // Just to get the compiler to shut up about unused playlist
+function PlaylistAnalysis({ filteredTracks, className, state }: PlaylistAnalysisProps) {
+    const { header, stats } = getAnalysis(state, filteredTracks);
     return (
         <div className={`block ${className}
             rounded-sm gap-2 py-4 px-3 lg:gap-4 lg:px-5 lg:py-5 ${getDisabledStyling(state)}`}>
-            <h1 className={`sticky top-20 font-semibold text-4xl ${state === 'synced' ? undefined : 'opacity-30'}`}>{getAnaylsisText(state, length - 40)}</h1>
+            <div className='sticky top-20 flex flex-col gap-5'>
+                <h1 className={`font-semibold text-4xl ${state === 'synced' ? undefined : 'opacity-30'}`}>{header}</h1>
+                {
+                    stats &&
+                    <div className='flex flex-col gap-2'>
+                        <AnalysisStat header='Plays'>
+                            Total of <span className='font-semibold'>{stats.totalPlays}</span> play{stats.totalPlays === 1 ? '' : 's'} with an average of <span className='font-semibold'>{roundToDecimals(stats.avgPlays, 2)}</span> play{stats.avgPlays === 1 ? '' : 's'} per track
+                        </AnalysisStat>
+                        <AnalysisStat header='Likelihood' tip='assuming equal chance for all songs'>
+                            More likely than {!stats.isFair && 'only'} about <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
+                                {roundToDecimals(stats.fairnessScore * 100, 2)}%
+                            </span> of distributions
+                        </AnalysisStat>
+                        <AnalysisStat header='Pareto' >
+                            Top {stats.trackCounts.length >= 5 ? '20% of tracks account' : 'track accounts'} for <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
+                                {roundToDecimals(stats.top20Share * 100, 2)}%
+                            </span> of the plays
+                        </AnalysisStat>
+                        <AnalysisStat header='Track' tip='select a track to see more info'>
+                            {''}
+                        </AnalysisStat>
+                    </div>
+                }
+            </div>
+        </div>
+    )
+}
+
+function AnalysisStat({ header, children, tip }: { header: string, children: React.ReactNode, tip?: string }) {
+    return (
+        <div>
+            <h2 className='font-semibold text-dark-highlight'>{header}:</h2>
+            <div className=''>{children}</div>
+            {tip && <p className='text-sm text-dark-highlight'>({tip})</p>}
         </div>
     )
 }

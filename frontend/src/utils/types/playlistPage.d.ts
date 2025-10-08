@@ -1,3 +1,5 @@
+import type { Fairness } from "../fairness";
+
 export default interface PlaylistMetadata {
     totalMs: number;
     numTracks: number;
@@ -18,4 +20,14 @@ export type SortingOption = {
 export type SortDropdownOption = {
     label: string;
     option: SortingOption;
+}
+
+export interface AnalysisStats {
+    trackCounts: number[];
+    totalPlays: number;
+    avgPlays: number;
+    fairnessScore: number;
+    fairness: Fairness;
+    isFair: boolean;
+    top20Share: number;
 }

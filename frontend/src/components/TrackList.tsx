@@ -4,23 +4,21 @@ import * as Public from 'spotifair';
 import Button from "./ui/Button";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
-import type { PlaylistHistState, SortingOption } from "../utils/types/playlistPage";
+import type { PlaylistHistState } from "../utils/types/playlistPage";
 import SpotifyLink from "./ui/SpotifyLink";
 import { List } from "react-window";
-import { useMemo } from "react";
 
 interface TrackListProps {
     className?: string,
-    playlist: Public.PlaylistHist | null;
+    playlist: Public.Playlist | null;
+    filteredTracks: Public.PlaylistTrackHist[] | null;
+    totalNumTracks: number
     setPlaylistSync: (setSyncTo: boolean) => void;
     state: PlaylistHistState;
     refetch: () => Promise<void>;
-    filterBySearch: (playlistTrack: Public.PlaylistTrackHist) => boolean;
-    filterByOptions: (playlistTrack: Public.PlaylistTrackHist) => boolean;
-    comparator: (a: Public.PlaylistTrackHist, b: Public.PlaylistTrackHist) => number;
 }
 
-function getTrackList(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number, maxPlayCount: number) {
+function getTrackList(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number) {
     if (totalNumTracks < 1) {
         return (
             <div className="grow flex justify-center items-center">
@@ -38,6 +36,7 @@ function getTrackList(playlist: Public.Playlist, filteredTracks: Public.Playlist
         )
     }
 
+    const maxPlayCount = filteredTracks.reduce((max, curr) => Math.max(max, curr.listeningEvents.length), 0);
     return (
         <List
             className="grow flex flex-col w-full"
@@ -59,7 +58,7 @@ function getTrackList(playlist: Public.Playlist, filteredTracks: Public.Playlist
     // )
 }
 
-function getTrackListTable(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number, maxPlayCount: number) {
+function getTrackListTable(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number) {
     return (
         <>
             <div className="w-full flex flex-col gap-2 grow">
@@ -72,7 +71,7 @@ function getTrackListTable(playlist: Public.Playlist, filteredTracks: Public.Pla
                         <div className='text-right'>Plays</div>
                     </div>
                 </div>
-                {getTrackList(playlist, filteredTracks, totalNumTracks, maxPlayCount)}
+                {getTrackList(playlist, filteredTracks, totalNumTracks)}
             </div>
         </>
     )
@@ -91,7 +90,6 @@ function getMainContent(
     playlist: Public.Playlist | null,
     filteredTracks: Public.PlaylistTrackHist[] | null,
     totalNumTracks: number,
-    maxPlayCount: number,
     refetch: () => Promise<void>,
     setPlaylistSync: (setSyncTo: boolean) => void) {
 
@@ -128,7 +126,7 @@ function getMainContent(
                 </>
             );
         case 'synced':
-            return getTrackListTable(playlist!, filteredTracks!, totalNumTracks, maxPlayCount);
+            return getTrackListTable(playlist!, filteredTracks!, totalNumTracks);
         default:
             return getCenteredContent(
                 <>
@@ -138,31 +136,9 @@ function getMainContent(
     }
 }
 
-function TrackList({ className, playlist, setPlaylistSync, filterBySearch, filterByOptions, comparator, state, refetch }: TrackListProps) {
-
-    // Derive relevant playlist data
-    const totalNumTracks = playlist?.tracks.length ?? 0;
-    const maxPlayCount = useMemo(() => {
-        if (!playlist) return 0;
-        return playlist.tracks.reduce((accumulator, currentValue) => {
-            return Math.max(accumulator, currentValue.listeningEvents.length);
-        }, 0);
-    }, [playlist]);
-    const filteredBySearch = useMemo(() => {
-        console.log('filtering by SEARCH');
-        if (!playlist) return null;
-        return playlist.tracks.filter(t => filterBySearch(t));
-    }, [playlist, filterBySearch]);
-    const filteredTracks = useMemo(() => {
-        console.log('filtering by options');
-        if (!filteredBySearch) return null;
-        const filteredByOptions = filteredBySearch.filter(t => filterByOptions(t))
-        filteredByOptions.sort(comparator);
-        return filteredByOptions;
-    }, [filteredBySearch, filterByOptions]);
-
+function TrackList({ className, playlist, filteredTracks, totalNumTracks, setPlaylistSync, state, refetch }: TrackListProps) {
     // Get content from state
-    const mainContent = getMainContent(state, playlist, filteredTracks, totalNumTracks, maxPlayCount, refetch, setPlaylistSync);
+    const mainContent = getMainContent(state, playlist, filteredTracks, totalNumTracks, refetch, setPlaylistSync);
 
     return (
         <div className={`w-full flex flex-col items-center gap-2 py-3 px-2 rounded-sm ${className}`}>
