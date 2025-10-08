@@ -37,7 +37,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
     const [debouncedFilterOptions] = useDebounce(filterOptions, 200);
     const [selectedTrack, setSelectedTrack] = useState<Public.PlaylistTrackHist | null>(null);
 
-
+    console.log('Rendering body');
     // console.log(`search: ${searchString}`)
     // console.log(`debounced: ${debouncedSearchString}`)
 

@@ -7,6 +7,11 @@ import { PiMicrophoneStageFill } from 'react-icons/pi';
 import type { AnalysisStats } from '../utils/types/playlistPage';
 import { roundToDecimals } from '../utils/numberUtils';
 
+function getPlayDifference(stats: AnalysisStats, numPlays: number) {
+    if (stats.totalPlays <= 0) return undefined;
+    return <>({roundToDecimals(Math.abs(stats.avgPlays - numPlays), 2)} {stats.avgPlays > numPlays ? 'less' : 'more'} than average)</>;
+}
+
 function PlaylistTrackCard({ playlistTrack, stats }: { playlistTrack: Public.PlaylistTrackHist, stats: AnalysisStats }) {
     const numPlays = playlistTrack.listeningEvents.length;
 
@@ -14,7 +19,7 @@ function PlaylistTrackCard({ playlistTrack, stats }: { playlistTrack: Public.Pla
         <div className='flex flex-col'>
             <div className={`flex flex-col ${cardClasses['glass-card']} rounded-xs p-2 w-60 my-2 gap-1`}>
                 <CoverArt coverUrl={playlistTrack.track.album.coverUrl} size='w-full' />
-                <AutoResizeText maxFontSize={20} minFontSize={16} textStyle='line-clamp-4' text={playlistTrack.track.name} />
+                <AutoResizeText maxFontSize={20} minFontSize={16} textStyle='line-clamp-4' text={playlistTrack.track.name} containerStyle='min-h-6.5' />
                 <div className='w-full flex flex-col justify-between text-xs'>
                     <div className='flex items-baseline gap-1'>
                         <PiMicrophoneStageFill className='size-2.5 shrink-0' />
@@ -27,7 +32,7 @@ function PlaylistTrackCard({ playlistTrack, stats }: { playlistTrack: Public.Pla
                 </div>
             </div>
             <div className='text-sm'>
-                <p>Plays: {numPlays} <span className='text-sm text-dark-highlight'>({roundToDecimals(Math.abs(stats.avgPlays - numPlays), 2)} {stats.avgPlays > numPlays ? 'less' : 'more'} than average)</span></p>
+                <p>Plays: {numPlays} <span className='text-sm text-dark-highlight'> {getPlayDifference(stats, numPlays)}</span></p>
                 <p>Added to playlist: {playlistTrack.addedToPlaylistTime ? new Date(playlistTrack.addedToPlaylistTime).toLocaleDateString() : 'unknown'}</p>
             </div>
         </div>

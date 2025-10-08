@@ -6,9 +6,10 @@ interface AutoResizeTextProps {
     maxFontSize: number; // in px
     minFontSize: number; // in px
     textStyle?: string;
+    containerStyle?: string;
 }
 
-function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }: AutoResizeTextProps) {
+function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle, containerStyle }: AutoResizeTextProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
     // const [fontSize, setFontSize] = useState(maxFontSize);
@@ -37,7 +38,6 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }
             newFontSize -= 1
         }
 
-        console.log(`Size is ${newFontSize}`)
         // setFontSize(newFontSize)
 
         // If still overflowing at minFontSize, allow wrapping
@@ -66,7 +66,7 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }
 
     return (
         <div
-            className="w-full overflow-clip"
+            className={`w-full overflow-clip ${containerStyle}`}
             ref={containerRef}
         >
             <div

@@ -48,6 +48,7 @@ function getAnalysis(state: PlaylistHistState, filteredTracks: Public.PlaylistTr
             if (stats.totalPlays <= 0) {
                 return {
                     header: getAnalysisHeader('Your playlist', 'has no activity', 'neutral'),
+                    stats: stats,
                 }
             }
             // const scoreAnalysis = (stats!.fairnessScore > 0 ? <span className='text-green-600'>mostly fair</span> : <span className='text-red-400'>mostly unfair</span>)
@@ -89,6 +90,61 @@ function getDisabledStyling(state: PlaylistHistState) {
     return (state === 'synced') ? undefined : 'opacity-70 pointer-events-none';
 }
 
+function getLikelihoodDisplayStat(stats: AnalysisStats) {
+    const header = 'Likelihood';
+    if (stats.totalPlays <= 0) {
+        return (
+            <AnalysisStat header={header}>
+                Calculated once playlist has activity
+            </AnalysisStat>
+        );
+    }
+    return (
+        <AnalysisStat header={header} tip='assuming equal chance for all songs'>
+            More likely than {!stats.isFair && 'only'} about <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
+                {roundToDecimals(stats.fairnessScore * 100, 2)}%
+            </span> of distributions
+        </AnalysisStat>
+    )
+}
+
+function getPlaysDisplayStat(stats: AnalysisStats) {
+    if (stats.totalPlays <= 0) {
+        return (
+            <AnalysisStat header='Plays'>
+                <span className='font-semibold'>0</span> plays
+            </AnalysisStat>
+        )
+    }
+    return (
+        <AnalysisStat header='Plays'>
+            <span className='font-semibold'>
+                {stats.totalPlays.toLocaleString()}
+            </span> play{stats.totalPlays === 1 ? '' : 's'} <span className='text-sm text-dark-highlight'>
+                ({roundToDecimals(stats.avgPlays, 2).toLocaleString()} play{roundToDecimals(stats.avgPlays, 2) === 1 ? '' : 's'}/track)
+            </span>
+        </AnalysisStat>
+    );
+}
+
+function getParetoDisplayStat(stats: AnalysisStats) {
+    const header = 'Pareto';
+    if (stats.totalPlays <= 0) {
+        return (
+            <AnalysisStat header={header}>
+                Calculated once playlist has activity
+            </AnalysisStat>
+        )
+    }
+    return (
+        <AnalysisStat header={header} >
+            Top {stats.trackCounts.length >= 5 ? '20% of tracks account' : 'track accounts'} for <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
+                {roundToDecimals(stats.top20Share * 100, 2)}%
+            </span> of the plays
+        </AnalysisStat>
+    );
+}
+
 function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: PlaylistAnalysisProps) {
     const { header, stats } = getAnalysis(state, filteredTracks);
     return (
@@ -99,19 +155,9 @@ function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: P
                 {
                     stats &&
                     <div className='flex flex-col gap-2'>
-                        <AnalysisStat header='Likelihood' tip='assuming equal chance for all songs'>
-                            More likely than {!stats.isFair && 'only'} about <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
-                                {roundToDecimals(stats.fairnessScore * 100, 2)}%
-                            </span> of distributions
-                        </AnalysisStat>
-                        <AnalysisStat header='Plays' tip={`${roundToDecimals(stats.avgPlays, 2)} play${stats.avgPlays === 1 ? '' : 's'}/track`}>
-                            <span className='font-semibold'>{stats.totalPlays}</span> play{stats.totalPlays === 1 ? '' : 's'}
-                        </AnalysisStat>
-                        <AnalysisStat header='Pareto' >
-                            Top {stats.trackCounts.length >= 5 ? '20% of tracks account' : 'track accounts'} for <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
-                                {roundToDecimals(stats.top20Share * 100, 2)}%
-                            </span> of the plays
-                        </AnalysisStat>
+                        {getLikelihoodDisplayStat(stats)}
+                        {getPlaysDisplayStat(stats)}
+                        {getParetoDisplayStat(stats)}
                         <AnalysisStat header='Track' tip={!selectedTrack ? 'select a track to see more info' : undefined}>
                             {selectedTrack && <PlaylistTrackCard playlistTrack={selectedTrack} stats={stats} />}
                         </AnalysisStat>
