@@ -37,8 +37,6 @@ export function top20Plays(trackCounts: number[]) {
     if (numTracks < 5) {
         return trackCounts[0];
     }
-    console.log(trackCounts);
     const top20 = trackCounts.slice(0, Math.floor(numTracks / 5));
-    console.log(top20);
     return top20.reduce((sum, curr) => sum + curr, 0);
 }
