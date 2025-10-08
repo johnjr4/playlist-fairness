@@ -14,11 +14,18 @@ interface TrackListProps {
     filteredTracks: Public.PlaylistTrackHist[] | null;
     totalNumTracks: number
     setPlaylistSync: (setSyncTo: boolean) => void;
+    selectedTrack: Public.PlaylistTrackHist | null;
+    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void;
     state: PlaylistHistState;
     refetch: () => Promise<void>;
 }
 
-function getTrackList(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number) {
+function getTrackList(
+    playlist: Public.Playlist,
+    filteredTracks: Public.PlaylistTrackHist[],
+    selectedTrack: Public.PlaylistTrackHist | null,
+    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void,
+    totalNumTracks: number) {
     if (totalNumTracks < 1) {
         return (
             <div className="grow flex justify-center items-center">
@@ -43,7 +50,7 @@ function getTrackList(playlist: Public.Playlist, filteredTracks: Public.Playlist
             rowComponent={PlaylistTrackRow}
             rowCount={filteredTracks.length}
             rowHeight={63}
-            rowProps={{ filteredTracks, maxPlayCount }}
+            rowProps={{ filteredTracks, selectedTrack, setSelectedTrack, maxPlayCount }}
         />
     );
 
@@ -58,7 +65,12 @@ function getTrackList(playlist: Public.Playlist, filteredTracks: Public.Playlist
     // )
 }
 
-function getTrackListTable(playlist: Public.Playlist, filteredTracks: Public.PlaylistTrackHist[], totalNumTracks: number) {
+function getTrackListTable(
+    playlist: Public.Playlist,
+    filteredTracks: Public.PlaylistTrackHist[],
+    selectedTrack: Public.PlaylistTrackHist | null,
+    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void,
+    totalNumTracks: number) {
     return (
         <>
             <div className="w-full flex flex-col gap-2 grow">
@@ -71,7 +83,7 @@ function getTrackListTable(playlist: Public.Playlist, filteredTracks: Public.Pla
                         <div className='text-right'>Plays</div>
                     </div>
                 </div>
-                {getTrackList(playlist, filteredTracks, totalNumTracks)}
+                {getTrackList(playlist, filteredTracks, selectedTrack, setSelectedTrack, totalNumTracks)}
             </div>
         </>
     )
@@ -89,6 +101,8 @@ function getMainContent(
     state: PlaylistHistState,
     playlist: Public.Playlist | null,
     filteredTracks: Public.PlaylistTrackHist[] | null,
+    selectedTrack: Public.PlaylistTrackHist | null,
+    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void,
     totalNumTracks: number,
     refetch: () => Promise<void>,
     setPlaylistSync: (setSyncTo: boolean) => void) {
@@ -126,7 +140,7 @@ function getMainContent(
                 </>
             );
         case 'synced':
-            return getTrackListTable(playlist!, filteredTracks!, totalNumTracks);
+            return getTrackListTable(playlist!, filteredTracks!, selectedTrack, setSelectedTrack, totalNumTracks);
         default:
             return getCenteredContent(
                 <>
@@ -136,9 +150,9 @@ function getMainContent(
     }
 }
 
-function TrackList({ className, playlist, filteredTracks, totalNumTracks, setPlaylistSync, state, refetch }: TrackListProps) {
+function TrackList({ className, playlist, filteredTracks, totalNumTracks, setPlaylistSync, selectedTrack, setSelectedTrack, state, refetch }: TrackListProps) {
     // Get content from state
-    const mainContent = getMainContent(state, playlist, filteredTracks, totalNumTracks, refetch, setPlaylistSync);
+    const mainContent = getMainContent(state, playlist, filteredTracks, selectedTrack, setSelectedTrack, totalNumTracks, refetch, setPlaylistSync);
 
     return (
         <div className={`w-full flex flex-col items-center gap-2 py-3 px-2 rounded-sm ${className}`}>

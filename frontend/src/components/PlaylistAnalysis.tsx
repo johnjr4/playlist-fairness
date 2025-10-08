@@ -5,10 +5,12 @@ import seedrandom from 'seedrandom';
 import { evaluateFairness, fairColor, fairColorSmall, isFair, top20Plays } from '../utils/fairness';
 import type { JSX } from 'react';
 import { roundToDecimals } from '../utils/numberUtils';
+import PlaylistTrackCard from './PlaylistTrackCard';
 
 interface PlaylistAnalysisProps {
     filteredTracks: Public.PlaylistTrackHist[] | null;
     state: PlaylistHistState;
+    selectedTrack: Public.PlaylistTrackHist | null;
     className?: string;
 }
 
@@ -87,7 +89,7 @@ function getDisabledStyling(state: PlaylistHistState) {
     return (state === 'synced') ? undefined : 'opacity-70 pointer-events-none';
 }
 
-function PlaylistAnalysis({ filteredTracks, className, state }: PlaylistAnalysisProps) {
+function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: PlaylistAnalysisProps) {
     const { header, stats } = getAnalysis(state, filteredTracks);
     return (
         <div className={`block ${className}
@@ -97,21 +99,21 @@ function PlaylistAnalysis({ filteredTracks, className, state }: PlaylistAnalysis
                 {
                     stats &&
                     <div className='flex flex-col gap-2'>
-                        <AnalysisStat header='Plays'>
-                            Total of <span className='font-semibold'>{stats.totalPlays}</span> play{stats.totalPlays === 1 ? '' : 's'} with an average of <span className='font-semibold'>{roundToDecimals(stats.avgPlays, 2)}</span> play{stats.avgPlays === 1 ? '' : 's'} per track
-                        </AnalysisStat>
                         <AnalysisStat header='Likelihood' tip='assuming equal chance for all songs'>
                             More likely than {!stats.isFair && 'only'} about <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
                                 {roundToDecimals(stats.fairnessScore * 100, 2)}%
                             </span> of distributions
+                        </AnalysisStat>
+                        <AnalysisStat header='Plays' tip={`${roundToDecimals(stats.avgPlays, 2)} play${stats.avgPlays === 1 ? '' : 's'}/track`}>
+                            <span className='font-semibold'>{stats.totalPlays}</span> play{stats.totalPlays === 1 ? '' : 's'}
                         </AnalysisStat>
                         <AnalysisStat header='Pareto' >
                             Top {stats.trackCounts.length >= 5 ? '20% of tracks account' : 'track accounts'} for <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
                                 {roundToDecimals(stats.top20Share * 100, 2)}%
                             </span> of the plays
                         </AnalysisStat>
-                        <AnalysisStat header='Track' tip='select a track to see more info'>
-                            {''}
+                        <AnalysisStat header='Track' tip={!selectedTrack ? 'select a track to see more info' : undefined}>
+                            {selectedTrack && <PlaylistTrackCard playlistTrack={selectedTrack} stats={stats} />}
                         </AnalysisStat>
                     </div>
                 }

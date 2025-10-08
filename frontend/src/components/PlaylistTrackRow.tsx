@@ -12,6 +12,8 @@ import type { RowComponentProps } from 'react-window';
 
 interface PlaylistTrackRowsProps {
     filteredTracks: Public.PlaylistTrackHist[];
+    selectedTrack: Public.PlaylistTrackHist | null;
+    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void;
     maxPlayCount: number;
 }
 
@@ -20,7 +22,7 @@ function getFillPercent(playlistTrack: Public.PlaylistTrackHist, maxPlayCount: n
     return Math.max(0, Math.min(fillPercent, 100));
 }
 
-function PlaylistTrackRow({ index, style, filteredTracks, maxPlayCount }: RowComponentProps<PlaylistTrackRowsProps>) {
+function PlaylistTrackRow({ index, style, filteredTracks, selectedTrack, setSelectedTrack, maxPlayCount }: RowComponentProps<PlaylistTrackRowsProps>) {
     // return <div style={style}>{index}</div>
     const playlistTrack = filteredTracks[index];
     const track = playlistTrack.track;
@@ -30,7 +32,10 @@ function PlaylistTrackRow({ index, style, filteredTracks, maxPlayCount }: RowCom
         <div className={`w-full ${playlistTrack.currentlyOnPlaylist ? undefined : 'brightness-60'} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}
             style={style}>
             <div className='text-right text-sm font-mono'>{(index + 1).toString().replaceAll('0', 'O')}</div>
-            <div className={`relative px-2 py-1.5 ${ptRowClasses['row-details']} z-10 items-center`}>
+            <button
+                className={`text-left relative px-2 py-1.5 ${ptRowClasses['row-details']} z-10 items-center cursor-pointer rounded-xs outline-background-100 outline-0 ${selectedTrack && selectedTrack.track.id === playlistTrack.track.id ? 'outline-2' : 'hover:outline-1'}`}
+                onClick={selectedTrack && selectedTrack.track.id === playlistTrack.track.id ? () => setSelectedTrack(null) : () => setSelectedTrack(playlistTrack)}
+            >
                 {/* Background fill */}
                 <div
                     className="absolute top-0 left-0 h-full bg-background-200 opacity-40 -z-1 rounded-xs"
@@ -44,7 +49,7 @@ function PlaylistTrackRow({ index, style, filteredTracks, maxPlayCount }: RowCom
                 </div>
                 <div className='text-sm'>{track.album.name}</div>
                 <div className='text-sm text-right'>{playlistTrack.listeningEvents.length.toLocaleString()}</div>
-            </div>
+            </button>
         </div>
     )
 }
