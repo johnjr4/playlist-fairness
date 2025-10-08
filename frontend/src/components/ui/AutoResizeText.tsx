@@ -2,20 +2,20 @@ import { useEffect, useRef } from "react";
 
 interface AutoResizeTextProps {
     text: string;
-    parentRef: React.RefObject<HTMLDivElement | null>;
+    parentRef?: React.RefObject<HTMLDivElement | null>;
     maxFontSize: number; // in px
     minFontSize: number; // in px
     textStyle?: string;
 }
 
 function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }: AutoResizeTextProps) {
-    // const containerRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
     // const [fontSize, setFontSize] = useState(maxFontSize);
 
     // Helper function to resize text
     function resizeText() {
-        const container = parentRef.current
+        const container = parentRef ? parentRef.current : containerRef.current;
         const textEl = textRef.current
 
         // If the HTML elements don't exist then return
@@ -37,10 +37,12 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }
             newFontSize -= 1
         }
 
+        console.log(`Size is ${newFontSize}`)
         // setFontSize(newFontSize)
 
         // If still overflowing at minFontSize, allow wrapping
         if (newFontSize <= minFontSize && textEl.scrollWidth > container.clientWidth) {
+            console.log('wrapping');
             textEl.style.whiteSpace = 'normal';
             // setAllowWrap(true)
         }
@@ -51,9 +53,11 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }
 
         // Create ResizeObservor with action that triggers our resizeText method
         const resizeObservor = new ResizeObserver(() => resizeText());
-        if (parentRef.current) {
+        if (parentRef && parentRef.current) {
             // Add our container to the list of elements it's observing
             resizeObservor.observe(parentRef.current);
+        } else if (containerRef.current) {
+            resizeObservor.observe(containerRef.current);
         }
 
         // Disconnect observor on dismount or before re-render
@@ -62,7 +66,8 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle }
 
     return (
         <div
-            className="w-full overflow-auto"
+            className="w-full overflow-clip"
+            ref={containerRef}
         >
             <div
                 ref={textRef}
