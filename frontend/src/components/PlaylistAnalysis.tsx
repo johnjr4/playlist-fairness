@@ -1,9 +1,9 @@
 import * as Public from 'spotifair';
 import type { AnalysisStats, PlaylistHistState } from '../utils/types/playlistPage';
 import { monteCarloFairness } from '../utils/monteCarlo';
-import seedrandom from 'seedrandom';
+import seedrandom, { alea } from 'seedrandom';
 import { evaluateFairness, fairColor, fairColorSmall, isFair, top20Plays } from '../utils/fairness';
-import type { JSX } from 'react';
+import { useMemo, type JSX } from 'react';
 import { roundToDecimals } from '../utils/numberUtils';
 import PlaylistTrackCard from './PlaylistTrackCard';
 
@@ -69,12 +69,14 @@ function getAnalysisHeader(startText: string, statusText: string, statusType: 'u
 }
 
 function getAnalysisStats(filteredTracks: Public.PlaylistTrackHist[]): AnalysisStats {
-    const newRng = seedrandom(filteredTracks.length.toString());
+    const newRng = alea(filteredTracks.length.toString());
+
     const trackPlayCounts = filteredTracks.map(pt => pt.listeningEvents.length);
     const totalPlays = trackPlayCounts.reduce((acc, count) => acc + count, 0);
     const avgPlays = totalPlays / filteredTracks.length;
     const fairnessScore = monteCarloFairness(trackPlayCounts, newRng, totalPlays);
     const fairness = evaluateFairness(fairnessScore);
+    const top20Share = top20Plays(trackPlayCounts) / totalPlays;
     return {
         trackCounts: trackPlayCounts,
         totalPlays: totalPlays,
@@ -82,7 +84,7 @@ function getAnalysisStats(filteredTracks: Public.PlaylistTrackHist[]): AnalysisS
         fairnessScore: fairnessScore,
         fairness: fairness,
         isFair: isFair(fairness),
-        top20Share: top20Plays(trackPlayCounts) / totalPlays,
+        top20Share: top20Share,
     }
 }
 
@@ -146,7 +148,7 @@ function getParetoDisplayStat(stats: AnalysisStats) {
 }
 
 function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: PlaylistAnalysisProps) {
-    const { header, stats } = getAnalysis(state, filteredTracks);
+    const { header, stats } = useMemo(() => getAnalysis(state, filteredTracks), [state, filteredTracks]);
     return (
         <div className={`block ${className}
             rounded-sm gap-2 py-4 px-3 lg:gap-4 lg:px-5 lg:py-5 ${getDisabledStyling(state)}`}>

@@ -1,6 +1,6 @@
-import seedrandom from 'seedrandom';
+import seedrandom, { alea } from 'seedrandom';
 
-const fallbackRng = seedrandom('sjdao2084n42j');
+const fallbackRng = alea('sjdao2084n42j');
 
 // Sample a *uniform* multinomial distribution
 function sampleUniform(N: number, k: number, rng: seedrandom.PRNG | null) {
@@ -8,7 +8,7 @@ function sampleUniform(N: number, k: number, rng: seedrandom.PRNG | null) {
     // console.log(rng);
     const counts = new Array(k).fill(0);
     for (let i = 0; i < N; i++) {
-        counts[Math.floor(rng.quick() * k)]++;
+        counts[Math.floor(rng() * k)]++;
     }
     return counts;
 }
@@ -32,7 +32,6 @@ function log2Factorial(n: number) {
 function multinomialLogLikelihood(playCounts: number[], totalNumPlays: number) {
     const k = playCounts.length;
     const middleTerm = playCounts.reduce((acc, curr) => acc + (curr > 0 ? log2Factorial(curr) : 0), 0);
-    // console.log(middleTerm)
     return log2Factorial(totalNumPlays) - middleTerm - totalNumPlays * Math.log2(k);
 }
 
@@ -40,25 +39,28 @@ export function monteCarloFairness(playCounts: number[], rng: seedrandom.PRNG | 
     if (totalNumPlays === null) totalNumPlays = playCounts.reduce((sum, curr) => sum + curr, 0);
     const k = playCounts.length;
 
-    // Ad hoc attempt to lower time when playlist gets long
-    let numSamples = 3000;
-    if (k > 8000) {
-        numSamples = 1000;
-    } else if (k > 5000) {
-        numSamples = 1400;
-    } else if (k > 1000) {
-        numSamples = 2000;
-    }
+    let numSamples = 1000;
 
     const observedLogLikelihood = multinomialLogLikelihood(playCounts, totalNumPlays);
     // console.log(observedLogLikelihood);
 
     let numSamplesLessExtreme = 0;
+    // let sampleTime = 0;
+    // let multinomialTime = 0;
     for (let i = 0; i < numSamples; i++) {
+        // let startTime = performance.now();
         const sample = sampleUniform(totalNumPlays, k, rng);
+        // let endTime = performance.now();
+        // sampleTime += endTime - startTime;
+
+        // startTime = performance.now();
         const sampleLogLikelihood = multinomialLogLikelihood(sample, totalNumPlays);
+        // endTime = performance.now();
+        // multinomialTime += endTime - startTime;
         if (sampleLogLikelihood <= observedLogLikelihood) numSamplesLessExtreme++;
     }
+    // console.log(`\tget sample took ${sampleTime}ms`)
+    // console.log(`\tmultinomial took ${multinomialTime}ms`)
 
     // Ensure that ideal case is in there
     numSamples += 1;

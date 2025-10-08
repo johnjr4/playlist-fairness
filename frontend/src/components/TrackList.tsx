@@ -4,14 +4,17 @@ import * as Public from 'spotifair';
 import Button from "./ui/Button";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
-import type { PlaylistHistState } from "../utils/types/playlistPage";
+import type { PlaylistHistState, SortingOption } from "../utils/types/playlistPage";
 import SpotifyLink from "./ui/SpotifyLink";
 import { List } from "react-window";
+import { nameComparator, numPlaysComparator, lastPlayedAtComparator, playlistOrderComparator } from "../utils/comparators";
+import { useMemo } from "react";
 
 interface TrackListProps {
     className?: string,
     playlist: Public.Playlist | null;
     filteredTracks: Public.PlaylistTrackHist[] | null;
+    sortingOption: SortingOption;
     totalNumTracks: number
     setPlaylistSync: (setSyncTo: boolean) => void;
     selectedTrack: Public.PlaylistTrackHist | null;
@@ -46,7 +49,7 @@ function getTrackList(
     const maxPlayCount = filteredTracks.reduce((max, curr) => Math.max(max, curr.listeningEvents.length), 0);
     return (
         <List
-            className="grow flex flex-col w-full"
+            // className="grow flex flex-col w-full"
             rowComponent={PlaylistTrackRow}
             rowCount={filteredTracks.length}
             rowHeight={63}
@@ -150,9 +153,40 @@ function getMainContent(
     }
 }
 
-function TrackList({ className, playlist, filteredTracks, totalNumTracks, setPlaylistSync, selectedTrack, setSelectedTrack, state, refetch }: TrackListProps) {
+function TrackList({
+    className,
+    playlist,
+    filteredTracks,
+    sortingOption,
+    totalNumTracks,
+    setPlaylistSync,
+    selectedTrack,
+    setSelectedTrack,
+    state,
+    refetch
+}: TrackListProps) {
     // Get content from state
-    const mainContent = getMainContent(state, playlist, filteredTracks, selectedTrack, setSelectedTrack, totalNumTracks, refetch, setPlaylistSync);
+    function comparator(a: Public.PlaylistTrackHist, b: Public.PlaylistTrackHist) {
+        const ascendingMultipler = sortingOption.ascending ? 1 : -1;
+        switch (sortingOption.sortedOn) {
+            case 'num_plays':
+                return numPlaysComparator(ascendingMultipler, a, b);
+            case 'name':
+                return nameComparator(ascendingMultipler, a, b);
+            case 'playlist_order':
+                return playlistOrderComparator(ascendingMultipler, a, b);
+            case 'last_played_at':
+                return lastPlayedAtComparator(ascendingMultipler, a, b);
+        }
+    }
+
+    const sortedTracks = useMemo(() => {
+        const copiedTracks = filteredTracks ? [...filteredTracks] : null;
+        if (copiedTracks) copiedTracks.sort(comparator);
+        return copiedTracks;
+    }, [filteredTracks, sortingOption])
+
+    const mainContent = getMainContent(state, playlist, sortedTracks, selectedTrack, setSelectedTrack, totalNumTracks, refetch, setPlaylistSync);
 
     return (
         <div className={`w-full flex flex-col items-center gap-2 py-3 px-2 rounded-sm ${className}`}>

@@ -34,34 +34,8 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({ showRemoved: false, });
     const [sortOption, setSortOption] = useState<SortingOption>({ ascending: true, sortedOn: 'playlist_order' })
     const [debouncedSearchString] = useDebounce(searchString, 300);
-    const [debouncedFilterOptions] = useDebounce(filterOptions, 200);
     const [selectedTrack, setSelectedTrack] = useState<Public.PlaylistTrackHist | null>(null);
 
-    console.log('Rendering body');
-    // console.log(`search: ${searchString}`)
-    // console.log(`debounced: ${debouncedSearchString}`)
-
-    // if (!playlist) return <div>No playlist found</div>
-
-    const lowercaseSearchString = debouncedSearchString ? debouncedSearchString.toLowerCase() : null;
-    // Declare filtering function
-    function filterBySearch(playlistTrack: Public.PlaylistTrackHist) {
-        const track = playlistTrack.track;
-        // Only filter with search string if it exists and is not empty
-        if (lowercaseSearchString && lowercaseSearchString.length > 0) {
-            return track.name.toLowerCase().includes(lowercaseSearchString)
-                || track.album.name.toLowerCase().includes(lowercaseSearchString)
-                || track.artist.name.toLowerCase().includes(lowercaseSearchString);
-        }
-        return true;
-    }
-
-    function filterByOptions(playlistTrack: Public.PlaylistTrackHist) {
-        if (!debouncedFilterOptions.showRemoved) {
-            return playlistTrack.currentlyOnPlaylist;
-        }
-        return true;
-    }
 
     const sortDropdownOptions: SortDropdownOption[] = [
         {
@@ -109,34 +83,40 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
 
     ];
 
-    function comparator(a: Public.PlaylistTrackHist, b: Public.PlaylistTrackHist) {
-        const ascendingMultipler = sortOption.ascending ? 1 : -1;
-        switch (sortOption.sortedOn) {
-            case 'num_plays':
-                return numPlaysComparator(ascendingMultipler, a, b);
-            case 'name':
-                return nameComparator(ascendingMultipler, a, b);
-            case 'playlist_order':
-                return playlistOrderComparator(ascendingMultipler, a, b);
-            case 'last_played_at':
-                return lastPlayedAtComparator(ascendingMultipler, a, b);
-        }
-    }
-
     // Derive relevant playlist data
     const totalNumTracks = playlist?.tracks.length ?? 0;
     const filteredBySearch = useMemo(() => {
-        console.log('filtering by SEARCH');
         if (!playlist) return null;
+
+        const lowercaseSearchString = debouncedSearchString ? debouncedSearchString.toLowerCase() : null;
+        // Declare filtering function
+        function filterBySearch(playlistTrack: Public.PlaylistTrackHist) {
+            const track = playlistTrack.track;
+            // Only filter with search string if it exists and is not empty
+            if (lowercaseSearchString && lowercaseSearchString.length > 0) {
+                return track.name.toLowerCase().includes(lowercaseSearchString)
+                    || track.album.name.toLowerCase().includes(lowercaseSearchString)
+                    || track.artist.name.toLowerCase().includes(lowercaseSearchString);
+            }
+            return true;
+        }
+
         return playlist.tracks.filter(t => filterBySearch(t));
-    }, [playlist, filterBySearch]);
+    }, [playlist, debouncedSearchString]);
     const filteredTracks = useMemo(() => {
-        console.log('filtering by options');
         if (!filteredBySearch) return null;
+
+        // Declare filter function
+        function filterByOptions(playlistTrack: Public.PlaylistTrackHist) {
+            if (!filterOptions.showRemoved) {
+                return playlistTrack.currentlyOnPlaylist;
+            }
+            return true;
+        }
+
         const filteredByOptions = filteredBySearch.filter(t => filterByOptions(t))
-        filteredByOptions.sort(comparator);
         return filteredByOptions;
-    }, [filteredBySearch, filterByOptions]);
+    }, [filteredBySearch, filterOptions]);
 
 
     return (
@@ -170,6 +150,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                     className={`grow ${cardClasses['glass-card']}`}
                     playlist={playlist}
                     filteredTracks={filteredTracks}
+                    sortingOption={sortOption}
                     totalNumTracks={totalNumTracks}
                     setPlaylistSync={setPlaylistSync}
                     selectedTrack={selectedTrack}
