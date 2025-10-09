@@ -9,6 +9,7 @@ import SpotifyLink from "./ui/SpotifyLink";
 import { nameComparator, numPlaysComparator, lastPlayedAtComparator, playlistOrderComparator } from "../utils/comparators";
 import { useMemo, useRef } from "react";
 import { useWindowVirtualizer, Virtualizer } from "@tanstack/react-virtual";
+import { useMediaQuery } from "usehooks-ts";
 
 interface TrackListProps {
     className?: string,
@@ -31,8 +32,9 @@ function getTrackList(
 ) {
     if (rowVars.totalNumTracks < 1) {
         return (
-            <div className="grow flex justify-center items-center">
+            <div className="grow flex flex-col justify-center items-center gap-1 p-4 text-center text-sm md:text-base">
                 <p>This playlist doesn't have any tracks. Try adding some <SpotifyLink text='on Spotify' type='playlist' uri={playlist.spotifyUri} underlined={true} /></p>
+                <p className="text-xs md:text-sm text-dark-highlight">It may take several minutes for tracks to sync</p>
             </div>
         )
     }
@@ -94,12 +96,12 @@ function getTrackListTable(
     return (
         <>
             <div className="w-full flex flex-col gap-2 grow">
-                <div className={`${ptRowClasses['row-full']} font-bold w-full pr-4`}>
-                    <div className="text-right">#</div>
-                    <div className={`${ptRowClasses['row-details']}`}>
+                <div className={`${ptRowClasses['row-full']} font-bold w-full pr-4 text-sm md:text-base`} style={{ lineHeight: 'normal' }}>
+                    <div className="text-right max-[500px]:hidden">#</div>
+                    <div className={`${ptRowClasses['row-details']} px-2`}>
                         <div>Title</div>
                         <div />
-                        <div>Album</div>
+                        <div className="hidden min-[1024px]:block">Album</div>
                         <div className='text-right'>Plays</div>
                     </div>
                 </div>
@@ -111,7 +113,7 @@ function getTrackListTable(
 
 function getCenteredContent(children: React.ReactNode) {
     return (
-        <div className="w-full h-full flex flex-col gap-1 justify-center items-center">
+        <div className="w-full h-full flex flex-col gap-1 justify-center items-center text-center">
             {children}
         </div>
     )
@@ -205,14 +207,17 @@ function TrackList({
 
     const getItemKey = useMemo(() => (index: number) => sortedTracks ? sortedTracks[index].track.id : 0, [sortedTracks]);
 
+
+    const coverSizeMatches = useMediaQuery('(min-width: 500px)');
+    const gapSizeMatches = useMediaQuery('(min-width: 800px)')
     const listRef = useRef<HTMLDivElement | null>(null);
     const rowVirtualizer = useWindowVirtualizer({
         count: sortedTracks ? sortedTracks.length : 0,
-        estimateSize: () => 58,
+        estimateSize: () => coverSizeMatches ? 52 : 48,
         scrollMargin: listRef.current?.offsetTop ?? 0,
         overscan: 5, // How many extra items above and below are rendered
         getItemKey: getItemKey,
-        gap: 3.5,
+        gap: gapSizeMatches ? 6 : 3,
     });
 
     const rowVars: RowVars = { selectedTrack, setSelectedTrack, totalNumTracks };
@@ -222,7 +227,7 @@ function TrackList({
     const mainContent = getMainContent(state, playlist, sortedTracks, unsyncedVars, rowVars, virtualizerVars);
 
     return (
-        <div className={`w-full flex flex-col items-center gap-2 py-3 px-2 rounded-sm ${className}`}>
+        <div className={`w-full min-h-full h-0 flex flex-col items-center gap-2 py-3 px-1 md:px-2 rounded-sm ${className}`}>
             {mainContent}
         </div>
     )

@@ -52,7 +52,7 @@ function PlaylistTrackCard({ playlistTrack, stats, className }: { playlistTrack:
         </>)
     } else {
         cardContent = (
-            <div className='w-full flex justify-center items-center text-dark-highlight'>
+            <div className='h-20 w-full flex justify-center items-center text-dark-highlight'>
                 Select a track to see more
             </div>
         );

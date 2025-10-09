@@ -5,6 +5,8 @@ interface ToggleProps {
     onToggle: (newVal: boolean) => void;
     onLabel?: string;
     offLabel?: string;
+    className?: string;
+    disabled?: boolean;
 }
 
 function getStatusClassName(isOn: boolean, isOnButton: boolean) {
@@ -16,9 +18,11 @@ function Toggle({
     onToggle,
     onLabel = 'ON',
     offLabel = 'OFF',
+    className,
+    disabled = false,
 }: ToggleProps) {
     return (
-        <div className="flex">
+        <div className={`flex ${className} ${disabled && 'opacity-40'}`}>
             <button onClick={() => onToggle(true)} className={`py-0.5 px-1 rounded-l-sm ${getStatusClassName(isOn, true)}`}>
                 {onLabel}
             </button>

@@ -20,7 +20,7 @@ function Button({ children, variant = 'primary', onClick, className, disabled = 
     return (
         <button
             onClick={onClick}
-            className={`text-textPrimary  px-2 py-1 lg:px-4 lg:py-1.5 rounded-md font-medium cursor-pointer ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
+            className={`text-textPrimary px-2 py-1 lg:px-2 lg:py-1.5 rounded-md font-medium cursor-pointer ${disabled && 'pointer-events-none'} ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
             style={{ lineHeight: 'normal' }}
             disabled={disabled}
         >

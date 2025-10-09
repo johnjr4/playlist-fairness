@@ -13,6 +13,7 @@ type DropdownProps = {
     items: DropdownItem[];
     className?: string;
     positionClassName?: string;
+    disabled?: boolean;
 };
 
 export type DropdownItem = {
@@ -21,7 +22,7 @@ export type DropdownItem = {
     className?: string;
 };
 
-function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700', className, positionClassName }: DropdownProps) {
+function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700', className, positionClassName, disabled = false }: DropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     // Will simply maintain a reference to the 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -42,7 +43,8 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700
                 <Button
                     variant='secondary'
                     onClick={() => setIsOpen((prev) => !prev)}
-                    className={`flex items-center px-3 py-1 ${className} gap-1.5 ${color} rounded-sm ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
+                    className={`flex items-center ${className} gap-1.5 ${color} rounded-sm ${disabled && 'pointer-events-none opacity-40'} ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
+                    disabled={disabled}
                 >
                     {children}
                     {hasCaret && <AiFillCaretDown size='12' color='var(--textPrimary)' />}

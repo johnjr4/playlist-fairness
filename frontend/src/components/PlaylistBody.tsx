@@ -17,17 +17,6 @@ interface PlaylistBodyProps {
     refetch: () => Promise<void>;
 }
 
-function getSearchStyling(state: PlaylistHistState) {
-    switch (state) {
-        case 'synced':
-            return undefined;
-        case 'loading':
-            return 'opacity-0';
-        default:
-            return 'opacity-30';
-    }
-}
-
 function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: PlaylistBodyProps) {
     const [searchString, setSearchString] = useState('');
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({ showRemoved: false, });
@@ -38,14 +27,14 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
 
     const sortDropdownOptions: SortDropdownOption[] = [
         {
-            label: 'Spotify order',
+            label: 'Playlist',
             option: {
                 sortedOn: 'playlist_order',
                 ascending: true,
             }
         },
         {
-            label: 'Recently played',
+            label: 'Last played',
             option: {
                 sortedOn: 'last_played_at',
                 ascending: false,
@@ -59,7 +48,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
             }
         },
         {
-            label: 'Fewest plays',
+            label: 'Least plays',
             option: {
                 sortedOn: 'num_plays',
                 ascending: true,
@@ -117,36 +106,47 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
         return filteredByOptions;
     }, [filteredBySearch, filterOptions]);
 
+    const optionsDisabled = state !== 'synced';
 
     return (
-        <div className={`${className} w-full max-w-7xl px-2 flex flex-col md:flex-row justify-center mt-5 md:mt-14 gap-3 min-h-full`}>
+        <div className={`${className} w-full max-w-7xl px-2 sm:px-3 md:px-4 flex flex-col md:flex-row justify-center mt-5 md:mt-14 gap-3 min-h-full`}>
             <PlaylistAnalysis
                 filteredTracks={filteredTracks}
                 state={state}
                 selectedTrack={selectedTrack}
-                className={`w-full mx-auto md:w-80 ${cardClasses['glass-card']} grow-0 shrink-0`}
+                className={`w-full mx-auto md:w-60 lg:w-80 ${cardClasses['glass-card']} grow-0 shrink-0`}
             />
             <div className="w-full flex flex-col gap-3 grow">
-                <div className={`sticky top-15 w-full px-4  ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
-                ${state !== 'synced' ? 'pointer-events-none opacity-70' : undefined}`}>
-                    <div className={`flex justify-between items-center ${getSearchStyling(state)}`}>
-                        <SearchBar setSearchString={setSearchString} disabled={state !== 'synced'} />
-                        <div className="flex text-sm items-center gap-8">
-                            <div className="flex items-center">
-                                {/* <TiArrowSortedUp />
-                                <div>Playlist order</div> */}
-                                <SortDropdown onChange={(val) => setSortOption(val)} sortingOptions={sortDropdownOptions} value={sortOption} />
-                            </div>
-                            {/* <FaFilter /> */}
-                            <div className="text-xs flex flex-col items-center justify-center gap-0.5">
-                                Removed tracks:
-                                <Toggle
-                                    isOn={filterOptions.showRemoved}
-                                    onToggle={(newVal: boolean) => setFilterOptions({ ...filterOptions, showRemoved: newVal })}
-                                    onLabel="Show"
-                                    offLabel="Hide"
-                                />
-                            </div>
+                <div className={`sticky top-10 sm:top-12 md:top-14 lg:top-15 w-full flex justify-between items-center px-2 lg:px-4 py-3 lg:py-4 ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
+                ${state !== 'synced' ? 'pointer-events-none opacity-70' : undefined} `}>
+                    <SearchBar
+                        setSearchString={setSearchString}
+                        disabled={optionsDisabled}
+                        className="h-7 md:h-10 text-xs sm:text-sm lg:text-base sm:w-70 lg:w-85 xl:w-105"
+                        clearClassName="hidden sm:block" />
+                    <div className="flex text-sm items-center gap-1 lg:gap-2">
+                        <SortDropdown
+                            onChange={(val) => setSortOption(val)}
+                            sortingOptions={sortDropdownOptions}
+                            value={sortOption}
+                            disabled={optionsDisabled}
+                            className="w-26 sm:w-30 lg:w-40 text-xs sm:text-sm lg:text-base"
+                        />
+                        <div className="
+                            w-21 sm:w-24
+                            flex flex-col items-center justify-center
+                            gap-0.5
+                            text-center
+                            text-xs sm:text-sm
+                        ">
+                            <p className={`text-[11px] sm:text-xs ${optionsDisabled && 'opacity-40'} z-10`}>Deleted tracks:</p>
+                            <Toggle
+                                isOn={filterOptions.showRemoved}
+                                onToggle={(newVal: boolean) => setFilterOptions({ ...filterOptions, showRemoved: newVal })}
+                                onLabel="Show"
+                                offLabel="Hide"
+                                disabled={optionsDisabled}
+                            />
                         </div>
                     </div>
                 </div>

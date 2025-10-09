@@ -21,7 +21,8 @@
     "react-spinners": "^0.17.0",
     "seedrandom": "^3.0.5",
     "tailwindcss": "^4.1.13",
-    "use-debounce": "^10.0.6"
+    "use-debounce": "^10.0.6",
+    "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

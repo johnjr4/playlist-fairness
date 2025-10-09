@@ -18,8 +18,8 @@ function getFillPercent(playlistTrack: Public.PlaylistTrackHist, maxPlayCount: n
 
 function PlaylistTrackRow({ index, playlistTrack, selectedTrack, setSelectedTrack, maxPlayCount }: PlaylistTrackRowProps) {
     return (
-        <div className={`w-full ${playlistTrack.currentlyOnPlaylist ? undefined : 'brightness-60'} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}>
-            <div className='text-right text-sm font-mono'>{(index + 1).toString().replaceAll('0', 'O')}</div>
+        <div className={`w-full ${playlistTrack.currentlyOnPlaylist ? undefined : 'brightness-60'} text-dark-highlight z-10 sm:pr-2 lg:pr-4 ${ptRowClasses['row-full']} items-center`}>
+            <div className='max-[500px]:hidden text-right text-xs md:text-sm font-mono'>{(index + 1).toString().replaceAll('0', 'O')}</div>
             <button
                 className={`rounded-xs outline-background-100 outline-0 ${selectedTrack && selectedTrack.track.id === playlistTrack.track.id ? 'md:outline-2' : 'md:hover:outline-1'}`}
                 onClick={selectedTrack && selectedTrack.track.id === playlistTrack.track.id ? () => setSelectedTrack(null) : () => setSelectedTrack(playlistTrack)}
@@ -50,10 +50,11 @@ const PlaylistTrackRowContent = memo(function PlaylistTrackRowContent({ playlist
             {/* Content */}
             <CoverArt coverUrl={track.album.coverUrl} size="w-full" />
             <div className='flex flex-col'>
-                <p className='text-textPrimary line-clamp-1'>{track.name}</p>
-                <p className='text-sm '>{track.artist.name}</p>
+                <p className='text-textPrimary text-sm md:text-base line-clamp-1' style={{ lineHeight: 'normal' }}>{track.name}</p>
+                <p className='text-xs md:text-sm line-clamp-1'>{track.artist.name}</p>
             </div>
-            <div className='text-sm'>{track.album.name}</div>
+            {/* Hide album when less than 800 px */}
+            <div className='max-[1024px]:hidden text-sm line-clamp-2'>{track.album.name}</div>
             <div
                 className=' text-right font-mono'
                 style={{ filter: `brightness(${fillPercent + 100}%)` }}

@@ -41,6 +41,7 @@ function getAnalysis(state: PlaylistHistState, filteredTracks: Public.PlaylistTr
             if (filteredTracks!.length < 1) {
                 return {
                     header: getAnalysisHeader('Your playlist', 'has no tracks', 'neutral'),
+                    stats: getEmptyStats(),
                 }
             }
             // TODO: Actually display the analysis score somehow
@@ -88,6 +89,18 @@ function getAnalysisStats(filteredTracks: Public.PlaylistTrackHist[]): AnalysisS
     }
 }
 
+function getEmptyStats(): AnalysisStats {
+    return {
+        trackCounts: [0],
+        totalPlays: 0,
+        avgPlays: 0,
+        fairnessScore: 0,
+        fairness: 'extremely unfair',
+        isFair: false,
+        top20Share: 0,
+    }
+}
+
 function getDisabledStyling(state: PlaylistHistState) {
     return (state === 'synced') ? undefined : 'opacity-70 pointer-events-none';
 }
@@ -111,7 +124,8 @@ function getLikelihoodDisplayStat(stats: AnalysisStats, className?: string) {
     if (stats.totalPlays <= 0) {
         return getTransformedDisplayStat({
             header,
-            content: <>Calculated once playlist has activity</>
+            content: <>Calculated once playlist has activity</>,
+            tip: 'may take several minutes to sync'
         }, className);
     }
 
@@ -142,7 +156,7 @@ function getPlaysDisplayStat(stats: AnalysisStats, className?: string) {
             <span className='font-semibold'>
                 {stats.totalPlays.toLocaleString()}
             </span> play{stats.totalPlays === 1 ? '' : 's'} <span className='text-xs lg:text-sm text-dark-highlight'>
-                ({roundToDecimals(stats.avgPlays, 2).toLocaleString()} play{roundToDecimals(stats.avgPlays, 2) === 1 ? '' : 's'} per track)
+                ({roundToDecimals(stats.avgPlays, 2).toLocaleString()} per track)
             </span>
         </>)
     }, className);

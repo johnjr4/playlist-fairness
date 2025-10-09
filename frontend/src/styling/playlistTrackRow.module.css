@@ -2,10 +2,21 @@
     display: grid;
     grid-template-columns: 2em 1fr;
     gap: calc(var(--spacing) * 3);
+    @media (max-width: 500px) {
+        grid-template-columns: 1fr;
+    }
 }
+
 
 .row-details {
     display: grid;
-    grid-template-columns: .3fr 3fr 2fr 0.25fr;
+    grid-template-columns: 36px 3fr 3em;
     gap: calc(var(--spacing) * 2);
+    @media (min-width: 500px) {
+        grid-template-columns: 40px 3fr 3em;
+    }
+    @media (min-width: 1024px) {
+        /* Include index and album column only when it's wide enough */
+        grid-template-columns: 40px 3fr 2fr 3em;
+    }
 }

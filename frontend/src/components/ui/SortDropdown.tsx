@@ -6,6 +6,8 @@ interface SortDropdownProps {
     sortingOptions: SortDropdownOption[];
     value: SortingOption;
     onChange: (value: SortingOption) => void;
+    className?: string;
+    disabled?: boolean;
 }
 
 function optionsEqual(a: SortingOption, b: SortingOption) {
@@ -22,14 +24,22 @@ function getRegularDropdownProps(sortingOptions: SortDropdownOption[], onChange:
     });
 }
 
-function SortDropdown({ sortingOptions, value, onChange }: SortDropdownProps) {
+function SortDropdown({ sortingOptions, value, onChange, className, disabled = false }: SortDropdownProps) {
     return (
         <Dropdown
             items={getRegularDropdownProps(sortingOptions, onChange, value)}
             hasCaret={false}
-            className="text-sm text-left"
+            className={`${className}`}
+            disabled={disabled}
         >
-            {!value.ascending ? <FaSortAmountDown /> : <FaSortAmountUpAlt />}{sortingOptions.find(o => optionsEqual(o.option, value))?.label ?? 'Error'}
+            <div className="w-full flex gap-0.5 items-center justify-center text-left">
+                <div className="basis-4">
+                    {!value.ascending ? <FaSortAmountDown /> : <FaSortAmountUpAlt />}
+                </div>
+                <div className="grow-1">
+                    {sortingOptions.find(o => optionsEqual(o.option, value))?.label ?? 'Error'}
+                </div>
+            </div>
         </Dropdown>
     )
 }
