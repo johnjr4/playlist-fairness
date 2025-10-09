@@ -51,6 +51,7 @@ async function upsertUser(accessToken: string, refreshToken: string) {
                 accessToken: accessToken,
                 refreshToken: refreshToken,
                 displayName: spotifyUser.display_name,
+                ...(spotifyUser.country ? { country: spotifyUser.country } : {}), // Update country if it exists on spotifyUser
             },
             create: {
                 spotifyUri: spotifyUser.uri,
@@ -59,6 +60,7 @@ async function upsertUser(accessToken: string, refreshToken: string) {
                 accessToken: accessToken,
                 refreshToken: refreshToken,
                 displayName: spotifyUser.display_name,
+                country: spotifyUser.country ? spotifyUser.country : null,
             },
         });
 

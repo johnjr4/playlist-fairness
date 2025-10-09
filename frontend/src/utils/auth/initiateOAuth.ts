@@ -1,6 +1,6 @@
 import { REDIRECT_URI, SPOTIFY_CLIENT_ID } from "../envLoader";
 
-const scopes = ['user-library-read', 'playlist-read-private', 'user-read-recently-played'].join(' ');
+const scopes = ['user-library-read', 'playlist-read-private', 'user-read-recently-played', 'user-read-private'].join(' ');
 
 export function getAuthServerUrl(codeChallenge: string, state: string) {
     const params = new URLSearchParams({
