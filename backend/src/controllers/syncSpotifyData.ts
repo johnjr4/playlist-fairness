@@ -135,14 +135,15 @@ async function upsertPlaylistsWithoutData(user: User) {
 
 // Gets Spotify data needed for user (playlists, tracks, albums, artists), inserts/updates data in database
 export async function syncSpotifyData(user: User, spotifyAxios: AxiosInstance) {
+    console.log(`syncing data for ${user.displayName}`)
     try {
         const upsertedPlaylists = await upsertPlaylistsWithoutData(user);
         const toSync = upsertedPlaylists.filter(p => p.syncEnabled === true);
         await upsertSpotifyDataFromPlaylists(toSync, spotifyAxios, user);
-        console.log("Spotify data synced");
+        console.log(`Spotify data synced for ${user.displayName}`);
     } catch (err) {
         console.error(err);
-        throw new Error("Failed to sync spotify data");
+        throw new Error(`Failed to sync spotify data for ${user.displayName}`);
     }
 }
 
@@ -311,10 +312,10 @@ async function upsertSpotifyDataFromPlaylists(upsertedPlaylists: Array<Playlist>
             })
         );
         const trackResults = await Promise.allSettled(getAndUpsertTasks);
-        console.log("Spotify playlist data upserted");
+        console.log(`Spotify playlist data upserted for ${user.displayName}`);
     } catch (err) {
         console.error(err);
-        throw new Error("Failed to upsert playlist data to database");
+        throw new Error(`Failed to upsert playlist data to database for ${user.displayName}`);
     }
 }
 
@@ -794,6 +795,7 @@ async function upsertPlaylistTracks(bundledSpotifyPlaylistTracks: BundledSpotify
                 },
                 update: {
                     playlistPosition: i,
+                    currentlyOnPlaylist: true,
                 },
                 create: {
                     playlistId: playlist.id,
