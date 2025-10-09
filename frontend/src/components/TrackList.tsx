@@ -227,7 +227,7 @@ function TrackList({
     const mainContent = getMainContent(state, playlist, sortedTracks, unsyncedVars, rowVars, virtualizerVars);
 
     return (
-        <div className={`w-full min-h-full h-0 flex flex-col items-center gap-2 py-3 px-1 md:px-2 rounded-sm ${className}`}>
+        <div className={`w-full min-h-full flex flex-col items-center gap-2 py-3 px-1 md:px-2 rounded-sm ${className}`}>
             {mainContent}
         </div>
     )
