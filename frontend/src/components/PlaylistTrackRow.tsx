@@ -54,7 +54,12 @@ const PlaylistTrackRowContent = memo(function PlaylistTrackRowContent({ playlist
                 <p className='text-sm '>{track.artist.name}</p>
             </div>
             <div className='text-sm'>{track.album.name}</div>
-            <div className='text-sm text-right'>{playlistTrack.listeningEvents.length.toLocaleString()}</div>
+            <div
+                className=' text-right font-mono'
+                style={{ filter: `brightness(${fillPercent + 100}%)` }}
+            >
+                {playlistTrack.listeningEvents.length.toLocaleString().replaceAll('0', 'O')}
+            </div>
         </div>
     )
 });

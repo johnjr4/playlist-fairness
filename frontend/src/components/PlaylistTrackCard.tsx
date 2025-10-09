@@ -35,6 +35,7 @@ function PlaylistTrackCard({ playlistTrack, stats }: { playlistTrack: Public.Pla
             <div className='text-sm'>
                 <p>Plays: {numPlays} <span className='text-sm text-dark-highlight'> {getPlayDifference(stats, numPlays)}</span></p>
                 <p>Added to playlist: {playlistTrack.addedToPlaylistTime ? new Date(playlistTrack.addedToPlaylistTime).toLocaleDateString() : 'unknown'}</p>
+                <p>Playlist position: {playlistTrack.playlistPosition + 1}</p>
                 <SpotifyLink text='Open on Spotify' type='track' uri={playlistTrack.track.spotifyUri} underlined={true} className='text-dark-highlight' />
             </div>
         </div>
