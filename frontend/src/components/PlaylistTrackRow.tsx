@@ -21,7 +21,7 @@ function PlaylistTrackRow({ index, playlistTrack, selectedTrack, setSelectedTrac
         <div className={`w-full ${playlistTrack.currentlyOnPlaylist ? undefined : 'brightness-60'} text-dark-highlight z-10 pr-4 ${ptRowClasses['row-full']} items-center`}>
             <div className='text-right text-sm font-mono'>{(index + 1).toString().replaceAll('0', 'O')}</div>
             <button
-                className={`rounded-xs outline-background-100 outline-0 ${selectedTrack && selectedTrack.track.id === playlistTrack.track.id ? 'outline-2' : 'hover:outline-1'}`}
+                className={`rounded-xs outline-background-100 outline-0 ${selectedTrack && selectedTrack.track.id === playlistTrack.track.id ? 'md:outline-2' : 'md:hover:outline-1'}`}
                 onClick={selectedTrack && selectedTrack.track.id === playlistTrack.track.id ? () => setSelectedTrack(null) : () => setSelectedTrack(playlistTrack)}
             >
                 <PlaylistTrackRowContent playlistTrack={playlistTrack} maxPlayCount={maxPlayCount} />

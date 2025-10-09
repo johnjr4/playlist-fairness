@@ -120,16 +120,17 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
     }
 
     return (
-        <div className='relative w-full max-w-7xl flex flex-col gap-4 justify-around items-center mt-5 md:mt-2'>
+        <div className='relative w-full max-w-70 sm:max-w-88 md:max-w-160 lg:max-w-3xl xl:max-w-5xl flex flex-col gap-4 justify-around items-center mt-3 md:mt-2'>
             <div className={`
+                w-full
                 relative flex items-center flex-col md:flex-row
-                rounded-md gap-2 py-2 px-3 lg:gap-4 lg:px-5 lg:py-1
+                rounded-md gap-2 py-2 px-3 lg:gap-4 md:px-5 lg:py-1
                 ${cardClasses['glass-card']}
                 `}
             >
                 <CoverArt
                     coverUrl={coverUrl}
-                    size='w-50 sm:w-60 md:w-32 lg:w-40'
+                    size='w-40 sm:w-54 md:w-40 lg:w-48'
                     className="
                         scale-112
                         md:scale-124
@@ -140,7 +141,7 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
                         shadow-2xl shadow-background-500 z-10
                     "
                 />
-                <div className="w-80 sm:w-110 md:w-120 lg:w-2xl xl:w-3xl" ref={overviewRef}>
+                <div className="w-full" ref={overviewRef}>
                     <AutoResizeText text={title} parentRef={overviewRef} maxFontSize={60} minFontSize={18} textStyle="font-bold" />
                     <p className="flex text-dark-highlight gap-1 text-xs md:text-sm">
                         {summary}

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 interface AutoResizeTextProps {
-    text: string;
+    text: React.ReactNode;
     parentRef?: React.RefObject<HTMLDivElement | null>;
     maxFontSize: number; // in px
     minFontSize: number; // in px
@@ -42,7 +42,6 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle, 
 
         // If still overflowing at minFontSize, allow wrapping
         if (newFontSize <= minFontSize && textEl.scrollWidth > container.clientWidth) {
-            console.log('wrapping');
             textEl.style.whiteSpace = 'normal';
             // setAllowWrap(true)
         }

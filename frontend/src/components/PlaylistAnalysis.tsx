@@ -92,76 +92,113 @@ function getDisabledStyling(state: PlaylistHistState) {
     return (state === 'synced') ? undefined : 'opacity-70 pointer-events-none';
 }
 
-function getLikelihoodDisplayStat(stats: AnalysisStats) {
-    const header = 'Likelihood';
-    if (stats.totalPlays <= 0) {
-        return (
-            <AnalysisStat header={header}>
-                Calculated once playlist has activity
-            </AnalysisStat>
-        );
-    }
+interface DisplayStatHelper {
+    header: string;
+    tip?: string;
+    content: React.ReactNode;
+}
+
+function getTransformedDisplayStat(helper: DisplayStatHelper, className?: string) {
     return (
-        <AnalysisStat header={header} tip='assuming equal chance for all songs'>
-            More likely than {!stats.isFair && 'only'} about <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
-                {roundToDecimals(stats.fairnessScore * 100, 2)}%
-            </span> of distributions
+        <AnalysisStat header={helper.header} tip={helper.tip} className={className}>
+            {helper.content}
         </AnalysisStat>
     )
 }
 
-function getPlaysDisplayStat(stats: AnalysisStats) {
+function getLikelihoodDisplayStat(stats: AnalysisStats, className?: string) {
+    const header = 'Likelihood';
     if (stats.totalPlays <= 0) {
-        return (
-            <AnalysisStat header='Plays'>
-                <span className='font-semibold'>0</span> plays
-            </AnalysisStat>
-        )
+        return getTransformedDisplayStat({
+            header,
+            content: <>Calculated once playlist has activity</>
+        }, className);
     }
-    return (
-        <AnalysisStat header='Plays'>
-            <span className='font-semibold'>
-                {stats.totalPlays.toLocaleString()}
-            </span> play{stats.totalPlays === 1 ? '' : 's'} <span className='text-sm text-dark-highlight'>
-                ({roundToDecimals(stats.avgPlays, 2).toLocaleString()} play{roundToDecimals(stats.avgPlays, 2) === 1 ? '' : 's'}/track)
-            </span>
-        </AnalysisStat>
-    );
+
+    return getTransformedDisplayStat({
+        header,
+        tip: 'assuming equal chance for all songs',
+        content: (
+            <>
+                More likely than {!stats.isFair && 'only'} about <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
+                    {roundToDecimals(stats.fairnessScore * 100, 2)}%
+                </span> of distributions
+            </>
+        )
+    }, className);
 }
 
-function getParetoDisplayStat(stats: AnalysisStats) {
+function getPlaysDisplayStat(stats: AnalysisStats, className?: string) {
+    const header = 'Plays';
+    if (stats.totalPlays <= 0) {
+        return getTransformedDisplayStat({
+            header,
+            content: (<><span className='font-semibold'>0</span> plays</>)
+        }, className);
+    }
+    return getTransformedDisplayStat({
+        header,
+        content: (<>
+            <span className='font-semibold'>
+                {stats.totalPlays.toLocaleString()}
+            </span> play{stats.totalPlays === 1 ? '' : 's'} <span className='text-xs lg:text-sm text-dark-highlight'>
+                ({roundToDecimals(stats.avgPlays, 2).toLocaleString()} play{roundToDecimals(stats.avgPlays, 2) === 1 ? '' : 's'} per track)
+            </span>
+        </>)
+    }, className);
+}
+
+function getParetoDisplayStat(stats: AnalysisStats, className?: string) {
     const header = 'Pareto';
     if (stats.totalPlays <= 0) {
-        return (
-            <AnalysisStat header={header}>
-                Calculated once playlist has activity
-            </AnalysisStat>
-        )
+        return getTransformedDisplayStat({
+            header,
+            content: (<>Calculated once playlist has activity</>)
+        }, className);
     }
-    return (
-        <AnalysisStat header={header} >
-            Top {stats.trackCounts.length >= 5 ? '20% of tracks account' : 'track accounts'} for <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
+    return getTransformedDisplayStat({
+        header,
+        content: (<>
+            Top {stats.trackCounts.length >= 5 ? '20% of tracks have' : 'track has'} <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
                 {roundToDecimals(stats.top20Share * 100, 2)}%
             </span> of the plays
-        </AnalysisStat>
-    );
+        </>)
+    }, className);
 }
 
 function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: PlaylistAnalysisProps) {
     const { header, stats } = useMemo(() => getAnalysis(state, filteredTracks), [state, filteredTracks]);
     return (
-        <div className={`block ${className}
-            rounded-sm gap-2 py-4 px-3 lg:gap-4 lg:px-5 lg:py-5 ${getDisabledStyling(state)}`}>
-            <div className='sticky top-20 flex flex-col gap-5'>
-                <h1 className={`font-semibold text-4xl ${state === 'synced' ? undefined : 'opacity-30'}`}>{header}</h1>
+        <div className={`
+            block ${className}
+            rounded-sm 
+            gap-2 lg:gap-4 
+            py-4 px-2 sm:px-3 lg:px-5 lg:py-5
+            ${getDisabledStyling(state)}
+        `}>
+            <div className='md:sticky md:top-20 flex flex-col
+            gap-2 xl:gap-5'>
+                <h1 className={`
+                text-center
+                    font-semibold
+                    text-xl sm:text-2xl lg:text-3xl
+                    ${state === 'synced' ? undefined : 'opacity-30'}
+
+                `}>
+                    {header}
+                </h1>
                 {
                     stats &&
-                    <div className='flex flex-col gap-2'>
-                        {getLikelihoodDisplayStat(stats)}
-                        {getPlaysDisplayStat(stats)}
-                        {getParetoDisplayStat(stats)}
-                        <AnalysisStat header='Track' tip={!selectedTrack ? 'select a track to see more info' : undefined}>
-                            {selectedTrack && <PlaylistTrackCard playlistTrack={selectedTrack} stats={stats} />}
+                    <div className='w-full flex flex-col gap-2'>
+                        <div className='w-full flex md:flex-col gap-2 md:gap-2'>
+                            {getLikelihoodDisplayStat(stats, 'grow-2')}
+                            {getParetoDisplayStat(stats, 'grow-2')}
+                            {getPlaysDisplayStat(stats, 'grow-1')}
+                            {/* <div className='flex md:flex-col justify-between gap-1.5 md:gap-2'>
+                            </div> */}
+                        </div>
+                        <AnalysisStat header='Track' className='hidden md:block max-w-60'>
+                            <PlaylistTrackCard playlistTrack={selectedTrack} stats={stats} className='' />
                         </AnalysisStat>
                     </div>
                 }
@@ -170,12 +207,12 @@ function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: P
     )
 }
 
-function AnalysisStat({ header, children, tip }: { header: string, children: React.ReactNode, tip?: string }) {
+function AnalysisStat({ header, children, tip, className }: { header: string, children: React.ReactNode, tip?: string, className?: string }) {
     return (
-        <div>
-            <h2 className='font-semibold text-dark-highlight'>{header}:</h2>
-            <div className=''>{children}</div>
-            {tip && <p className='text-sm text-dark-highlight'>({tip})</p>}
+        <div className={`${className} grow basis-0`}>
+            <h2 className='font-semibold text-dark-highlight text-sm lg:text-base' style={{ lineHeight: 'normal' }}>{header}:</h2>
+            <div className='text-sm lg:text-base' style={{ lineHeight: 'normal' }}>{children}</div>
+            {tip && <p className='hidden md:block text-xs lg:text-sm text-dark-highlight' style={{ lineHeight: 'normal' }}>({tip})</p>}
         </div>
     )
 }

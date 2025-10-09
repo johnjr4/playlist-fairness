@@ -119,8 +119,13 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
 
 
     return (
-        <div className={`${className} w-full max-w-7xl flex justify-center mt-14 gap-3 min-h-full`}>
-            <PlaylistAnalysis filteredTracks={filteredTracks} state={state} selectedTrack={selectedTrack} className={`w-80 ${cardClasses['glass-card']} grow-0 shrink-0`} />
+        <div className={`${className} w-full max-w-7xl px-2 flex flex-col md:flex-row justify-center mt-5 md:mt-14 gap-3 min-h-full`}>
+            <PlaylistAnalysis
+                filteredTracks={filteredTracks}
+                state={state}
+                selectedTrack={selectedTrack}
+                className={`w-full mx-auto md:w-80 ${cardClasses['glass-card']} grow-0 shrink-0`}
+            />
             <div className="w-full flex flex-col gap-3 grow">
                 <div className={`sticky top-15 w-full px-4  ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
                 ${state !== 'synced' ? 'pointer-events-none opacity-70' : undefined}`}>
