@@ -6,9 +6,9 @@ import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';
 import type { PlaylistHistState, SortingOption } from "../utils/types/playlistPage";
 import SpotifyLink from "./ui/SpotifyLink";
-import { List } from "react-window";
 import { nameComparator, numPlaysComparator, lastPlayedAtComparator, playlistOrderComparator } from "../utils/comparators";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useWindowVirtualizer, Virtualizer } from "@tanstack/react-virtual";
 
 interface TrackListProps {
     className?: string,
@@ -25,11 +25,11 @@ interface TrackListProps {
 
 function getTrackList(
     playlist: Public.Playlist,
-    filteredTracks: Public.PlaylistTrackHist[],
-    selectedTrack: Public.PlaylistTrackHist | null,
-    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void,
-    totalNumTracks: number) {
-    if (totalNumTracks < 1) {
+    sortedTracks: Public.PlaylistTrackHist[],
+    rowVars: RowVars,
+    virtualizerVars: VirtualizerVars,
+) {
+    if (rowVars.totalNumTracks < 1) {
         return (
             <div className="grow flex justify-center items-center">
                 <p>This playlist doesn't have any tracks. Try adding some <SpotifyLink text='on Spotify' type='playlist' uri={playlist.spotifyUri} underlined={true} /></p>
@@ -38,7 +38,7 @@ function getTrackList(
     }
 
 
-    if (filteredTracks.length < 1) {
+    if (sortedTracks.length < 1) {
         return (
             <div className="grow flex justify-center items-center">
                 <p>No search results</p>
@@ -46,34 +46,51 @@ function getTrackList(
         )
     }
 
-    const maxPlayCount = filteredTracks.reduce((max, curr) => Math.max(max, curr.listeningEvents.length), 0);
+    const maxPlayCount = sortedTracks.reduce((max, curr) => Math.max(max, curr.listeningEvents.length), 0);
     return (
-        <List
-            // className="grow flex flex-col w-full"
-            rowComponent={PlaylistTrackRow}
-            rowCount={filteredTracks.length}
-            rowHeight={63}
-            rowProps={{ filteredTracks, selectedTrack, setSelectedTrack, maxPlayCount }}
-        />
+        <div
+            ref={virtualizerVars.listRef}
+        >
+            <ul
+                style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: `${virtualizerVars.rowVirtualizer.getTotalSize()}px`
+                }}
+            >
+                {virtualizerVars.rowVirtualizer.getVirtualItems().map((virtualRow => (
+                    <li
+                        key={virtualRow.key}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: `${virtualRow.size}px`,
+                            transform: `translateY(${virtualRow.start - virtualizerVars.rowVirtualizer.options.scrollMargin}px)`
+                        }}
+                    >
+                        <PlaylistTrackRow
+                            key={virtualRow.key}
+                            index={virtualRow.index}
+                            playlistTrack={sortedTracks[virtualRow.index]}
+                            maxPlayCount={maxPlayCount}
+                            selectedTrack={rowVars.selectedTrack}
+                            setSelectedTrack={rowVars.setSelectedTrack}
+                        />
+                    </li>
+                )))}
+            </ul>
+        </div>
     );
-
-    // return (
-    //     <ul className="grow flex flex-col w-full gap-2">
-    //         {filteredTracks.map((t, i) => <PlaylistTrackRow
-    //             index={i}
-    //             playlistTrack={t}
-    //             key={t.track.id}
-    //             fillPercent={maxCount > 0 ? (t.listeningEvents.length / maxCount) * 100 : 0} />)}
-    //     </ul>
-    // )
 }
 
 function getTrackListTable(
     playlist: Public.Playlist,
-    filteredTracks: Public.PlaylistTrackHist[],
-    selectedTrack: Public.PlaylistTrackHist | null,
-    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void,
-    totalNumTracks: number) {
+    sortedTracks: Public.PlaylistTrackHist[],
+    rowVars: RowVars,
+    virtualizerVars: VirtualizerVars,
+) {
     return (
         <>
             <div className="w-full flex flex-col gap-2 grow">
@@ -86,7 +103,7 @@ function getTrackListTable(
                         <div className='text-right'>Plays</div>
                     </div>
                 </div>
-                {getTrackList(playlist, filteredTracks, selectedTrack, setSelectedTrack, totalNumTracks)}
+                {getTrackList(playlist, sortedTracks, rowVars, virtualizerVars)}
             </div>
         </>
     )
@@ -103,12 +120,11 @@ function getCenteredContent(children: React.ReactNode) {
 function getMainContent(
     state: PlaylistHistState,
     playlist: Public.Playlist | null,
-    filteredTracks: Public.PlaylistTrackHist[] | null,
-    selectedTrack: Public.PlaylistTrackHist | null,
-    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void,
-    totalNumTracks: number,
-    refetch: () => Promise<void>,
-    setPlaylistSync: (setSyncTo: boolean) => void) {
+    sortedTracks: Public.PlaylistTrackHist[] | null,
+    unsyncedVars: UnsyncedVars,
+    rowVars: RowVars,
+    virtualizerVars: VirtualizerVars,
+) {
 
     switch (state) {
         case 'loading':
@@ -118,7 +134,7 @@ function getMainContent(
             return getCenteredContent(
                 <>
                     <div>Sorry, something went wrong</div>
-                    <Button onClick={() => refetch()}>Try again</Button>
+                    <Button onClick={() => unsyncedVars.refetch()}>Try again</Button>
                 </>
             );
         case 'syncing':
@@ -139,11 +155,11 @@ function getMainContent(
             return getCenteredContent(
                 <>
                     <div>Sync not enabled for this playlist</div>
-                    <Button onClick={() => setPlaylistSync(true)}>Enable sync</Button>
+                    <Button onClick={() => unsyncedVars.setPlaylistSync(true)}>Enable sync</Button>
                 </>
             );
         case 'synced':
-            return getTrackListTable(playlist!, filteredTracks!, selectedTrack, setSelectedTrack, totalNumTracks);
+            return getTrackListTable(playlist!, sortedTracks!, rowVars, virtualizerVars);
         default:
             return getCenteredContent(
                 <>
@@ -165,6 +181,7 @@ function TrackList({
     state,
     refetch
 }: TrackListProps) {
+
     // Get content from state
     function comparator(a: Public.PlaylistTrackHist, b: Public.PlaylistTrackHist) {
         const ascendingMultipler = sortingOption.ascending ? 1 : -1;
@@ -186,13 +203,48 @@ function TrackList({
         return copiedTracks;
     }, [filteredTracks, sortingOption])
 
-    const mainContent = getMainContent(state, playlist, sortedTracks, selectedTrack, setSelectedTrack, totalNumTracks, refetch, setPlaylistSync);
+    const getItemKey = useMemo(() => (index: number) => sortedTracks ? sortedTracks[index].track.id : 0, [sortedTracks]);
+
+    const listRef = useRef<HTMLDivElement | null>(null);
+    const rowVirtualizer = useWindowVirtualizer({
+        count: sortedTracks ? sortedTracks.length : 0,
+        estimateSize: () => 58,
+        scrollMargin: listRef.current?.offsetTop ?? 0,
+        overscan: 5, // How many extra items above and below are rendered
+        getItemKey: getItemKey,
+        gap: 3.5,
+    });
+
+    const rowVars: RowVars = { selectedTrack, setSelectedTrack, totalNumTracks };
+    const virtualizerVars: VirtualizerVars = { rowVirtualizer, listRef };
+    const unsyncedVars: UnsyncedVars = { refetch, setPlaylistSync };
+
+    const mainContent = getMainContent(state, playlist, sortedTracks, unsyncedVars, rowVars, virtualizerVars);
 
     return (
         <div className={`w-full flex flex-col items-center gap-2 py-3 px-2 rounded-sm ${className}`}>
             {mainContent}
         </div>
     )
+}
+
+// For params passed all the way to PlaylistTrackRows
+interface RowVars {
+    selectedTrack: Public.PlaylistTrackHist | null;
+    setSelectedTrack: (track: Public.PlaylistTrackHist | null) => void;
+    totalNumTracks: number;
+}
+
+// For top level getMainContent (used on cases other than state === 'synced')
+interface UnsyncedVars {
+    refetch: () => Promise<void>;
+    setPlaylistSync: (setSyncTo: boolean) => void;
+}
+
+// For params related to virtualization
+interface VirtualizerVars {
+    rowVirtualizer: Virtualizer<Window, Element>;
+    listRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default TrackList;
