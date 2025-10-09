@@ -29,7 +29,7 @@ function SortDropdown({ sortingOptions, value, onChange, className, disabled = f
         <Dropdown
             items={getRegularDropdownProps(sortingOptions, onChange, value)}
             hasCaret={false}
-            className={`${className}`}
+            buttonClassName={`${className}`}
             disabled={disabled}
         >
             <div className="w-full flex gap-0.5 items-center justify-center text-left">
