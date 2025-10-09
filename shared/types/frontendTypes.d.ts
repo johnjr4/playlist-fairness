@@ -9,7 +9,7 @@ export interface UserFull {
     playlists: Playlist[]
     listeningHistory: ListeningEvent[]
     trackingStartTime: string
-    country: string | null
+    country: string
 }
 export type User = Omit<UserFull, 'playlists' | 'listeningHistory'>
 

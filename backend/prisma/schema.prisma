@@ -28,7 +28,7 @@ model User {
   trackingStartTime DateTime         @default(now())
   accessToken       String           @unique
   refreshToken      String           @unique
-  country           String?
+  country           String
 }
 
 model Playlist {
