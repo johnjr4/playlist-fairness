@@ -1,7 +1,7 @@
 import * as Public from 'spotifair';
 import type { AnalysisStats, PlaylistHistState } from '../utils/types/playlistPage';
 import { monteCarloFairness } from '../utils/monteCarlo';
-import seedrandom, { alea } from 'seedrandom';
+import { alea } from 'seedrandom';
 import { evaluateFairness, fairColor, fairColorSmall, isFair, top20Plays } from '../utils/fairness';
 import { useMemo, type JSX } from 'react';
 import { roundToDecimals } from '../utils/numberUtils';

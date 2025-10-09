@@ -8,7 +8,6 @@ import type { SortingOption, FilterOptions, PlaylistHistState, SortDropdownOptio
 import { useDebounce } from "use-debounce";
 import Toggle from "./ui/Toggle";
 import SortDropdown from "./ui/SortDropdown";
-import { lastPlayedAtComparator, nameComparator, numPlaysComparator, playlistOrderComparator } from "../utils/comparators";
 
 interface PlaylistBodyProps {
     playlist: Public.PlaylistHist | null;
