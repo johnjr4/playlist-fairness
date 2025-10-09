@@ -85,8 +85,12 @@ export interface TrackObject {
     href: string,
     id: string,
     is_playable: boolean,
-    linked_from: {
-
+    linked_from?: {
+        external_urls: ExternalUrls;
+        href: string;
+        id: string;
+        type: "track";
+        uri: string;
     },
     restrictions: {
         reason: string,

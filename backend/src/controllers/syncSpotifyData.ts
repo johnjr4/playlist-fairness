@@ -138,7 +138,7 @@ export async function syncSpotifyData(user: User, spotifyAxios: AxiosInstance) {
     try {
         const upsertedPlaylists = await upsertPlaylistsWithoutData(user);
         const toSync = upsertedPlaylists.filter(p => p.syncEnabled === true);
-        await upsertSpotifyDataFromPlaylists(toSync, spotifyAxios);
+        await upsertSpotifyDataFromPlaylists(toSync, spotifyAxios, user);
         console.log("Spotify data synced");
     } catch (err) {
         console.error(err);
@@ -172,7 +172,7 @@ async function getSpotifyUserPlaylists(user: User, spotifyAxios: AxiosInstance) 
     }
 }
 
-async function getSpotifyPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance): Promise<BundledSpotifyPlaylistTracks> {
+async function getSpotifyPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance, user: User): Promise<BundledSpotifyPlaylistTracks> {
     let tracks: Array<Spotify.PlaylistTrackObject> = [];
     try {
         console.log(`Loading tracks obtained for playlist ${playlist.name}`);
@@ -180,7 +180,7 @@ async function getSpotifyPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosI
         let offset = 0;
         const maxLimit = 100;
         while (moreTracks) {
-            const res = await spotifyAxios.get(`/playlists/${playlist.spotifyId}/tracks?offset=${offset}&limit=${maxLimit}`);
+            const res = await spotifyAxios.get(`/playlists/${playlist.spotifyId}/tracks?offset=${offset}&limit=${maxLimit}&market=${user.country}`);
             const data = res.data;
             if (data.total > 0) {
                 tracks = tracks.concat(data.items);
@@ -268,7 +268,7 @@ export async function enableAndSyncPlaylist(playlist: Playlist, user: User): Pro
             }
         });
         const spotifyAxios = getSpotifyAxios(user.accessToken);
-        return await upsertSpotifyDataFromPlaylist(enabledPlaylist, spotifyAxios);
+        return await upsertSpotifyDataFromPlaylist(enabledPlaylist, spotifyAxios, user);
     } catch (err) {
         console.error(err);
         throw new Error("Failed to enable and sync playlist");
@@ -293,21 +293,21 @@ export async function disableAndDeletePlaylistSync(playlist: Playlist): Promise<
     }
 }
 
-async function upsertSpotifyDataFromPlaylist(playlist: Playlist, spotifyAxios: AxiosInstance): Promise<PlaylistSyncCounts> {
+async function upsertSpotifyDataFromPlaylist(playlist: Playlist, spotifyAxios: AxiosInstance, user: User): Promise<PlaylistSyncCounts> {
     await markPlaylistSynced(playlist, false);
-    const playlistSyncCounts = await getAndUpsertPlaylistTracks(playlist, spotifyAxios);
+    const playlistSyncCounts = await getAndUpsertPlaylistTracks(playlist, spotifyAxios, user);
     await markPlaylistSynced(playlist, true);
     return playlistSyncCounts;
 }
 
 // Inserts all tracks, albums, artists and PlaylistTracks from these playlists into my database
-async function upsertSpotifyDataFromPlaylists(upsertedPlaylists: Array<Playlist>, spotifyAxios: AxiosInstance) {
+async function upsertSpotifyDataFromPlaylists(upsertedPlaylists: Array<Playlist>, spotifyAxios: AxiosInstance, user: User) {
     try {
         // Get all Spotify.PlaylistTracks and upsert Tracks and PlaylistTracks with limited concurrency
         const limit = pLimit(SPOTIFY_CONCURRENCY_LIMIT);
         const getAndUpsertTasks = upsertedPlaylists.map(
             playlist => limit(async () => {
-                upsertSpotifyDataFromPlaylist(playlist, spotifyAxios);
+                upsertSpotifyDataFromPlaylist(playlist, spotifyAxios, user);
             })
         );
         const trackResults = await Promise.allSettled(getAndUpsertTasks);
@@ -334,8 +334,8 @@ async function markPlaylistSynced(playlist: Playlist, isSynced: boolean) {
     }
 }
 
-async function getAndUpsertPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance): Promise<PlaylistSyncCounts> {
-    const bundledSpotifyPlaylistTracks = await getSpotifyPlaylistTracks(playlist, spotifyAxios);
+async function getAndUpsertPlaylistTracks(playlist: Playlist, spotifyAxios: AxiosInstance, user: User): Promise<PlaylistSyncCounts> {
+    const bundledSpotifyPlaylistTracks = await getSpotifyPlaylistTracks(playlist, spotifyAxios, user);
     const { numTracks, numAlbums, numArtists } = await upsertSpotifyDataFromTracks(bundledSpotifyPlaylistTracks.spotifyPlaylistTracks);
     console.log(`tracks: ${numTracks}, albums: ${numAlbums}, artists: ${numArtists} for playlist: ${playlist.name}`);
     const dbPlaylistTracks = await upsertPlaylistTracks(bundledSpotifyPlaylistTracks);
@@ -395,8 +395,11 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
                 console.warn(`${spotifyTrackBatch.length - spotifyTracksWithNecessaryData.length} tracks skipped when inserting due to insufficient related data`);
             }
 
+            // const [spotifyTracksNative, spotifyTracksRelinked] = partition(spotifyTracksWithNecessaryData, st => !st.linked_from);
+
             // Find tracks already there
-            const tracksInDb = await prisma.track.findMany({
+            // "native" in this context is just the word I chose to represent when the URI match is from the outer/main track object, not the `linked_from` sub-field
+            const nativeInDb = await prisma.track.findMany({
                 where: {
                     spotifyUri: {
                         in: spotifyTracksWithNecessaryData.map(t => t.uri),
@@ -415,36 +418,55 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
                     }
                 }
             });
-            const urisInDb = new Map(tracksInDb.map(t => [t.spotifyUri, t]));
+            const nativeUrisInDb = new Map(nativeInDb.map(t => [t.spotifyUri, t]));
 
-            // toUpdate == all tracks from spotifyTracksWithNecessaryData that already exist in db
+            // toUpdateNative == all tracks non-relinked from spotifyTracksWithNecessaryData that already exist in db
+            // toUpdateRelinked == all tracks relinked from spotifyTracksWithNecessaryData that already exist in db
             // toInsert == all tracks from spotifyTracksWithNecessaryData that aren't in the db
-            const [alreadyInDb, toInsert] = partition(spotifyTracksWithNecessaryData, st => urisInDb.has(st.uri));
-
+            const [alreadyInDbNative, notInDbNative] = partition(spotifyTracksWithNecessaryData, st => nativeUrisInDb.has(st.uri));
             // Select only the tracks which have a difference somewhere
-            const toUpdate = alreadyInDb.filter(t => {
-                const dbTrack = urisInDb.get(t.uri)!; // non-null because of partition() call
+            const toUpdateNative = alreadyInDbNative.filter(t => {
+                const dbTrack = nativeUrisInDb.get(t.uri)!; // non-null because of partition() call
                 return dbTrack.name !== t.name || dbTrack.album.name !== t.album.name || dbTrack.artist.name !== selectFirstArtist(t.artists).name || dbTrack.durationMs !== t.duration_ms;
             });
 
-            const metadataMap: Map<string, Spotify.PlaylistTrackMetadata> = new Map(
-                playlistTrackBatch.map(pt => [
-                    pt.track.uri,
-                    {
-                        added_by: pt.added_by,
-                        added_at: pt.added_at,
-                        is_local: pt.is_local
-                    }
-                ])
-            );
-            let insertedTracks: Track[] = [];
-            let updatedTracks: Track[] = [];
+            // toInsertNative is all of the tracks with no `linked_from` object that are not in the db
+            // possibleRelinked is all the tracks not in db according to native URI, but having a `linked_from` object we should check out
+            const [toInsertNative, possibleRelinked] = partition(notInDbNative, st => !st.linked_from);
+            const relinkedInDb = await prisma.track.findMany({
+                where: {
+                    spotifyUri: {
+                        in: possibleRelinked.map(t => t.linked_from!.uri),
+                    },
+                }
+                // Don't need to include any additional info becase we're always going to update these
+            });
+            const relinkedUrisInDb = new Map(relinkedInDb.map(t => [t.spotifyUri, t]));
+            const [toUpdateRelinked, toInsertRelinked] = partition(possibleRelinked, st => relinkedUrisInDb.has(st.linked_from!.uri));
 
-            // Update track batch
-            if (toUpdate.length > 0) {
-                console.log(`Updating ${toUpdate.length} tracks`)
-                updatedTracks = await Promise.all(
-                    toUpdate.map(spotifyTrack =>
+            // We just concat the relinked ones on since for new tracks it really doesn't matter if the linked_from exists since we don't use it
+            const toInsert = toInsertNative.concat(toInsertRelinked);
+
+
+            // const metadataMap: Map<string, Spotify.PlaylistTrackMetadata> = new Map(
+            //     playlistTrackBatch.map(pt => [
+            //         pt.track.uri,
+            //         {
+            //             added_by: pt.added_by,
+            //             added_at: pt.added_at,
+            //             is_local: pt.is_local
+            //         }
+            //     ])
+            // );
+            let insertedTracks: Track[] = [];
+            let updatedNativeTracks: Track[] = [];
+            let updatedRelinkedTracks: Track[] = [];
+
+            // Update track batch that matched on native URI
+            if (toUpdateNative.length > 0) {
+                console.log(`Updating ${toUpdateNative.length} tracks that matched main URIs`)
+                updatedNativeTracks = await Promise.all(
+                    toUpdateNative.map(spotifyTrack =>
                         prisma.track.update({
                             where: { spotifyUri: spotifyTrack.uri },
                             data: {
@@ -453,11 +475,30 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
                                 artistId: uriToArtistId.get(selectFirstArtist(spotifyTrack.artists).uri)!,
                                 albumId: uriToAlbumId.get(spotifyTrack.album.uri)!,
                                 durationMs: spotifyTrack.duration_ms,
-
                             },
                         })
                     )
                 );
+            }
+
+            if (toUpdateRelinked.length > 0) {
+                console.log(`Updating ${toUpdateNative.length} tracks that matched linked_from URIs`)
+                updatedRelinkedTracks = await Promise.all(
+                    toUpdateRelinked.map(spotifyTrack =>
+                        prisma.track.update({
+                            where: { spotifyUri: spotifyTrack.linked_from!.uri },
+                            data: {
+                                name: spotifyTrack.name,
+                                // Can assert non-null because we checked for related data above
+                                artistId: uriToArtistId.get(selectFirstArtist(spotifyTrack.artists).uri)!,
+                                albumId: uriToAlbumId.get(spotifyTrack.album.uri)!,
+                                durationMs: spotifyTrack.duration_ms,
+                                spotifyUri: spotifyTrack.uri,
+                            },
+                        })
+                    )
+                );
+
             }
 
             // Then insert track batch
@@ -477,7 +518,8 @@ async function upsertSpotifyDataFromTracks(spotifyPlaylistTracks: Spotify.Playli
                 });
             }
 
-            tracks = tracks.concat(updatedTracks);
+            tracks = tracks.concat(updatedNativeTracks);
+            tracks = tracks.concat(updatedRelinkedTracks);
             tracks = tracks.concat(insertedTracks);
         }
 
