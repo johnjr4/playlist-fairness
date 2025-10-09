@@ -74,6 +74,7 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle, 
             <div
                 ref={textRef}
                 className={`${textStyle}`}
+                style={{ lineHeight: 'normal' }}
             >
                 {text}
             </div>
