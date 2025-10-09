@@ -5,10 +5,11 @@ interface SpotifyLinkProps {
     uri: string;
     type: 'playlist' | 'track';
     underlined?: boolean;
+    className?: string;
 }
 
-function SpotifyLink({ text, uri, type, underlined = false }: SpotifyLinkProps) {
-    return <a href={toSpotifyLink(uri, type)} target='_blank' className={`hover:brightness-70 ${underlined ? 'underline' : undefined}`}>{text}</a>
+function SpotifyLink({ text, uri, type, underlined = false, className }: SpotifyLinkProps) {
+    return <a href={toSpotifyLink(uri, type)} target='_blank' className={`hover:brightness-80 ${underlined ? 'underline' : undefined} ${className}`}>{text}</a>
 }
 
 export default SpotifyLink;

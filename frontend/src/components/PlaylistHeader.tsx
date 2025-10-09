@@ -12,6 +12,7 @@ import errorCoverUrl from "../assets/covers/error_cover.svg";
 import loadingCoverUrl from "../assets/covers/loading_cover.svg";
 import useQuery from "../utils/api/useQuery";
 import type { PlaylistHeaderState, PlaylistHistState } from "../utils/types/playlistPage";
+import { toSpotifyLink } from "../utils/spotifyLink";
 
 interface PlaylistHeaderProps {
     playlistId: number;
@@ -38,7 +39,7 @@ function getHeaderState(isLoading: boolean, error: string | null): PlaylistHeade
 
 // Functions deriving from state
 
-function getDropdown(state: PlaylistHistState, setSyncModalOpen: (setOpen: boolean) => void, updateSync: (setSync: boolean) => void) {
+function getDropdown(playlist: Public.Playlist | null, state: PlaylistHistState, setSyncModalOpen: (setOpen: boolean) => void, updateSync: (setSync: boolean) => void) {
     // Determine dropdown
     if (state === 'syncing' || state === 'loading')
         return (
@@ -50,6 +51,7 @@ function getDropdown(state: PlaylistHistState, setSyncModalOpen: (setOpen: boole
 
     // We're in valid loaded state, so determine dropdown items
     const settingsDropdownItems: DropdownItem[] = [];
+    if (playlist) settingsDropdownItems.push({ label: 'Open on Spotify', onClick: () => window.open(toSpotifyLink(playlist.spotifyUri, 'playlist')) });
     if (state === 'synced') settingsDropdownItems.push({ label: 'Disable sync', onClick: () => setSyncModalOpen(true) });
     else if (state === 'unsynced') settingsDropdownItems.push({ label: 'Enable sync', onClick: () => updateSync(true) });
 
@@ -109,7 +111,7 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
 
     const { title, coverUrl } = getPlaylistIdentifiers(state, playlist);
 
-    const dropdown = getDropdown(playlistHistState, setSyncModalOpen, updateSync);
+    const dropdown = getDropdown(playlist, playlistHistState, setSyncModalOpen, updateSync);
     const summary = getSummaryText(playlistHistState, state, playlistStats);
 
     function updateSync(setSync: boolean) {

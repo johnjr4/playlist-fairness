@@ -6,6 +6,7 @@ import { FaCompactDisc } from 'react-icons/fa';
 import { PiMicrophoneStageFill } from 'react-icons/pi';
 import type { AnalysisStats } from '../utils/types/playlistPage';
 import { roundToDecimals } from '../utils/numberUtils';
+import SpotifyLink from './ui/SpotifyLink';
 
 function getPlayDifference(stats: AnalysisStats, numPlays: number) {
     if (stats.totalPlays <= 0) return undefined;
@@ -34,6 +35,7 @@ function PlaylistTrackCard({ playlistTrack, stats }: { playlistTrack: Public.Pla
             <div className='text-sm'>
                 <p>Plays: {numPlays} <span className='text-sm text-dark-highlight'> {getPlayDifference(stats, numPlays)}</span></p>
                 <p>Added to playlist: {playlistTrack.addedToPlaylistTime ? new Date(playlistTrack.addedToPlaylistTime).toLocaleDateString() : 'unknown'}</p>
+                <SpotifyLink text='Open on Spotify' type='track' uri={playlistTrack.track.spotifyUri} underlined={true} className='text-dark-highlight' />
             </div>
         </div>
     );
