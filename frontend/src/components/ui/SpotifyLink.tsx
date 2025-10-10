@@ -3,7 +3,7 @@ import { toSpotifyLink } from "../../utils/spotifyLink";
 interface SpotifyLinkProps {
     text: string;
     uri: string;
-    type: 'playlist' | 'track';
+    type: 'playlist' | 'track' | 'user';
     underlined?: boolean;
     className?: string;
 }

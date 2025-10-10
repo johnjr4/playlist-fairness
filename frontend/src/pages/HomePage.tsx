@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import PlaylistCardGrid from '../components/PlaylistCardGrid';
 import SearchBar from '../components/SearchBar';
-import gradientClasses from '../styling/gradient.module.css';
 import cardGridClasses from '../styling/cardGrid.module.css';
 
 function HomePage() {
