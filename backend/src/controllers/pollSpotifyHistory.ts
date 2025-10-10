@@ -10,7 +10,7 @@ import { syncSpotifyData } from "./syncSpotifyData.js";
 import type { AxiosInstance } from "axios";
 import { refreshAccessToken } from "./refreshToken.js";
 
-const cronStr = '*/10 * * * *';
+const cronStr = '*/25 * * * *';
 const pollTask = cron.createTask(cronStr, pollAndUpdateSpotifyHistory);
 
 export function startPollingHistory() {
