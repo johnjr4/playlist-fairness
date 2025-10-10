@@ -22,10 +22,10 @@ function ProfileMenu() {
         <Dropdown
             items={dropdownItems}
             hasCaret={false}
-            color='bg-inherit'
             hoverColor="red"
-            outerClassName="bg-background-700 h-full"
-            buttonClassName="min-h-5 h-full bg-amber-300 gap-2 text-sm"
+            outerClassName="h-full"
+            buttonClassName="min-h-5 h-full gap-2 text-xs md:text-sm py-0.5 md:py-1.5 px-2 md:px-3"
+            optionListClassName="bg-background-700"
         >
             <div>{user.displayName}</div>
             <ProfilePicture size="h-full" className="outline-2 outline-gray-700" />

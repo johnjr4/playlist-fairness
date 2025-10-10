@@ -14,7 +14,8 @@ function NavbarLink({ children, to }: NavbarLinkProps) {
         <NavLink to={to} end className={({ isActive }) =>
             `
                 ${isActive ? activeLinkStyle : undefined}
-                px-3 py-2 rounded-md font-semibold
+                px-2 py-1 md:px-3 md:py-2 rounded-md font-semibold
+                text-nowrap
                 text-background-50
                 ${hoverClasses.hover3D} ${hoverClasses.transition}
             `

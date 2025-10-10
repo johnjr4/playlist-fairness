@@ -1,0 +1,20 @@
+:root {
+    --navbar-height: 3.2rem;
+    @media (max-width: 768px) {
+        /* sm: tailwind breakpoint */
+        --navbar-height: 2rem;
+    }
+}
+
+.navbar {
+    height: var(--navbar-height);
+}
+
+.content-margin {
+    margin-top: var(--navbar-height);
+}
+
+.sticky {
+    position: sticky;
+    top: var(--navbar-height);
+}

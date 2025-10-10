@@ -8,11 +8,11 @@ type DropdownProps = {
     onLogout?: () => void;
     children: React.ReactNode;
     hasCaret?: boolean;
-    color?: string,
     hoverColor?: string,
     items: DropdownItem[];
     buttonClassName?: string;
     outerClassName?: string;
+    optionListClassName?: string;
     disabled?: boolean;
 };
 
@@ -22,7 +22,7 @@ export type DropdownItem = {
     className?: string;
 };
 
-function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700', buttonClassName, outerClassName, disabled = false }: DropdownProps) {
+function Dropdown({ children, items, hasCaret = true, buttonClassName, outerClassName, optionListClassName, disabled = false }: DropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     // Will simply maintain a reference to the 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -42,7 +42,7 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700
             <Button
                 variant='secondary'
                 onClick={() => setIsOpen((prev) => !prev)}
-                className={`flex items-center ${buttonClassName} ${color} ${disabled && 'pointer-events-none opacity-40'} ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
+                className={`flex items-center ${buttonClassName} ${disabled && 'pointer-events-none opacity-40'} ${hoverClasses.hover3D} ${hoverClasses.transition} cursor-pointer`}
                 disabled={disabled}
             >
                 {children}
@@ -51,7 +51,7 @@ function Dropdown({ children, items, hasCaret = true, color = 'bg-background-700
 
             {/* Dropdown menu */}
             {isOpen && (
-                <div className={`absolute right-0 mt-1.5 w-30 md:w-40 ${color} rounded-sm outline-2 outline-background-500 shadow-lg z-50 md:text-base`}>
+                <div className={`absolute right-0 mt-1.5 w-30 md:w-40 rounded-sm outline-2 ${optionListClassName} outline-background-500 shadow-lg z-50 md:text-base`}>
                     {items.map((item, idx) => (
                         <button
                             key={idx}

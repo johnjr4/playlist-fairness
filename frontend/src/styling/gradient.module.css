@@ -3,7 +3,7 @@
 }
 
 .navGradient {
-    background: linear-gradient(to bottom, var(--color-background-700) 92%, var(--color-background-400))
+    background: linear-gradient(to bottom, var(--color-background-700) 80%, var(--color-background-600))
 }
 
 .dropShadow {

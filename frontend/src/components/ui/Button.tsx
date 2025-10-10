@@ -12,7 +12,7 @@ function Button({ children, variant = 'primary', onClick, className, disabled = 
 
     const variantStyles = {
         primary: `bg-radial-[at_30%_40%] from-primary-500 from-30% to-primary-700 to-110% ${hoverClasses.hover3DPrimary}`,
-        secondary: `bg-transparent ${hoverClasses.hover3D}`,
+        secondary: `${!className && 'bg-transparent'} ${hoverClasses.hover3D}`,
         danger: `bg-radial-[at_30%_40%] from-red-700 from-30% to-red-950 to-110%  ${hoverClasses.hover3DDanger}`,
     };
 
@@ -20,7 +20,7 @@ function Button({ children, variant = 'primary', onClick, className, disabled = 
     return (
         <button
             onClick={onClick}
-            className={`text-textPrimary px-2 py-1 lg:px-2 lg:py-1.5 rounded-md font-medium cursor-pointer ${disabled && 'pointer-events-none'} ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
+            className={`text-textPrimary rounded-md font-medium cursor-pointer ${disabled && 'pointer-events-none'} ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
             style={{ lineHeight: 'normal' }}
             disabled={disabled}
         >
