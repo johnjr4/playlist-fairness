@@ -2,9 +2,11 @@ import { useState } from 'react';
 import PlaylistCardGrid from '../components/PlaylistCardGrid';
 import SearchBar from '../components/SearchBar';
 import cardGridClasses from '../styling/cardGrid.module.css';
+import { useDebounce } from 'use-debounce';
 
 function HomePage() {
     const [filterString, setFilterString] = useState('');
+    const [debouncedFilterString] = useDebounce(filterString, 100);
     console.log("Rendering home page");
 
     // [text-shadow:_0px_0px_20px_var(--color-background-300)]
@@ -30,7 +32,7 @@ function HomePage() {
                     <SearchBar setSearchString={setFilterString} className='w-full max-w-40 sm:max-w-60 md:max-w-80 lg:max-w-120 h-8 md:h-10' clearClassName='hidden sm:block' />
                 </div>
             </div>
-            <PlaylistCardGrid filterString={filterString} />
+            <PlaylistCardGrid filterString={debouncedFilterString} />
         </div>
     )
 }
