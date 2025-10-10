@@ -1,5 +1,6 @@
 import useQuery from "../utils/api/useQuery";
 import hoverClasses from '../styling/hovereffect.module.css';
+import cardGridClasses from '../styling/cardGrid.module.css';
 import PlaylistCard from "./PlaylistCard";
 import * as Public from 'spotifair';
 
@@ -25,26 +26,12 @@ function PlaylistCardGrid({ filterString: searchString = "" }: { filterString?: 
     });
 
     return (
-        <ul className="
-                grid
-                grid-cols-[repeat(auto-fill,theme(width.28))] 
-                sm:grid-cols-[repeat(auto-fill,theme(width.44))] 
-                md:grid-cols-[repeat(auto-fill,theme(width.52))] 
-                lg:grid-cols-[repeat(auto-fill,theme(width.64))] 
-                gap-4
-                justify-center 
-                w-full
-                px-5
-                md:px-20
-                max-w-[1920px]
-                relative
-                z-10
-            ">
+        <ul className={`${cardGridClasses['card-grid']}`}>
             {playlists!.filter(p => (filterString(p.name))).map(p =>
                 <PlaylistCard
                     key={p.id}
                     playlist={p}
-                    className={`w-28 sm:w-44 md:w-52 lg:w-64 bg-background-300/80 ${hoverClasses.hover3D} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${hoverClasses.hoverRise}`}
+                    className={`w-full bg-background-300/80 ${hoverClasses.hover3D} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${hoverClasses.hoverRise}`}
                 />)}
         </ul>
     )

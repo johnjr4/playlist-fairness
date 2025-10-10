@@ -1,11 +1,11 @@
 .transition {
     /* un-hover transition time and style */
-    transition: box-shadow 400ms, transform 200ms ease-in, scale 200ms, background-color 200ms, z-index 200ms;
+    transition: box-shadow 400ms, transform 250ms ease-in, scale 250ms, background-color 250ms, z-index 250ms;
 }
 
 .transition:hover {
     /* hover transition time and style */
-    transition: box-shadow 70ms, transform 50ms ease-out, scale 80ms, background-color 30ms, z-index 30ms;
+    transition: box-shadow 70ms, transform 50ms ease-out, scale 30ms, background-color 30ms, z-index 30ms;
 }
 
 .hover3D {
@@ -44,22 +44,22 @@
 }
 
 .hoverRise:hover {
-    transform: translateY(-8px) rotate(1deg);
+    transform: translateY(-8px) rotate(2deg) ;
     scale: 103%;
     z-index: 20;
 }
 
 /* Series of variants to make rotation look random */
 .hoverRise:nth-of-type(2n):hover {
-    transform: translateY(-8px) rotate(5deg);
+    transform: translateY(-12px) rotate(4deg);
 }
 
 .hoverRise:nth-of-type(3n):hover {
-    transform: translateY(-8px) rotate(-2deg);
+    transform: translateY(-10px) rotate(-3deg);
 }
 
 .hoverRise:nth-of-type(3n+1):hover {
-    transform: translateY(-8px) rotate(-3deg);
+    transform: translateY(-8px) rotate(-1deg);
 }
 
 
@@ -69,5 +69,5 @@
 
 .hoverGlint:hover {
     /* backdrop-filter: brightness(250%) blur(10px); */
-    background-color: var(--color-background-300);
+    background-color: var(--color-background-200);
 }

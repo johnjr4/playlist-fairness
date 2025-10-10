@@ -99,8 +99,7 @@ function getTrackListTable(
                 <div className={`${ptRowClasses['row-full']} font-bold w-full pr-4 text-sm md:text-base`} style={{ lineHeight: 'normal' }}>
                     <div className="text-right max-[500px]:hidden">#</div>
                     <div className={`${ptRowClasses['row-details']} px-2`}>
-                        <div>Title</div>
-                        <div />
+                        <div className="col-span-2">Title</div>
                         <div className="hidden min-[1024px]:block">Album</div>
                         <div className='text-right'>Plays</div>
                     </div>

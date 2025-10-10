@@ -1,0 +1,36 @@
+@reference 'tailwindcss';
+
+.card-grid {
+    display: grid;
+    position: relative;
+    grid-template-columns: repeat(auto-fill, 280px);
+    gap: 12px;
+    justify-content: center;
+    width: 100%;
+    max-width: 1800px;
+    padding-left: 40px;
+    padding-right: 40px;
+    z-index: 10;
+
+    /* Probably a better way to do this */
+    @media(max-width: 1328px) {
+        grid-template-columns: repeat(auto-fill, 200px);
+        gap: 8px;
+        /* background-color: blueviolet; */
+        @media(max-width: 1000px) {
+            grid-template-columns: repeat(auto-fill, 180px);
+            @media(max-width: 790px) {
+                grid-template-columns: repeat(auto-fill, 140px);
+                @media(max-width: 580px) {
+                    grid-template-columns: repeat(auto-fill, 110px);
+                    @media(max-width: 500px) {
+                        grid-template-columns: repeat(auto-fill, 100px);
+                        gap: 4px;
+                        padding-left: 10px;
+                        padding-right: 10px;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -5,25 +5,3 @@
 .navGradient {
     background: linear-gradient(to bottom, var(--color-background-700) 80%, var(--color-background-600))
 }
-
-.dropShadow {
-    position: relative;
-    background-color: transparent;
-    z-index: 0;
-}
-
-.dropShadow::before {
-    content: "";
-    position: absolute;
-    inset: -50px -90px;
-    width: 100%;
-    /* shorthand for top: 0; right: 0; bottom: 0; left: 0 */
-    /* background: rgba(0, 0, 0, 0.5); */
-    background: radial-gradient(var(--color-background-400), transparent 70%);
-    overflow: visible;
-    /* or transparent if needed */
-    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); */
-    z-index: -100;
-    border-radius: 8px;
-    /* optional */
-}
