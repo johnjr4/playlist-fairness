@@ -9,7 +9,6 @@ import SpotifyLink from "./ui/SpotifyLink";
 import { nameComparator, numPlaysComparator, lastPlayedAtComparator, playlistOrderComparator } from "../utils/comparators";
 import { useMemo, useRef } from "react";
 import { useWindowVirtualizer, Virtualizer } from "@tanstack/react-virtual";
-import { useMediaQuery } from "usehooks-ts";
 
 interface TrackListProps {
     className?: string,
@@ -210,16 +209,14 @@ function TrackList({
     const getItemKey = useMemo(() => (index: number) => sortedTracks ? sortedTracks[index].track.id : 0, [sortedTracks]);
 
 
-    const coverSizeMatches = useMediaQuery('(min-width: 500px)');
-    const gapSizeMatches = useMediaQuery('(min-width: 800px)')
     const listRef = useRef<HTMLDivElement | null>(null);
     const rowVirtualizer = useWindowVirtualizer({
         count: sortedTracks ? sortedTracks.length : 0,
-        estimateSize: () => coverSizeMatches ? 52 : 48,
+        estimateSize: () => 62,
         scrollMargin: listRef.current?.offsetTop ?? 0,
         overscan: 5, // How many extra items above and below are rendered
         getItemKey: getItemKey,
-        gap: gapSizeMatches ? 6 : 3,
+        gap: 3,
     });
 
     const rowVars: RowVars = { selectedTrack, setSelectedTrack, totalNumTracks };

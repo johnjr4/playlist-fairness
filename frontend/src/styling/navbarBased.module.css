@@ -2,7 +2,7 @@
     --navbar-height: 3.2rem;
     @media (max-width: 768px) {
         /* sm: tailwind breakpoint */
-        --navbar-height: 2rem;
+        --navbar-height: 2.4rem;
     }
 }
 
