@@ -34,7 +34,6 @@ function PlaylistPage() {
     const [isSyncing, setIsSyncing] = useState(false);
     const { data: playlistHist, isLoading: isTracksLoading, error: tracksError, refetch: refetchTracks } = useQuery<Public.PlaylistHist>(`/playlists/${playlistId}/tracks/hist`);
 
-    // console.log(playlist);
     const playlistHistState = getPlaylistHistState(isTracksLoading, tracksError, isSyncing, playlistHist);
     const filteredTracks = useMemo(() => {
         return playlistHist?.tracks.filter(t => t.currentlyOnPlaylist) ?? null;

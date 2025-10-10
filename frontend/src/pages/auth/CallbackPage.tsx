@@ -80,7 +80,6 @@ function CallbackPage() {
             }
 
             if (!stateUser) {
-                console.log("Sending request!");
                 exchangeCode();
             }
         }

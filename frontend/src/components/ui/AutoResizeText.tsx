@@ -43,7 +43,6 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle, 
         // If still overflowing at minFontSize, allow wrapping
         if (newFontSize <= minFontSize && textEl.scrollWidth > container.clientWidth) {
             textEl.style.whiteSpace = 'normal';
-            console.log("wrapping")
             // setAllowWrap(true)
         }
     }
@@ -55,10 +54,8 @@ function AutoResizeText({ text, parentRef, maxFontSize, minFontSize, textStyle, 
         const resizeObservor = new ResizeObserver(() => resizeText());
         if (parentRef && parentRef.current) {
             // Add our container to the list of elements it's observing
-            console.log('attaching parent')
             resizeObservor.observe(parentRef.current);
         } else if (containerRef.current) {
-            console.log('attaching container')
             resizeObservor.observe(containerRef.current);
         }
 

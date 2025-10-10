@@ -115,7 +115,7 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
     const summary = getSummaryText(playlistHistState, state, playlistStats);
 
     function updateSync(setSync: boolean) {
-        console.log(`Updating sync to ${setSync}`);
+        // console.log(`Updating sync to ${setSync}`);
         setPlaylistSync(setSync);
     }
 

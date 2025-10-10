@@ -20,9 +20,9 @@ function ProfilePage() {
 
     async function handleDelete() {
         setIsDeleting(true);
-        const deletedUser = await backendAxios.delete<Public.User>(`/user/${user.id}`);
-        console.log("Deleted user");
-        console.log(deletedUser);
+        await backendAxios.delete<Public.User>(`/user/${user.id}`);
+        // console.log("Deleted user");
+        // console.log(deletedUser);
         setIsDeleting(false);
         setUser(null);
     }

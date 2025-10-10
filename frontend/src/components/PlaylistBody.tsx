@@ -22,7 +22,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
     const [searchString, setSearchString] = useState('');
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({ showRemoved: false, });
     const [sortOption, setSortOption] = useState<SortingOption>({ ascending: true, sortedOn: 'playlist_order' })
-    const [debouncedSearchString] = useDebounce(searchString, 300);
+    const [debouncedSearchString] = useDebounce(searchString, 200);
     const [selectedTrack, setSelectedTrack] = useState<Public.PlaylistTrackHist | null>(null);
 
 

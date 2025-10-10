@@ -7,7 +7,6 @@ import { useDebounce } from 'use-debounce';
 function HomePage() {
     const [filterString, setFilterString] = useState('');
     const [debouncedFilterString] = useDebounce(filterString, 100);
-    console.log("Rendering home page");
 
     // [text-shadow:_0px_0px_20px_var(--color-background-300)]
     return (
