@@ -1,6 +1,7 @@
 import useQuery from "../utils/api/useQuery";
 import hoverClasses from '../styling/hovereffect.module.css';
 import cardGridClasses from '../styling/cardGrid.module.css';
+import cardClasses from '../styling/cards.module.css';
 import PlaylistCard from "./PlaylistCard";
 import * as Public from 'spotifair';
 import SpotifyLink from "./ui/SpotifyLink";
@@ -85,7 +86,7 @@ function PlaylistCardGrid({ filterString: searchString = "" }: { filterString?: 
                 <PlaylistCard
                     key={p.id}
                     playlist={p}
-                    className={`w-full bg-background-300/80 ${hoverClasses.hover3D} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${mdBreakpoint && hoverClasses.hoverRise}`}
+                    className={`w-full ${mdBreakpoint ? 'bg-background-300/80' : cardClasses['glass-card']} ${hoverClasses.hover3D} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${mdBreakpoint && hoverClasses.hoverRise}`}
                 />)}
         </ul>
     )
