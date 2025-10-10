@@ -21,7 +21,7 @@ function Button({ children, variant = 'primary', onClick, className, disabled = 
     return (
         <button
             onClick={onClick}
-            className={`text-textPrimary rounded-md font-medium cursor-pointer ${useDefaultSizing && 'px-2 py-1.5 lg:px-3 lg:py-2 text-sm lg:text-base'} ${disabled && 'pointer-events-none'} ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
+            className={`text-textPrimary rounded-md font-medium cursor-pointer ${useDefaultSizing && 'px-2 py-1 lg:px-3 lg:py-2 text-sm lg:text-base'} ${disabled && 'pointer-events-none'} ${hoverClasses.transition} ${variantStyles[variant]} ${className}`}
             style={{ lineHeight: 'normal' }}
             disabled={disabled}
         >

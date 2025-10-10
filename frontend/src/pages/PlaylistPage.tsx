@@ -53,7 +53,7 @@ function PlaylistPage() {
     }
 
     return (
-        <div className="overflow-x-clip min-h-full h-full py-4">
+        <div className="overflow-x-clip min-h-full h-full pt-4 pb-6">
             <div className='w-dvw min-h-full flex flex-col items-center ' // Fixes layout shift when scrollbar appears
             >
                 <PlaylistHeader playlistId={parseInt(playlistId!)} playlistStats={{ numTracks, totalMs }} setPlaylistSync={setPlaylistSync} playlistHistState={playlistHistState} />

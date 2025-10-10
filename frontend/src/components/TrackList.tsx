@@ -112,7 +112,10 @@ function getTrackListTable(
 
 function getCenteredContent(children: React.ReactNode) {
     return (
-        <div className="w-full h-full flex flex-col gap-1 justify-center items-center text-center">
+        <div
+            className="w-full h-full flex flex-col gap-1 justify-center items-center text-center px-5 py-10 text-sm md:text-base"
+            style={{ lineHeight: 'normal' }}
+        >
             {children}
         </div>
     )

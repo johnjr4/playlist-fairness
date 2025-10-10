@@ -1,12 +1,20 @@
 @reference "tailwindcss";
+:root {
+    --glass-background-color: #2a41603a;
+    --glass-outline-color: #3c638a57;
+}
 
 .glass-card {
     /* @apply bg-[var(--color-background-300)]/30; */
     /* --start-col: color-mix(in oklab, var(--color-background-200) 60%, transparent);
     --end-col: color-mix(in oklab, var(--color-background-200) 30%, transparent); */
     /* background: linear-gradient(150deg, var(--start-col) 100px, var(--end-col)); */
-    background-color: color-mix(in oklab, var(--color-background-200) 20%, transparent);
-    outline-color: color-mix(in oklab, var(--color-background-50) 30%, transparent);
+    
+    /* background-color: color-mix(in oklab, var(--color-background-200) 20%, transparent); */
+    background-color: var(--glass-background-color);
+    /* outline-color: color-mix(in oklab, var(--color-background-50) 30%, transparent); */
+    outline-color: var(--glass-outline-color);
+
     @apply outline md:outline-2;
     --tw-shadow-color: var(--color-background-500);
     @apply shadow-sm md:shadow-md;

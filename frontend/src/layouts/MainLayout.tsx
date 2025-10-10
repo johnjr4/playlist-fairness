@@ -5,7 +5,7 @@ import navbarClasses from '../styling/navbarBased.module.css';
 
 function MainLayout() {
     return (
-        <div className={`min-h-screen h-full flex flex-col text-textPrimary`}>
+        <div className={`min-h-dvh h-full flex flex-col text-textPrimary`}>
             <header className="relative">
                 <Navbar />
             </header>

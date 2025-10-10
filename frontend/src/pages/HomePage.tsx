@@ -11,7 +11,7 @@ function HomePage() {
     // [text-shadow:_0px_0px_20px_var(--color-background-300)]
     return (
 
-        <div className='w-full flex flex-col justify-center items-center gap-2 lg:gap-5'
+        <div className='w-full flex flex-col justify-center items-center gap-2 lg:gap-5 pb-10'
             style={{ paddingLeft: 'calc(100vw - 100%)' }} // Fixes layout shift when scrollbar appears
         >
             <div

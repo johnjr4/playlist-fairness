@@ -110,14 +110,14 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
     const optionsDisabled = state !== 'synced';
 
     return (
-        <div className={`${className} w-full max-w-7xl px-2 sm:px-3 md:px-4 flex flex-col md:flex-row justify-center mt-5 md:mt-14 gap-3 min-h-full`}>
+        <div className={`${className} w-full max-w-7xl px-2 sm:px-3 md:px-4 flex flex-col md:flex-row justify-center mt-4 md:mt-14 gap-3 min-h-full`}>
             <PlaylistAnalysis
                 filteredTracks={filteredTracks}
                 state={state}
                 selectedTrack={selectedTrack}
                 className={`w-full mx-auto md:w-60 lg:w-80 ${cardClasses['glass-card']} grow-0 shrink-0`}
             />
-            <div className="w-full flex flex-col gap-3 grow">
+            <div className="w-full flex flex-col gap-2 md:gap-3 grow">
                 <div className={`${navbarClasses['sticky']} w-full flex justify-between items-center px-1.5 md:px-4 py-1.5 lg:py-4 ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
                 ${state !== 'synced' ? 'pointer-events-none opacity-70' : undefined} `}>
                     <SearchBar

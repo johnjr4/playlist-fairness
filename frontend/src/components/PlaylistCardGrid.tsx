@@ -38,7 +38,7 @@ function getPlaceholderContent(isLoading: boolean, error: string | null, numPlay
         return null;
     }
     return (
-        <div className="w-full h-full flex justify-center items-center text-center px-6 py-2 text-base md:text-lg">
+        <div className="w-full h-full flex flex-col justify-center items-center text-center gap-2 px-6 py-2 text-base md:text-lg">
             {centeredContent}
         </div>
     )

@@ -5,6 +5,7 @@ import { alea } from 'seedrandom';
 import { evaluateFairness, fairColor, fairColorSmall, isFair, top20Plays } from '../utils/fairness';
 import { useMemo, type JSX } from 'react';
 import { roundToDecimals } from '../utils/numberUtils';
+import navbarClasses from '../styling/navbarBased.module.css';
 import PlaylistTrackCard from './PlaylistTrackCard';
 
 interface PlaylistAnalysisProps {
@@ -187,11 +188,13 @@ function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: P
             block ${className}
             rounded-sm 
             gap-2 lg:gap-4 
-            py-4 px-2 sm:px-3 lg:px-5 lg:py-5
+            py-2 px-2.5 sm:px-3 lg:px-5 lg:py-5
             ${getDisabledStyling(state)}
         `}>
-            <div className='md:sticky md:top-20 flex flex-col
-            gap-2 xl:gap-5'>
+            <div
+                className={`${navbarClasses['sticky']} md:translate-y-2 flex flex-col
+                gap-2 xl:gap-5`}
+            >
                 <h1 className={`
                 text-center
                     font-semibold
