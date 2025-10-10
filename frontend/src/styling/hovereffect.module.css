@@ -24,7 +24,7 @@
 
 .hover3DDanger:hover {
     /* @apply hover:inset-shadow-sm transition-shadow duration-75; */
-    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0px 2px 3px 1px var(--color-red-500), inset 0px -1px 3px 0px var(--color-background-400);
+    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0px 2px 5px 1px var(--color-red-400), inset 0px -2px 4px 0px var(--color-background-700);
     /* --tw-inset-shadow-color: var(--color-background-100); */
 }
 
@@ -34,7 +34,7 @@
 
 .hover3DPrimary:hover {
     /* @apply hover:inset-shadow-sm transition-shadow duration-75; */
-    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0px 2px 3px 1px var(--color-primary-300), inset 0px -1px 4px 0px var(--color-background-300);
+    box-shadow: 0px 0px 5px 1px var(--color-background-600), inset 0px 2px 5px 1px var(--color-primary-200), inset 0px -2px 4px 0px var(--color-background-700);
     /* --tw-inset-shadow-color: var(--color-background-100); */
 }
 
@@ -63,9 +63,9 @@
 }
 
 
-.hoverGlint {
-    /* backdrop-filter: none; */
-}
+/* .hoverGlint {
+    backdrop-filter: none;
+} */
 
 .hoverGlint:hover {
     /* backdrop-filter: brightness(250%) blur(10px); */

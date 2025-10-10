@@ -12,9 +12,9 @@ type ButtonProps = {
 function Button({ children, variant = 'primary', onClick, className, disabled = false, useDefaultSizing = false }: ButtonProps) {
 
     const variantStyles = {
-        primary: `bg-radial-[at_30%_40%] from-primary-500 from-30% to-primary-700 to-110% ${hoverClasses.hover3DPrimary}`,
+        primary: `bg-primary-500 ${hoverClasses.hover3DPrimary}`,
         secondary: `${!className && 'bg-transparent'} ${hoverClasses.hover3D}`,
-        danger: `bg-radial-[at_30%_40%] from-red-700 from-30% to-red-950 to-110%  ${hoverClasses.hover3DDanger}`,
+        danger: `bg-red-700 ${hoverClasses.hover3DDanger}`,
     };
 
 
