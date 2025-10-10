@@ -118,7 +118,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                 className={`w-full mx-auto md:w-60 lg:w-80 ${cardClasses['glass-card']} grow-0 shrink-0`}
             />
             <div className="w-full flex flex-col gap-3 grow">
-                <div className={`${navbarClasses['sticky']} w-full flex justify-between items-center px-2 lg:px-4 py-3 lg:py-4 ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
+                <div className={`${navbarClasses['sticky']} w-full flex justify-between items-center px-1.5 md:px-4 py-1.5 lg:py-4 ${cardClasses['glass-card']} ${cardClasses['glass-filter']} rounded-xs
                 ${state !== 'synced' ? 'pointer-events-none opacity-70' : undefined} `}>
                     <SearchBar
                         setSearchString={setSearchString}
@@ -147,6 +147,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                                 onLabel="Show"
                                 offLabel="Hide"
                                 disabled={optionsDisabled}
+                                className="text-xs lg:text-sm"
                             />
                         </div>
                     </div>

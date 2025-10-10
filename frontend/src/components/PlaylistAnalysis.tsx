@@ -125,18 +125,18 @@ function getLikelihoodDisplayStat(stats: AnalysisStats, className?: string) {
         return getTransformedDisplayStat({
             header,
             content: <>Calculated once playlist has activity</>,
-            tip: 'may take several minutes to sync'
+            tip: 'may take up to 30 minutes to sync'
         }, className);
     }
 
     return getTransformedDisplayStat({
         header,
-        tip: 'assuming equal chance for all songs',
+        tip: 'assuming equal chance for all tracks',
         content: (
             <>
                 More likely than {!stats.isFair && 'only'} about <span className={`font-semibold ${fairColorSmall(stats.isFair)}`}>
                     {roundToDecimals(stats.fairnessScore * 100, 2)}%
-                </span> of distributions
+                </span> of distributions <span>with equal plays</span>
             </>
         )
     }, className);
@@ -205,9 +205,9 @@ function PlaylistAnalysis({ filteredTracks, selectedTrack, className, state }: P
                     stats &&
                     <div className='w-full flex flex-col gap-2'>
                         <div className='w-full flex md:flex-col gap-2 md:gap-2'>
-                            {getLikelihoodDisplayStat(stats, 'grow-2')}
+                            {getLikelihoodDisplayStat(stats, 'grow-3')}
                             {getParetoDisplayStat(stats, 'grow-2')}
-                            {getPlaysDisplayStat(stats, 'grow-1')}
+                            {getPlaysDisplayStat(stats, 'grow-[1.5]')}
                             {/* <div className='flex md:flex-col justify-between gap-1.5 md:gap-2'>
                             </div> */}
                         </div>

@@ -47,7 +47,7 @@ function PlaylistTrackCard({ playlistTrack, stats, className }: { playlistTrack:
         statsContent = (<>
             <p>{numPlays.toLocaleString()} play{numPlays === 1 ? '' : 's'}<span className='text-dark-highlight'> {getPlayDifference(stats, numPlays)}</span></p>
             <p>On playlist since {playlistTrack.addedToPlaylistTime ? new Date(playlistTrack.addedToPlaylistTime).toLocaleDateString() : 'unknown'}</p>
-            <p>Position {playlistTrack.playlistPosition + 1} on playlist</p>
+            {/* <p>Position {playlistTrack.playlistPosition + 1} on playlist</p> */}
             <SpotifyLink text='Open on Spotify' type='track' uri={playlistTrack.track.spotifyUri} underlined={true} className='text-dark-highlight' />
         </>)
     } else {

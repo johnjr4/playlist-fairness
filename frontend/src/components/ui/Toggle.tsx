@@ -23,10 +23,10 @@ function Toggle({
 }: ToggleProps) {
     return (
         <div className={`flex ${className} ${disabled && 'opacity-40'}`}>
-            <button onClick={() => onToggle(true)} className={`py-0.5 px-1 rounded-l-sm ${getStatusClassName(isOn, true)}`}>
+            <button onClick={() => onToggle(true)} className={`sm:py-0.5 px-1 rounded-l-sm ${getStatusClassName(isOn, true)}`}>
                 {onLabel}
             </button>
-            <button onClick={() => onToggle(false)} className={`py-0.5 px-1 rounded-r-sm ${getStatusClassName(isOn, false)}`}>
+            <button onClick={() => onToggle(false)} className={`sm:py-0.5 px-1 rounded-r-sm ${getStatusClassName(isOn, false)}`}>
                 {offLabel}
             </button>
         </div>

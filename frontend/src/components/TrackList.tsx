@@ -34,7 +34,7 @@ function getTrackList(
         return (
             <div className="grow flex flex-col justify-center items-center gap-1 p-4 text-center text-sm md:text-base">
                 <p>This playlist doesn't have any tracks. Try adding some <SpotifyLink text='on Spotify' type='playlist' uri={playlist.spotifyUri} underlined={true} /></p>
-                <p className="text-xs md:text-sm text-dark-highlight">It may take several minutes for tracks to sync</p>
+                <p className="text-xs md:text-sm text-dark-highlight">It may take up to 30 minutes for tracks to sync</p>
             </div>
         )
     }
