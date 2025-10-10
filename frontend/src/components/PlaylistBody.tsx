@@ -123,8 +123,8 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                     <SearchBar
                         setSearchString={setSearchString}
                         disabled={optionsDisabled}
-                        className="h-7 md:h-10 text-xs sm:text-sm lg:text-base sm:w-70 lg:w-85 xl:w-105"
-                        clearClassName="hidden sm:block" />
+                        className="h-7 md:h-10 text-xs sm:text-sm lg:text-base sm:w-60 lg:w-85 xl:w-105"
+                        clearClassName="" />
                     <div className="flex text-sm items-center gap-1 lg:gap-2">
                         <SortDropdown
                             onChange={(val) => setSortOption(val)}

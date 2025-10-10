@@ -28,7 +28,7 @@ function HomePage() {
                     >Your playlists</h1>
                 </div>
                 <div className='-col-start-3 -col-end-1 flex justify-end'>
-                    <SearchBar setSearchString={setFilterString} className='w-full max-w-40 sm:max-w-60 md:max-w-80 lg:max-w-120 h-8 md:h-10' clearClassName='hidden sm:block' />
+                    <SearchBar setSearchString={setFilterString} className='w-full max-w-44 sm:max-w-60 md:max-w-80 lg:max-w-120 h-8 md:h-10' />
                 </div>
             </div>
             <PlaylistCardGrid filterString={debouncedFilterString} />

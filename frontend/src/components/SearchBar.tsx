@@ -18,7 +18,7 @@ function SearchBar({ setSearchString, disabled = false, className, clearClassNam
 
     return (
         // <div className='px-4 py-2 m-4 bg-red-300 lg:w-2xl'>Search bar goes here!</div>
-        <div className={`flex justify-center items-center gap-2 md:gap-4 ${className} ${disabled ? 'opacity-40' : 'opacity-100'}`}>
+        <div className={`flex justify-center items-center gap-1 lg:gap-4 ${className} ${disabled ? 'opacity-40' : 'opacity-100'}`}>
             <input
                 type='text'
                 disabled={disabled}
@@ -30,7 +30,7 @@ function SearchBar({ setSearchString, disabled = false, className, clearClassNam
             <Button
                 onClick={!disabled ? () => setQuery('') : () => { }}
                 variant="secondary"
-                className={`max-h-full ${clearClassName} text-xs md:text-sm lg:text-base px-2 py-1 lg:px-3 lg:py-2`}
+                className={`max-h-full ${clearClassName} text-xs md:text-sm lg:text-base px-1 py-0.5 lg:px-3 lg:py-2`}
                 disabled={disabled}
             >
                 Clear
