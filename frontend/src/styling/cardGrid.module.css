@@ -1,5 +1,3 @@
-@reference 'tailwindcss';
-
 .card-grid {
     display: grid;
     position: relative;

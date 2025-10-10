@@ -8,6 +8,7 @@ import { useProtectedAuth } from "../utils/AuthContext";
 import { handleLogin } from "../utils/handleLogin";
 import Button from "./ui/Button";
 import { useMemo } from "react";
+import { useMediaQuery } from "usehooks-ts";
 
 function getPlaceholderContent(isLoading: boolean, error: string | null, numPlaylistsUnfiltered: number | null, filteredPlaylists: Public.Playlist[] | null, user: Public.User) {
     let centeredContent: React.ReactNode;
@@ -50,6 +51,8 @@ function PlaylistCardGrid({ filterString: searchString = "" }: { filterString?: 
 
     const numPlaylistsUnfiltered = playlists?.length ?? null;
 
+    const mdBreakpoint = useMediaQuery('(min-width: 768px)');
+
     const filteredPlaylists = useMemo(() => {
         if (!playlists) return null;
         const lowercaseSearchString = searchString ? searchString.toLowerCase() : null;
@@ -82,7 +85,7 @@ function PlaylistCardGrid({ filterString: searchString = "" }: { filterString?: 
                 <PlaylistCard
                     key={p.id}
                     playlist={p}
-                    className={`w-full bg-background-300/80 ${hoverClasses.hover3D} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${hoverClasses.hoverRise}`}
+                    className={`w-full bg-background-300/80 ${hoverClasses.hover3D} ${hoverClasses.hoverGlint} ${hoverClasses.transition} ${mdBreakpoint && hoverClasses.hoverRise}`}
                 />)}
         </ul>
     )

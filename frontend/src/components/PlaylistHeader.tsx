@@ -13,6 +13,7 @@ import loadingCoverUrl from "../assets/covers/loading_cover.svg";
 import useQuery from "../utils/api/useQuery";
 import type { PlaylistHeaderState, PlaylistHistState } from "../utils/types/playlistPage";
 import { toSpotifyLink } from "../utils/spotifyLink";
+import { useMediaQuery } from "usehooks-ts";
 
 interface PlaylistHeaderProps {
     playlistId: number;
@@ -108,6 +109,7 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
 
     const state = getHeaderState(isLoading, error);
     // const state = 'loading';
+    const mdBreakpoint = useMediaQuery('(min-width: 768px)');
 
     const { title, coverUrl } = getPlaylistIdentifiers(state, playlist);
 
@@ -134,7 +136,8 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
                     className="
                         scale-112
                         md:scale-124
-                        -translate-y-4
+                        -translate-y-2
+                        sm:-translate-y-3
                         md:translate-y-0
                         md:-translate-x-5
                         shrink-0
@@ -143,7 +146,7 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
                     "
                 />
                 <div className="w-full md:w-0 basis-0 grow shrink" ref={overviewRef}>
-                    <AutoResizeText text={title} maxFontSize={60} minFontSize={18} textStyle="font-bold" />
+                    <AutoResizeText text={title} maxFontSize={mdBreakpoint ? 60 : 30} minFontSize={18} textStyle="font-bold" />
                     <p className="flex text-dark-highlight gap-1 text-xs md:text-sm">
                         {summary}
                     </p>
