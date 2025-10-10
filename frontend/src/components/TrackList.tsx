@@ -136,7 +136,7 @@ function getMainContent(
             return getCenteredContent(
                 <>
                     <div>Sorry, something went wrong</div>
-                    <Button onClick={() => unsyncedVars.refetch()}>Try again</Button>
+                    <Button useDefaultSizing={true} onClick={() => unsyncedVars.refetch()}>Try again</Button>
                 </>
             );
         case 'syncing':
@@ -157,7 +157,7 @@ function getMainContent(
             return getCenteredContent(
                 <>
                     <div>Sync not enabled for this playlist</div>
-                    <Button onClick={() => unsyncedVars.setPlaylistSync(true)}>Enable sync</Button>
+                    <Button useDefaultSizing={true} onClick={() => unsyncedVars.setPlaylistSync(true)}>Enable sync</Button>
                 </>
             );
         case 'synced':

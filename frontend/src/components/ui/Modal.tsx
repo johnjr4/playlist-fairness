@@ -64,12 +64,14 @@ function Modal({
                         <Button
                             onClick={onClose}
                             variant='secondary'
+                            useDefaultSizing={true}
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={onConfirm}
                             variant='danger'
+                            useDefaultSizing={true}
                         >
                             Confirm
                         </Button>

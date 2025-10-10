@@ -131,7 +131,7 @@ function PlaylistBody({ playlist, state, setPlaylistSync, className, refetch }: 
                             sortingOptions={sortDropdownOptions}
                             value={sortOption}
                             disabled={optionsDisabled}
-                            className="max-w-26 sm:max-w-36 lg:max-w-32 text-xs sm:text-sm lg:text-base text-nowrap"
+                            className="max-w-26 sm:max-w-36 lg:max-w-32 text-xs sm:text-sm lg:text-base text-nowrap px-1.5 py-1.5 lg:px-4 lg:py-2"
                         />
                         <div className="
                             w-21 sm:w-24

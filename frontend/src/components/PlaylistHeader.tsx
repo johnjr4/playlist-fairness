@@ -43,7 +43,7 @@ function getDropdown(playlist: Public.Playlist | null, state: PlaylistHistState,
     // Determine dropdown
     if (state === 'syncing' || state === 'loading')
         return (
-            <div className="px-2 py-1 lg:px-4 lg:py-1.5"><CgSpinner className="animate-spin text-2xl lg:text-4xl" /></div>
+            <div className="px-2 py-1 lg:px-3 lg:py-1"><CgSpinner className="animate-spin text-2xl lg:text-4xl" /></div>
         );
     else if (state === 'error') {
         return undefined;
@@ -56,7 +56,7 @@ function getDropdown(playlist: Public.Playlist | null, state: PlaylistHistState,
     else if (state === 'unsynced') settingsDropdownItems.push({ label: 'Enable sync', onClick: () => updateSync(true) });
 
     return (
-        <Dropdown items={settingsDropdownItems} hasCaret={false}>
+        <Dropdown items={settingsDropdownItems} hasCaret={false} buttonClassName="px-2 py-1 lg:px-3 lg:py-1" optionListClassName="bg-background-700">
             <LuEllipsis className="text-2xl lg:text-4xl" />
         </Dropdown>
     );
@@ -148,8 +148,8 @@ function PlaylistHeader({ playlistId, setPlaylistSync, playlistHistState, playli
                         {summary}
                     </p>
                 </div>
-                <div className="absolute top-0 flex justify-center
-                    -right-0 md:-right-14 lg:-right-21 xl:-right-30
+                <div className="absolute top-1 flex justify-center
+                    right-1 md:-right-14 lg:-right-21 xl:-right-30
                 ">
                     {dropdown}
                 </div>

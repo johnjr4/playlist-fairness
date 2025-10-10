@@ -109,7 +109,7 @@ function CallbackPage() {
                     <h2 className="text-xl lg:text-3xl font-semibold">Sorry, something went wrong</h2>
                     <p className="text-sm lg:text-base text-background-50">Error: {error.message}</p>
                 </div>
-                <Button onClick={() => handleLogin()}>
+                <Button onClick={() => handleLogin()} useDefaultSizing={true}>
                     Try again
                 </Button>
             </>

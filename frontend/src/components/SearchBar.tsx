@@ -25,9 +25,14 @@ function SearchBar({ setSearchString, disabled = false, className, clearClassNam
                 value={localQuery}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search..."
-                className="relative z-10 px-2 py-1 lg:px-5 lg:py-3 w-full max-h-full rounded-sm bg-background-300 shadow-sm shadow-background-700"
+                className="relative z-10 px-2 py-1 lg:px-5 lg:py-3 w-full max-h-full rounded-sm bg-background-300 shadow-sm shadow-background-700 text-xs md:text-sm lg:text-base"
             />
-            <Button onClick={!disabled ? () => setQuery('') : () => { }} variant="secondary" className={`max-h-full ${clearClassName}`} disabled={disabled}>
+            <Button
+                onClick={!disabled ? () => setQuery('') : () => { }}
+                variant="secondary"
+                className={`max-h-full ${clearClassName} text-xs md:text-sm lg:text-base px-2 py-1 lg:px-3 lg:py-2`}
+                disabled={disabled}
+            >
                 Clear
             </Button>
         </div>

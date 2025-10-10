@@ -19,7 +19,7 @@ function LandingPage() {
     return (
         <div className={`flex flex-col justify-center items-center h-full text-textPrimary ${gradientClasses.bgGradient}`}>
             <h1 className="font-bold text-7xl p-6">Spotifair</h1>
-            <Button onClick={onClick} variant='primary'>
+            <Button onClick={onClick} variant='primary' className="px-3 py-2.5 xl:text-lg xl:px-4 xl:py-3">
                 Get Started
             </Button>
         </div>

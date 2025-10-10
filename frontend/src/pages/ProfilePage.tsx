@@ -38,10 +38,10 @@ function ProfilePage() {
             <div className=" flex flex-col items-end gap-2 my-2 md:mr-15">
                 <ProfileStats />
                 <div className='flex justify-end gap-2 items-center'>
-                    <Button variant='secondary' onClick={() => handleLogout()}>
+                    <Button variant='secondary' onClick={() => handleLogout()} useDefaultSizing={true}>
                         Log Out
                     </Button>
-                    <Button variant='danger' onClick={() => setIsDeleteModalOpen(true)}>
+                    <Button variant='danger' onClick={() => setIsDeleteModalOpen(true)} useDefaultSizing={true}>
                         Delete Profile
                     </Button>
                 </div>

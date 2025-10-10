@@ -30,6 +30,7 @@ function SortDropdown({ sortingOptions, value, onChange, className, disabled = f
             items={getRegularDropdownProps(sortingOptions, onChange, value)}
             hasCaret={false}
             buttonClassName={`${className}`}
+            optionListClassName={`bg-background-700`}
             disabled={disabled}
         >
             <div className="w-full flex gap-0.5 items-center justify-center text-left">
