@@ -1,21 +1,25 @@
+import { sha256 } from "@noble/hashes/sha2.js";
+import { randomBytes } from "@noble/hashes/utils.js";
+
 // From Spotify's Authorization code PKCE
 function generateRandomString(length: number) {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const values = crypto.getRandomValues(new Uint8Array(length));
+    const values = randomBytes(length);
     return values.reduce((acc, x) => acc + possible[x % possible.length], "");
 }
 
-async function sha256(plain: string) {
+async function getSha256(plain: string) {
     const encoder = new TextEncoder();
     const data = encoder.encode(plain); // Get array of Uint8 types instead of finicky JavaScript strings
-    return await crypto.subtle.digest("SHA-256", data);
+    return sha256(data);
 }
 
-function base64encode(input: ArrayBuffer) {
+function base64encode(input: Uint8Array) {
     // btoa creates ASCII-encoded string (every char is 2 bytes)
     // String.fromCharCode turns our array into a JavaScript string
     // new Uint8Array is because we're passing in an ArrayBuffer (just a collection of bytes), so we need a data view
-    return btoa(String.fromCharCode(... new Uint8Array(input)))
+    // (Since switching to noble hashes, we actually are passing in Uint8Array, but I kept the above comment for posterity)
+    return btoa(String.fromCharCode(...(input)))
         .replace(/[+]/g, '-') // Replace global (all) instances of '+' (not URL safe)
         .replace(/[/]/g, '_') // Replace global (all) instances of '/' (not URL safe)
         .replace(/=+$/, ''); // Replace 1 or more ='s immediately preceding string end ($) because that's padding
@@ -27,14 +31,14 @@ export function getCodeVerifier(): string {
 }
 
 export async function getCodeChallengeFromVerifier(verifier: string) {
-    const hashed = await sha256(verifier);
+    const hashed = await getSha256(verifier);
     return base64encode(hashed);
 }
 
 export async function createNewPKCE() {
     const verifier = getCodeVerifier();
     const challenge = await getCodeChallengeFromVerifier(verifier);
-    const state = crypto.randomUUID();
+    const state = base64encode(randomBytes(32));
     return { verifier, challenge, state }
 }
 
