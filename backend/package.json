@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/server.ts",
     "typecheck": "tsc --noEmit",
-    "build": "npm install && tsc && npx prisma migrate deploy && npx prisma generate --sql",
+    "build": "npm install && npx prisma migrate deploy && npx prisma generate --sql && tsc",
     "prod": "node dist/server.js",
     "prestart": "node -e \"console.log('Building and running PRODUCTION! Use npm run dev for development server')\" && npm run build",
     "start": "npm run prod"
