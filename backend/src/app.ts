@@ -4,8 +4,10 @@ import session from 'express-session';
 import express from 'express';
 import authRouter from './routes/auth.js';
 import apiRouter from './routes/api.js';
-import { isProd, SESSION_SECRET, VITE_URLS } from './utils/envLoader.js';
+import { DATABASE_URL, isProd, SESSION_SECRET, VITE_URLS } from './utils/envLoader.js';
 import { errorHandler } from './utils/middleware/handleServerError.js';
+import connectPgSimple from 'connect-pg-simple';
+import { Pool } from 'pg';
 
 // Create main express app
 const app = express();
@@ -23,6 +25,14 @@ app.use(cors({
     credentials: true,
 }));
 
+const PgSession = connectPgSimple(session);
+const pgPool = new Pool({
+    connectionString: DATABASE_URL,
+    ssl: isProd() ? {
+        rejectUnauthorized: false, // Render requires this apparently
+    } : false,
+});
+
 app.use(session({
     name: 'spotifair.sid',
     secret: SESSION_SECRET,
@@ -33,7 +43,12 @@ app.use(session({
         httpOnly: true,
         sameSite: isProd() ? 'none' : 'lax',
         maxAge: 1000 * 60 * 60 * 5, // 5 hours
-    }
+    },
+    store: new PgSession({
+        pool: pgPool,
+        tableName: 'session',
+        createTableIfMissing: true,
+    }),
 }));
 
 // Require application/json request bodies
