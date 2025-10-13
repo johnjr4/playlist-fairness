@@ -12,6 +12,10 @@ import { Pool } from 'pg';
 // Create main express app
 const app = express();
 
+if (isProd()) {
+    app.set('trust proxy', 1);
+}
+
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) {
