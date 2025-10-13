@@ -1,4 +1,4 @@
-import * as Public from "spotifair";
+import type * as Public from "spotifair";
 import type { Album, Artist, ListeningEvent, Playlist, PlaylistTrack, Track, User } from "../../generated/prisma/client.js";
 import type { AlbumFull, ArtistFull, ListeningEventFull, PlaylistFull, PlaylistHist, PlaylistTrackFull, PlaylistTrackHist, PlaylistTrackWithMeta, TrackFull, TrackWithMeta, UserFull } from "./includeTypes.js";
 import type { NullableBigIntListeningStat } from "./helperTypes.js";

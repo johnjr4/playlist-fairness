@@ -1,4 +1,4 @@
-import * as Public from "spotifair";
+import type * as Public from "spotifair";
 import { queryListeningStat } from "../generated/prisma/sql.js";
 import prisma from "../utils/prismaClient.js";
 import type { NullableBigIntListeningStat } from "../utils/types/helperTypes.js";

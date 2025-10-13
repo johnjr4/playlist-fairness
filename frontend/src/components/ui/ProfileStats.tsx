@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import ProfileStat from "./ProfileStat";
 import useQuery from "../../utils/api/useQuery";
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import { msToMin, msToMore } from "../../utils/unitConvert";
 import { useProtectedAuth } from "../../utils/AuthContext";
 import { toSpotifyLink } from "../../utils/spotifyLink";

@@ -1,4 +1,4 @@
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import CoverArt from './ui/CoverArt';
 import cardClasses from '../styling/cards.module.css';
 import AutoResizeText from './ui/AutoResizeText';

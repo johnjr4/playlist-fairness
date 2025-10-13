@@ -3,7 +3,7 @@ import type { Playlist, User } from "../generated/prisma/client.js";
 import prisma from "../utils/prismaClient.js";
 import { disableAndDeletePlaylistSync, enableAndSyncPlaylist } from "./syncSpotifyData.js";
 import { queryTopPlaylist } from "../generated/prisma/sql.js";
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import { playlistFullArgs, playlistHistArgs, playlistTrackHistArgs, type PlaylistHist } from "../utils/types/includeTypes.js";
 import { getPlaylistTrackCount } from "./playlistTrackController.js";
 

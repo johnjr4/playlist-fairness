@@ -3,7 +3,7 @@ import hoverClasses from '../styling/hovereffect.module.css';
 import cardGridClasses from '../styling/cardGrid.module.css';
 import cardClasses from '../styling/cards.module.css';
 import PlaylistCard from "./PlaylistCard";
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import SpotifyLink from "./ui/SpotifyLink";
 import { useProtectedAuth } from "../utils/AuthContext";
 import { handleLogin } from "../utils/handleLogin";

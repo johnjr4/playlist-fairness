@@ -1,7 +1,7 @@
 import PlaylistAnalysis from "./PlaylistAnalysis";
 import cardClasses from "../styling/cards.module.css";
 import navbarClasses from '../styling/navbarBased.module.css';
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import TrackList from "./TrackList";
 import SearchBar from "./SearchBar";
 import { useMemo, useState } from "react";

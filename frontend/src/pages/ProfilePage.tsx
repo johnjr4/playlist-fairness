@@ -5,7 +5,7 @@ import ProfileStats from "../components/ui/ProfileStats";
 import { useProtectedAuth } from "../utils/AuthContext";
 import Modal from "../components/ui/Modal";
 import { backendAuthAxios, backendAxios } from "../utils/axiosInstances";
-import * as Public from "spotifair";
+import type * as Public from "spotifair";
 
 function ProfilePage() {
     const { user, setUser } = useProtectedAuth();

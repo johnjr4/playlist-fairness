@@ -1,4 +1,4 @@
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import { backendAuthAxios } from '../axiosInstances';
 import { isSuccess } from '../resParser';
 import type { AxiosResponse } from 'axios';

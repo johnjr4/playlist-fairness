@@ -1,4 +1,4 @@
-import * as Public from 'spotifair'
+import type * as Public from 'spotifair'
 import CoverArt from './ui/CoverArt';
 import { useNavigate } from 'react-router';
 import { FaSyncAlt } from 'react-icons/fa';

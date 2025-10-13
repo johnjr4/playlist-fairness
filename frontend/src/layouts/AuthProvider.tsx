@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import { getMe } from '../utils/auth/authFetch';
 import { AuthContext } from "../utils/AuthContext";
 

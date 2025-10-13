@@ -1,4 +1,4 @@
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import { getListeningHistoryStat } from './listeningEventController.js';
 import { getTopPlaylist, getPlaylistCount } from './playlistsController.js';
 import { getTopTrack, getTrackCount } from './trackController.js';

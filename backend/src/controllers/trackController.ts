@@ -1,6 +1,6 @@
 import { queryTopTrack } from "../generated/prisma/sql.js";
 import prisma from "../utils/prismaClient.js";
-import * as Public from "spotifair";
+import type * as Public from "spotifair";
 import { trackFullArgs } from "../utils/types/includeTypes.js";
 
 export async function getTrack(trackId: number) {

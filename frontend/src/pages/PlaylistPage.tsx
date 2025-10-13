@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import useQuery from "../utils/api/useQuery";
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import { useMemo, useState } from "react";
 import { backendAxios } from "../utils/axiosInstances";
 import PlaylistHeader from "../components/PlaylistHeader";

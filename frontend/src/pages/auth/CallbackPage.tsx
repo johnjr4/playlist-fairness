@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../../utils/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import { backendAuthAxios } from "../../utils/axiosInstances";
-import * as Public from "spotifair";
+import type * as Public from "spotifair";
 import { deletePCKEVals, getPKCEVals } from "../../utils/pkce";
 import { REDIRECT_URI } from "../../utils/envLoader";
 import { ScaleLoader } from "react-spinners";

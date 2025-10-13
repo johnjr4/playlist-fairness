@@ -1,4 +1,4 @@
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import type { AnalysisStats, PlaylistHistState } from '../utils/types/playlistPage';
 import { monteCarloFairness } from '../utils/monteCarlo';
 import { alea } from 'seedrandom';

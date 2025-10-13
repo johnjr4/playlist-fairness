@@ -1,6 +1,6 @@
 import PlaylistTrackRow from "../components/PlaylistTrackRow";
 import ptRowClasses from '../styling/playlistTrackRow.module.css'
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import Button from "./ui/Button";
 import { ScaleLoader } from "react-spinners";
 import loadingClasses from '../styling/loading.module.css';

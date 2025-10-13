@@ -1,4 +1,4 @@
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import CoverArt from './ui/CoverArt';
 import ptRowClasses from '../styling/playlistTrackRow.module.css'
 import { memo } from 'react';

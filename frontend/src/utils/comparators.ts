@@ -1,4 +1,4 @@
-import * as Public from "spotifair";
+import type * as Public from "spotifair";
 
 export function numPlaysComparator(ascendingMultipler: number, a: Public.PlaylistTrackHist, b: Public.PlaylistTrackHist) {
     const compVal = a.listeningEvents.length - b.listeningEvents.length;

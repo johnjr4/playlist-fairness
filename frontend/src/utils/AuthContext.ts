@@ -1,6 +1,6 @@
 // AuthContext.jsx
 import { createContext, useContext } from 'react';
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 
 interface AuthContextType {
   // TODO: Change me!

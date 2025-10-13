@@ -1,6 +1,6 @@
 import { msToHour } from "../utils/unitConvert";
 import CoverArt from "./ui/CoverArt";
-import * as Public from 'spotifair';
+import type * as Public from 'spotifair';
 import Dropdown, { type DropdownItem } from "./ui/Dropdown";
 import { LuEllipsis } from "react-icons/lu";
 import { useRef, useState } from "react";
