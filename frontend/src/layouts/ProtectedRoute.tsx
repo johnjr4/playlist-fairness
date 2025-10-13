@@ -13,7 +13,7 @@ function ProtectedRoute({ children }: { children: ReactElement }) {
             navigate('/');
         }
     }, [user, loading, navigate]);
-    if (true) return (
+    if (loading) return (
         <div className={`${gradientClasses['bgGradient']} w-full h-full text-textPrimary flex justify-center items-center`}>
             Loading...
         </div>
