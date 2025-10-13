@@ -56,7 +56,7 @@ router.get('/callback', async (req: Request<{}, any, any, AuthCallbackReqQuery>,
         // console.log(`Refresh token ${refresh_token}`);
         const user = await upsertUserAndPlaylists(access_token, refresh_token);
         req.session.user = { id: user.id, spotifyUri: user.spotifyUri };
-        // console.log(`Session saved ${req.session.id}`);
+        console.log(`Session saved ${req.session.id}`);
 
         res.json(
             successfulResponse(

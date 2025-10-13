@@ -6,6 +6,7 @@ export default function requrieAuth(req: Request, res: Response, next: NextFunct
     if (req.session && req.session.user) {
         return next(); // User is authenticated
     }
+    console.error(`User session not found for ${req.url} from ${req.ip}. Cookies were ${req.cookies}`);
     return res.status(401).json(
         errorResponse(
             "Route requires user authentication",
