@@ -16,6 +16,8 @@ if (isProd()) {
     app.set('trust proxy', 1);
 }
 
+console.log(`Configuring to use VITE_URLS: ${VITE_URLS}`);
+
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) {
