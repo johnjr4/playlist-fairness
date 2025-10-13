@@ -53,6 +53,8 @@ function CallbackPage() {
                 try {
                     // Query backend
                     const authRes = await backendAuthAxios.get<Public.User>(backendCallbackRoute);
+                    console.log('Auth res:');
+                    console.log(authRes);
                     // Check success
                     if (!isSuccess(authRes)) {
                         const errRes = authRes as AxiosResponse<Public.HTTPResponseFailure>;
