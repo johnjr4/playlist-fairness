@@ -4,14 +4,15 @@ import type { AlbumFull, ArtistFull, ListeningEventFull, PlaylistFull, PlaylistH
 import type { NullableBigIntListeningStat } from "./helperTypes.js";
 
 export function userToPublic(user: User): Public.User {
-    const { trackingStartTime } = user;
-    return { ...user, trackingStartTime: trackingStartTime.toISOString() };
+    const { accessToken, refreshToken, trackingStartTime, ...subUser } = user;
+    return { ...subUser, trackingStartTime: trackingStartTime.toISOString() };
 }
 
 export function userToPublicFull(user: UserFull): Public.UserFull {
     const { playlists, listeningHistory } = user;
+    const subUser = userToPublic(user);
     const convertedHistory = listeningHistory.map(le => listeningEventToPublic(le));
-    return { ...user, ...userToPublic(user), playlists, listeningHistory: convertedHistory };
+    return { ...subUser, ...userToPublic(user), playlists, listeningHistory: convertedHistory };
 }
 
 export function playlistToPublic(playlist: Playlist): Public.Playlist {
