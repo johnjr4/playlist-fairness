@@ -12,11 +12,13 @@ import ProtectedRoute from './layouts/ProtectedRoute.tsx'
 import LandingPage from './pages/LandingPage.tsx'
 import PlaylistPage from './pages/PlaylistPage.tsx'
 import ProfilePage from './pages/ProfilePage.tsx'
+import ErrorPage from './pages/ErrorPage.tsx'
 
 const router = createBrowserRouter([
   {
     index: true,
     Component: LandingPage,
+    ErrorBoundary: ErrorPage,
   },
   {
     path: '/u', // u for user (arbitrary)
