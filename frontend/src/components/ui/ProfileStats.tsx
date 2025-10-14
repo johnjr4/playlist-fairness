@@ -65,7 +65,7 @@ function ProfileStats() {
                 <ProfileStat category="Top playlist" tip={`${topPlaylist ? msToMin(topPlaylist.listening.totalMs).toLocaleString() : 0} minutes`}>
                     {
                         topPlaylist
-                            ? <Link to={`/u/${topPlaylist.id}`} className="hover:brightness-70">{topPlaylist.name}</Link>
+                            ? <Link to={`/u/playlists/${topPlaylist.id}`} className="hover:brightness-70">{topPlaylist.name}</Link>
                             : 'Not found'
                     }
                 </ProfileStat>
