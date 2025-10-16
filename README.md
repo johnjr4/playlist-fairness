@@ -1,4 +1,4 @@
-![spotifair](https://github.com/user-attachments/assets/12ef034d-a94d-49d9-a9d6-89fe4934cf46)
+![spotifair](https://github.com/user-attachments/assets/eedd97be-c545-4d26-a237-de838c2639b1)
 ## 🎧 Spotify Playlist Fairness Tracker
 
 > Analyze how "fair" your Spotify playlists are based on your actual listening history.
@@ -50,7 +50,7 @@ Frontend:
 
 Users see their synced playlists and sync status in a fun and dynamic animated way.
 
-![home](https://github.com/user-attachments/assets/2de243c4-4f6c-4711-8d34-dbbe8cb0979d)
+![home](https://github.com/user-attachments/assets/aa7db2f3-75fa-44f5-b0f1-1570aebd0569)
 
 ---
 
@@ -58,7 +58,7 @@ Users see their synced playlists and sync status in a fun and dynamic animated w
 
 Users can selectively sync playlists, which pulls all related artists, albums, and tracks, and begins tracking your listening history for that playlist.
 
-![to_sync](https://github.com/user-attachments/assets/9320a08c-f18a-474c-8b30-16e3ff2fa705)
+![to_sync](https://github.com/user-attachments/assets/20155ed2-2556-48a3-a22b-4c6f15084387)
 
 ---
 
@@ -66,7 +66,7 @@ Users can selectively sync playlists, which pulls all related artists, albums, a
 
 Playlists are shown as interactive tracklists with sorting, filtering, and virtualized scrolling.
 
-![tracklist](https://github.com/user-attachments/assets/c00ee5e8-939c-4bd9-8558-5d3d9422d0c8)
+![tracklist](https://github.com/user-attachments/assets/1ef2becb-c4b2-48c3-8ce0-ccd5f540a728)
 
 ---
 
@@ -74,7 +74,7 @@ Playlists are shown as interactive tracklists with sorting, filtering, and virtu
 
 Fairness is evaluated via a multinomial bootstrap and shown in a bar chart via your tracklist.
 
-![analysis](https://github.com/user-attachments/assets/8d1e73ca-e100-4534-b5f7-440e69b2df23)
+![analysis](https://github.com/user-attachments/assets/233dbad5-fe57-42e0-a269-7023f8945f7d)
 
 ---
 
@@ -82,7 +82,7 @@ Fairness is evaluated via a multinomial bootstrap and shown in a bar chart via y
 
 Profile-wide statistics can be viewed for additional depth in listening history analysis
 
-![profile](https://github.com/user-attachments/assets/c80a2410-6312-43cb-b31f-d4c811a4a24e)
+![profile](https://github.com/user-attachments/assets/ed6e1e8b-0aa7-4a3c-83be-a09543bea322)
 
 ---
 
